@@ -8,10 +8,12 @@ env:
   CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
   CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
   CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-  # Netlify settings "Site name"
-  NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
   # Netlify personal access token created here: https://app.netlify.com/user/applications
+  # See: https://docs.netlify.com/cli/get-started/#obtain-a-token-in-the-netlify-ui
   NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+  # Netlify settings: Project configuration > General > Project details > Project information > Project ID":
+  # See: https://docs.netlify.com/cli/get-started/#link-with-an-environment-variable
+  NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
   TMDB_MOVIE_LIST_ID: ${{ secrets.TMDB_MOVIE_LIST_ID }}
   TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
   TMDB_TV_LIST_ID: ${{ secrets.TMDB_TV_LIST_ID }}
@@ -21,10 +23,10 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/rebuild-and-publish-to-netlify.yaml'
-      - 'lib/**'
-      - 'public/**'
-      - 'src/**'
+      - ".github/workflows/rebuild-and-publish-to-netlify.yaml"
+      - "lib/**"
+      - "public/**"
+      - "src/**"
       - astro.config.mjs
       - netlify.toml
       - postcss.config.cjs
@@ -49,8 +51,8 @@ jobs:
       - name: Set up node 🧰
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
-          cache: 'npm'
+          node-version-file: ".nvmrc"
+          cache: "npm"
 
       - name: Install dependencies 📦
         run: npm ci --prefer-offline
