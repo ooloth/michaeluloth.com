@@ -2,7 +2,6 @@
 import { actions } from 'astro:actions'
 import { generateNotesListItemHtml } from '../actions/filterNotes/generateNotesPageHtml'
 import { generateTagCloudItemHtml } from '../actions/filterNotes/generateNotesPageHtml'
-import { getNestedNotes, type NoteWithChildren } from '../utils/notes'
 import Main from '../layouts/Main.astro'
 
 // At build time (when URL query params are not available), fetch all notes and their tags and prerender them
