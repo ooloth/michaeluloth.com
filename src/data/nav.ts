@@ -7,6 +7,7 @@ export default {
   top: [
     { title: 'writing', url: '/' },
     { title: 'notes', url: '/notes/' },
+    { title: 'bookmarks', url: '/bookmarks/' },
     { title: 'about', url: '/about/' },
     { title: 'likes', url: '/likes/' },
   ],
