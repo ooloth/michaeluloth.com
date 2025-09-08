@@ -1,106 +1,55 @@
 ---
-import { actions } from 'astro:actions'
-import { generateTagCloudItemHtml } from '../actions/filterNotes/generateNotesPageHtml'
+import { getNestedNotes, type NoteWithChildren } from '../utils/notes'
 import Main from '../layouts/Main.astro'
-import { generateNotesListItemHtml } from '../actions/filterNotes/generateNotesPageHtml'
-
-// At build time (when URL query params are not available), fetch all notes and their tags and prerender them
-const { data, error } = await Astro.callAction(actions.filterNotes, { tags: [] })
-if (error) console.error(error)
 
 const title = 'Notes'
-const allEntries = data?.results || []
-const allTags = data?.tags || { valid: [], filtered: [], all: [] }
+
+const notes = await getNestedNotes()
 ---
 
 <Main title={title} description="Rough notes about coding and other topics.">
   <h1 class="sr-only">{title}</h1>
 
   <section>
-    <h2 class="sr-only">Bookmarks, post drafts and topic notes (sorted by last modified date and filterable by tag)</h2>
-    <ul
-      data-tag-cloud
-      set:html={generateTagCloudItemHtml(allTags.valid, allTags.filtered, allTags.all)}
-      class="flex flex-wrap gap-2"
-    />
-    <ul data-notes-list set:html={generateNotesListItemHtml(allEntries)} class="mt-5 leading-loose" />
+    <h2 class="sr-only">Topics</h2>
+    <ul class="list-notes">
+      {
+        notes.map(note => {
+          const getLinkText = (item: NoteWithChildren): string => item.data.linkText || item.data.title || item.id
+
+          const getChildren = (item: NoteWithChildren, level: number) =>
+            item.data.children && (
+              <ul>
+                {item.data.children
+                  // Sort alphabetically by link text
+                  .sort((a: NoteWithChildren, b: NoteWithChildren) => getLinkText(a).localeCompare(getLinkText(b)))
+                  .map((child: NoteWithChildren) => (
+                    <li
+                      class="before:content-['└'] before:pe-[0.3rem] mt-[0.1rem]"
+                      style={`padding-left: ${level === 0 ? 0 : 1.4}rem`}
+                    >
+                      <a href={`/${child.id}/`} class="link">
+                        {getLinkText(child)}
+                      </a>
+
+                      {/* Recursively render grandchildren, etc */}
+                      {getChildren(child, level + 1)}
+                    </li>
+                  ))}
+              </ul>
+            )
+
+          return (
+            <li class="mb-2 break-inside-avoid-column">
+              <a href={`/${note.id}/`} class="link">
+                {getLinkText(note)}
+              </a>
+
+              {getChildren(note, 0)}
+            </li>
+          )
+        })
+      }
+    </ul>
   </section>
 </Main>
-
-<script>
-  import { actions } from 'astro:actions'
-  import {
-    generateNotesListItemHtml,
-    generateTagCloudItemHtml,
-    type NotesListItem,
-  } from '../actions/filterNotes/generateNotesPageHtml'
-  import type { FilteredNotes } from '../actions/filterNotes'
-
-  const getFilteredNotes = async (tags: string[]): Promise<FilteredNotes | undefined> => {
-    const { data, error } = await actions.filterNotes({ tags })
-    if (error) console.error(error)
-
-    return data
-  }
-
-  const getTagsFromUrl = (): string[] => {
-    const tagsInUrl = new URLSearchParams(window.location.search).get('tags')
-    return tagsInUrl ? tagsInUrl.split(',') : []
-  }
-
-  const updateTagsInUrl = (tags: string[]): void => {
-    const url = new URL(window.location.href)
-
-    if (!tags.length) {
-      url.searchParams.delete('tags') // remove the tags param from the URL
-    } else {
-      url.search = `tags=${tags.sort().join(',')}` // add the tags as an unencoded comma-separated list
-    }
-
-    window.history.pushState({}, '', url)
-  }
-
-  const updateTagCloudHtml = (tags: FilteredNotes['tags']): void => {
-    const tagCloud = document.querySelector('ul[data-tag-cloud]')!
-    tagCloud.innerHTML = generateTagCloudItemHtml(tags.valid, tags.filtered, tags.all)
-  }
-
-  const updateNotesListHtml = (data: NotesListItem[]): void => {
-    const notesList = document.querySelector('ul[data-notes-list]')!
-    notesList.innerHTML = generateNotesListItemHtml(data)
-  }
-
-  const updateUrlAndDOM = async (tags: string[]): Promise<void> => {
-    const filteredNotes = await getFilteredNotes(tags)
-
-    if (filteredNotes) {
-      const { results, tags } = filteredNotes
-      updateTagsInUrl(tags.valid)
-      updateTagCloudHtml(tags)
-      updateNotesListHtml(results)
-      attachTagButtonEventListeners()
-    }
-  }
-
-  const attachTagButtonEventListeners = (): void => {
-    const handleTagButtonClick = (button: Element): void => {
-      const tag = button.getAttribute('data-tag-value')!
-      const tagsInUrl = getTagsFromUrl()
-
-      // If the tag is already in the URL, remove it; otherwise append it
-      // TODO: use set operations?
-      const newTagsInUrl = tagsInUrl.includes(tag) ? tagsInUrl.filter(t => t !== tag) : [...tagsInUrl, tag]
-
-      updateUrlAndDOM(newTagsInUrl)
-    }
-
-    const tagButtons = document.querySelectorAll('button[data-tag-button]')
-
-    tagButtons.forEach(button => {
-      button.addEventListener('click', () => handleTagButtonClick(button))
-    })
-  }
-
-  // On page load, render results matching "tags" URL search parameter
-  updateUrlAndDOM(getTagsFromUrl())
-</script>

@@ -54,8 +54,9 @@ const notes = defineCollection({
   loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/notes' }),
   schema: z.object({
     // description: z.string().optional().nullable(),
+    linkText: z.string().optional().nullable(),
     ogImage: z.string().optional().nullable(),
-    // parent: z.string().optional().nullable(), // TODO: remove? (will be ignored); legacy from when notes were nested; still useful for determining which notes are related?
+    parent: z.string().optional().nullable(), // TODO: remove? (will be ignored); legacy from when notes were nested; still useful for determining which notes are related?
     private: z.boolean().optional().nullable(), // TODO: remove from articles
     tags: z.array(z.string()).optional().nullable(), // TODO: require? report?
     title: z.string().optional().nullable(),
