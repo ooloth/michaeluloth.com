@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # cloudinary resource details
 lib/cloudinary/*.json
+
+# Local Netlify folder
+.netlify
