@@ -15,6 +15,10 @@ const bookmarks = await getBookmarks()
 
 const { pathname } = Astro.url
 
+const maxWidthByPathname: Record<string, string> = {
+  '/': 'max-w-[70ch]',
+}
+
 // see: https://docs.astro.build/en/reference/api-reference/#astrourl
 const isCurrentPage = (item: NavItem): boolean =>
   item.url === pathname ||
@@ -25,7 +29,7 @@ const isCurrentPage = (item: NavItem): boolean =>
   (isPathnameInCollection(pathname, bookmarks) && item.url === '/notes/')
 ---
 
-<header class="mb-12 bg-zinc-900 pt-7">
+<header class=`mx-auto mb-12 bg-zinc-900 pt-7 w-full ${maxWidthByPathname?.[pathname] ?? ''}`>
   <a href="#skip" class="sr-only">Skip to main content</a>
 
   <nav>
