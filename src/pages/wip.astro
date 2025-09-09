@@ -1,0 +1,105 @@
+---
+import { getNestedNotes, type NoteWithChildren } from '../utils/notes'
+import { getAllTagsInItems } from '../utils/tags'
+import { getTILsByFolder } from '../utils/tils'
+import Main from '../layouts/Main.astro'
+
+const title = 'WIP'
+
+const notes = await getNestedNotes()
+const tags = getAllTagsInItems(notes)
+const tilsByFolder = await getTILsByFolder()
+---
+
+<Main title={title} description="Rough notes about coding and other topics.">
+  <!-- TODO: breadcrumbs at top to help me go back on mobile and not need to show every option in the world inline? -->
+  <h1 class="sr-only">{title}</h1>
+
+  <!-- TODO: just leverage the nested parent approach? stick with top-level parents only? likely easiest mobile workflow -->
+  <section>
+    <h2 class="">TIL folders</h2>
+    <ul class="">
+      {
+        Object.keys(tilsByFolder).map(topLevelTopic => {
+          return (
+            <li>
+              <a href={`/${topLevelTopic}/`} class="link">
+                <!-- TODO: this page includes all manual topic.md notes + all tag-based bookmarks, drafts, posts and other -->
+                <!-- TODO: what if there's no topic.md yet? how to not explode? -->
+                <!-- TODO: click to go to that page, where you'll still see the sidebar with all topics -->
+                <!-- TODO: avoid need for state by using static URL paths + CSS to determine what appears on each page -->
+                {topLevelTopic}
+              </a>
+              <ul class="pl-4">
+                <!-- TODO: just show the top-level topic in the list? click to reveal all sub-content, by modified date? -->
+                {tilsByFolder[topLevelTopic].map(til => (
+                  <li>
+                    <a href={`/${til.id.replaceAll('/', '-')}/`} class="link">
+                      {til.data.linkText || til.data.title || til.id}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          )
+        })
+      }
+    </ul>
+  </section>
+
+  <section class="mt-12">
+    <h2 class="">Tags</h2>
+    <ul class="">
+      {
+        tags.map(tag => {
+          return <li>{tag}</li>
+        })
+      }
+    </ul>
+  </section>
+
+  <section class="mt-12">
+    <h2 class="">Topics</h2>
+    <ul class="">
+      {
+        notes.map(note => {
+          const getLinkText = (item: NoteWithChildren): string => item.data.linkText || item.data.title || item.id
+
+          const getChildren = (item: NoteWithChildren, level: number) =>
+            item.data.children && (
+              <ul>
+                {item.data.children
+                  // Sort alphabetically by link text
+                  .sort((a: NoteWithChildren, b: NoteWithChildren) => getLinkText(a).localeCompare(getLinkText(b)))
+                  .map((child: NoteWithChildren) => (
+                    <li
+                      class="before:content-['└'] before:pe-[0.3rem] mt-[0.1rem]"
+                      style={`padding-left: ${level === 0 ? 0 : 1.4}rem`}
+                    >
+                      <span>📂 </span>
+                      <a href={`/${child.id}/`} class="link">
+                        {getLinkText(child)}
+                      </a>
+
+                      {/* Recursively render grandchildren, etc */}
+                      {getChildren(child, level + 1)}
+                    </li>
+                  ))}
+              </ul>
+            )
+
+          return (
+            <li class="mb-2 break-inside-avoid-column">
+              <span>📂 </span>
+              <a href={`/${note.id}/`} class="link">
+                {getLinkText(note)}
+              </a>
+
+              {getChildren(note, 0)}
+            </li>
+          )
+        })
+      }
+    </ul>
+  </section>
+</Main>

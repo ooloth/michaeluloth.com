@@ -22,7 +22,7 @@ export async function getStaticPaths() {
   const standalone = await getCollection('pages')
 
   const paginatedRoutes = paginated.map((entry, index) => ({
-    params: { slug: entry.id },
+    params: { slug: entry.id.replaceAll('/', '-') }, // flatten nested paths
     props: {
       entry,
       prev: paginated?.[index - 1] ?? null,
