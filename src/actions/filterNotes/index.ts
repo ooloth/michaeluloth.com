@@ -2,7 +2,7 @@ import { defineAction } from 'astro:actions'
 import { z } from 'astro:schema'
 
 import { getBookmarks } from '../../utils/bookmarks'
-import { getNotes } from '../../utils/notes'
+// import { getNotes } from '../../utils/notes'
 import {
   sortByLastModifiedDate,
   type Bookmark,
