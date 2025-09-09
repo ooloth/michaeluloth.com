@@ -3,7 +3,7 @@
 // see: https://github.com/syntax-tree/mdast
 
 import type { RemarkPlugin } from '@astrojs/markdown-remark'
-import type { Data, Paragraph, PhrasingContent } from 'mdast'
+import type { Paragraph, PhrasingContent } from 'mdast'
 import { u } from 'unist-builder'
 import { visit } from 'unist-util-visit'
 import type { Node } from 'unist'
@@ -80,14 +80,14 @@ const convertWikiLinksToMarkdownLinks = (textNodeValue: string): PhrasingContent
   return segments
 }
 
-type Transformer = (tree: Node<Data>) => Promise<void>
+type Transformer = (tree: Node) => Promise<void>
 
 /**
  * Convert Obsidian wiki links to Markdown links.
  */
 const remarkWikiLink: RemarkPlugin =
   (): Transformer =>
-  async (tree: Node<Data>): Promise<void> => {
+  async (tree: Node): Promise<void> => {
     // Identify the type of node I want to modify ("paragraph" in this case) here: https://astexplorer.net
     visit(tree, 'paragraph', (node: Paragraph) => {
       const newChildren: PhrasingContent[] = []
