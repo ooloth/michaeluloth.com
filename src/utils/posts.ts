@@ -10,7 +10,7 @@ import {
   type PostWithContent,
 } from './collections'
 
-export const FEATURED_COUNT = 5
+export const FEATURED_COUNT = 3
 
 /**
  * Returns true if the entry is from the posts collection.
