@@ -53,7 +53,7 @@ const postsToShowInList = postsToShowOnHomePage.slice(FEATURED_COUNT) as Post[]
   <section>
     <h2 class="sr-only">Recent Posts</h2>
 
-    <ol reversed class="grid md:grid-cols-2 gap-x-6 xl:gap-x-12 mx-auto w-fit">
+    <ol reversed class="grid md:grid-cols-2 gap-x-6 xl:gap-x-12 mx-auto md:w-fit">
       {
         postsToShowInList.map(post => {
           const date = post.data.date || Date.now()
