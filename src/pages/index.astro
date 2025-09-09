@@ -15,7 +15,7 @@ const postsToShowInList = posts.slice(FEATURED_COUNT) as Post[]
 <Main title={site.title} description={site.description.site}>
   <h1 class="sr-only">{site.title}</h1>
 
-  <section class="mx-auto max-w-[70ch]">
+  <section class="mx-auto pt-2 max-w-[70ch]">
     <h2 class="sr-only">The full content of my {postsToShowInline.length} most recent posts</h2>
 
     <ol reversed>
@@ -27,7 +27,7 @@ const postsToShowInList = posts.slice(FEATURED_COUNT) as Post[]
             <li>
               <article>
                 <header>
-                  <time datetime={getMachineReadableDate(date)} class="timestamp block mt-2 mb-1 md:min-w-[7rem]">
+                  <time datetime={getMachineReadableDate(date)} class="timestamp block mb-1 md:min-w-[7rem]">
                     {getHumanReadableDate(date)}
                   </time>
 
