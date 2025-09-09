@@ -131,6 +131,15 @@
 }
 
 @layer components {
+  .home-page-full-posts {
+    & .markdown {
+      /* smaller subheadings on the home page */
+      & h2 {
+        @apply heading mt-8 text-[1.4rem];
+      }
+    }
+  }
+
   .markdown {
     & h1 {
       @apply heading mb-8 text-4xl leading-[1.1] font-bold;
