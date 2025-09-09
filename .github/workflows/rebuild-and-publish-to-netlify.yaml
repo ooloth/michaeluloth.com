@@ -62,4 +62,4 @@ jobs:
 
       - name: Publish to Netlify 🚀
         # Deploy updated "dist" folder to production Netlify branch
-        run: npx netlify-cli deploy --prod --message "deploy from GitHub Action" --dir=dist
+        run: npx netlify-cli deploy --no-build --prod --message "deploy from GitHub Action" --dir=dist
