@@ -28,7 +28,7 @@ const getAllItems = async (): Promise<NotesListItem[]> => {
     const allEntries = [
       ...(await getScheduledPosts()),
       ...(await getDrafts()),
-      ...(await getNotes()),
+      // ...(await getNotes()),
       ...(await getBookmarks()),
     ]
     cachedItemsAll = createNotesListItems(sortByLastModifiedDate(allEntries))
