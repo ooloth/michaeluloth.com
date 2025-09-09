@@ -52,14 +52,13 @@ const postsToShowInList = posts.slice(FEATURED_COUNT) as Post[]
   <section class="mt-12">
     <h2 class="sr-only">Recent Posts</h2>
 
-    <ol reversed class="columns-sm gap-x-6 md:gap-x-10 xl:gap-x-12">
+    <ol reversed class="grid md:grid-cols-2 gap-x-6 xl:gap-x-12 mx-auto w-fit">
       {
         postsToShowInList.map(post => {
           const date = post.data.date || Date.now()
 
           return (
-            <li class={`pt-7 break-inside-avoid`}>
-              {/* <li class="flex flex-col md:flex-row md:items-baseline mb-7 md:mb-4"> */}
+            <li class="pt-7 break-inside-avoid-column">
               <time datetime={getMachineReadableDate(date)} class="timestamp block md:min-w-[7rem]">
                 {getHumanReadableDate(date)}
               </time>
