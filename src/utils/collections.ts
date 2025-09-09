@@ -77,13 +77,15 @@ export const sortByLastModifiedDate = <T extends HasLastModified>(items: T[]): T
 /**
  * Returns true if the entry is not marked private or obviously work-specific.
  */
-export const isPublic = (entry: CollectionEntry<'drafts' | 'notes' | 'bookmarks' | 'pages'>): boolean =>
+export const isPublic = (entry: CollectionEntry<'drafts' | 'notes' | 'bookmarks' | 'pages' | 'posts'>): boolean =>
   !(entry.data.private === true) && !(entry.data.tags ?? []).includes('private') && !entry.id.includes('recursion')
 
 /**
  * In production only, remove entries marked private.
  */
-export const removePrivateInProduction = <T extends CollectionEntry<'drafts' | 'notes' | 'bookmarks' | 'pages'>>(
+export const removePrivateInProduction = <
+  T extends CollectionEntry<'drafts' | 'notes' | 'bookmarks' | 'pages' | 'posts'>,
+>(
   entries: T[],
 ): T[] => (import.meta.env.PROD ? entries.filter(isPublic) : entries)
 

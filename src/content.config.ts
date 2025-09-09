@@ -24,7 +24,8 @@ const post = z.object({
   hackerNewsLink: z.string().optional().nullable(),
   linkSharedOnTwitter: z.string().optional().nullable(),
   ogImage: z.string().optional().nullable(),
-  // parent: z.string().optional().nullable(), // TODO: remove? (will be ignored); legacy from when collection was shared with notes, which were nested
+  parent: z.string().optional().nullable(), // TODO: remove? (will be ignored); legacy from when collection was shared with notes, which were nested
+  private: z.boolean().optional().nullable(),
   redditLink: z.string().optional().nullable(),
   tags: z.array(z.string()).optional().nullable(), // TODO: require? report when < 2?
   title: z.string().nonempty(),

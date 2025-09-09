@@ -3,6 +3,7 @@ import { getCollection, type CollectionEntry } from 'astro:content'
 import {
   addContent,
   addLastModifiedDate,
+  removePrivateInProduction,
   sortByLastModifiedDate,
   type HasCollection,
   type Post,
@@ -51,4 +52,4 @@ export const getScheduledPosts = async (): Promise<Post[]> =>
  * In production, only returns published posts (i.e. no scheduled posts).
  */
 export const getPosts = async (): Promise<(Post | PostWithContent)[]> =>
-  sortByLastModifiedDate(await addLastModifiedDate(await getCollection('posts')))
+  sortByLastModifiedDate(await addLastModifiedDate(removePrivateInProduction(await getCollection('posts'))))
