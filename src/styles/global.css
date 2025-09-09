@@ -142,7 +142,7 @@
 
   .markdown {
     & h1 {
-      @apply heading mb-8 text-4xl leading-[1.1] font-bold;
+      @apply heading mb-8 text-[2.25rem] leading-[1.1] font-bold;
     }
     & h2 {
       @apply heading mt-8 text-[1.6rem];
