@@ -2,7 +2,6 @@ import { defineAction } from 'astro:actions'
 import { z } from 'astro:schema'
 
 import { getBookmarks } from '../../utils/bookmarks'
-// import { getNotes } from '../../utils/notes'
 import {
   sortByLastModifiedDate,
   type Bookmark,
@@ -25,12 +24,7 @@ let cachedTagsAll: string[] | null = null
 
 const getAllItems = async (): Promise<NotesListItem[]> => {
   if (!cachedItemsAll) {
-    const allEntries = [
-      ...(await getScheduledPosts()),
-      ...(await getDrafts()),
-      // ...(await getNotes()),
-      ...(await getBookmarks()),
-    ]
+    const allEntries = [...(await getScheduledPosts()), ...(await getDrafts()), ...(await getBookmarks())]
     cachedItemsAll = createNotesListItems(sortByLastModifiedDate(allEntries))
   }
 
