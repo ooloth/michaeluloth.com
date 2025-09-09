@@ -1,9 +1,20 @@
 import { render, type CollectionEntry } from 'astro:content'
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js'
-// import type { MarkdownHeading } from 'astro'
 
 export type HasCollection = {
   collection: 'posts' | 'drafts' | 'notes' | 'bookmarks' | 'pages' | 'albums' | 'books' | 'podcasts'
+}
+
+type HasDate<T> = T & { data: { date: Date } } // TODO: this pattern worked much better for narrowing a property; reuse it
+
+type HasContent<T> = T & {
+  Content: AstroComponentFactory
+}
+
+type HasLastModified = {
+  data: {
+    lastModified?: string
+  }
 }
 
 // A generic type that adds a lastModified property to the existing data field
@@ -14,29 +25,19 @@ type WithRemarkFrontmatter<T extends CollectionEntry<'posts' | 'drafts' | 'notes
   }
 }
 
-export type HasDate<T extends CollectionEntry<'posts'>> = Omit<T, 'data'> & {
-  data: T['data'] & {
-    date: Date
-  }
-}
-
-type HasLastModified = {
-  data: {
-    lastModified?: string
-  }
-}
-
-export type HasContent<T extends CollectionEntry<'posts'>> = T & {
-  Content: AstroComponentFactory
-}
-
 export type Bookmark = WithRemarkFrontmatter<CollectionEntry<'bookmarks'>>
+export type BookmarkWithDate = HasDate<Bookmark>
 export type Draft = WithRemarkFrontmatter<CollectionEntry<'drafts'>>
+export type DraftWithDate = HasDate<Draft>
 export type Note = WithRemarkFrontmatter<CollectionEntry<'notes'>>
 export type Post = WithRemarkFrontmatter<CollectionEntry<'posts'>>
 export type PostWithContent = HasContent<Post>
 export type PostWithDate = HasDate<Post>
 export type SinglePage = CollectionEntry<'pages'>
+
+export const hasDate = <T extends CollectionEntry<'bookmarks' | 'drafts' | 'notes' | 'posts'>>(
+  item: T,
+): item is HasDate<T> => 'data' in item && 'date' in item.data && item.data.date instanceof Date
 
 /**
  * Adds the last modified date to the frontmatter of a post, draft, note, or bookmark.

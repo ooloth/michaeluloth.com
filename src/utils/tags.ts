@@ -1,4 +1,4 @@
-import type { Bookmark, Draft, Note, Post, HasDate } from './collections'
+import { type Bookmark, type Draft, type Note, type Post, hasDate } from './collections'
 
 type HasTags = {
   tags?: string[] | null
@@ -69,8 +69,8 @@ export const getAllEntriesWithSameTagsAsEntry = <T extends Post | Draft | Note |
 
   for (const tag in relatedByTag) {
     // Separate items with dates from those without dates
-    const itemsWithDate = relatedByTag[tag].filter(item => 'date' in item.data && item.data.date) as (T & HasDate)[]
-    const itemsWithoutDate = relatedByTag[tag].filter(item => !('date' in item.data) || !item.data.date)
+    const itemsWithDate = relatedByTag[tag].filter(hasDate)
+    const itemsWithoutDate = relatedByTag[tag].filter(item => !hasDate(item))
 
     // Sort items with dates by date (descending)
     itemsWithDate.sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
