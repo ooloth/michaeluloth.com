@@ -18,13 +18,13 @@ const postsToShowInList = posts.slice(FEATURED_COUNT) as Post[]
   <section class="mx-auto max-w-[70ch]">
     <h2 class="sr-only">The full content of my {postsToShowInline.length} most recent posts</h2>
 
-    <ol reversed class="-mt-12">
+    <ol reversed>
       {
         postsToShowInline.map(post => {
           const date = post.data.date || post.data.lastModified
 
           return (
-            <li class="pt-12 pb-12 border-b border-b-zinc-700">
+            <li>
               <article>
                 <header>
                   <time datetime={getMachineReadableDate(date)} class="timestamp block mt-2 mb-1 md:min-w-[7rem]">
@@ -40,6 +40,8 @@ const postsToShowInList = posts.slice(FEATURED_COUNT) as Post[]
                   <post.Content />
                 </div>
               </article>
+
+              <hr class="mt-12 mb-12 border-zinc-700" />
             </li>
           )
         })
