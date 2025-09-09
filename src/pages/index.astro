@@ -4,12 +4,12 @@ import site from '../data/site'
 import Main from '../layouts/Main.astro'
 import { type Post, type PostWithContent } from '../utils/collections'
 import { getHumanReadableDate, getMachineReadableDate } from '../utils/dates'
-import { FEATURED_COUNT, getPublishedPosts } from '../utils/posts'
+import { FEATURED_COUNT, getPublishedPosts, isAdvertised } from '../utils/posts'
 
-const posts = await getPublishedPosts()
+const postsToShowOnHomePage = (await getPublishedPosts()).filter(isAdvertised)
 
-const postsToShowInline = posts.slice(0, FEATURED_COUNT) as PostWithContent[]
-const postsToShowInList = posts.slice(FEATURED_COUNT) as Post[]
+const postsToShowInline = postsToShowOnHomePage.slice(0, FEATURED_COUNT) as PostWithContent[]
+const postsToShowInList = postsToShowOnHomePage.slice(FEATURED_COUNT) as Post[]
 ---
 
 <Main title={site.title} description={site.description.site}>

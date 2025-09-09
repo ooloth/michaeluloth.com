@@ -3,7 +3,6 @@ import { getCollection, type CollectionEntry } from 'astro:content'
 import {
   addContent,
   addLastModifiedDate,
-  removePrivateInProduction,
   sortByLastModifiedDate,
   type HasCollection,
   type Post,
@@ -16,6 +15,12 @@ export const FEATURED_COUNT = 3
  * Returns true if the entry is from the posts collection.
  */
 export const isPost = (entry: HasCollection): entry is Post => entry.collection === 'posts'
+
+/**
+ * Returns true if the post is not marked incognito and should therefore be included in menus.
+ */
+export const isAdvertised = (entry: Post): boolean =>
+  !(entry.data.incognito === true) && !(entry.data.tags ?? []).includes('incognito')
 
 /**
  * Returns entries sorted in descending order by publish date, with undefined dates sorted first.
@@ -31,7 +36,7 @@ export const isPublished = (post: CollectionEntry<'posts'> | Post | PostWithCont
  * full rendered content of the first few so they can be shown inline on the home page.
  */
 export const getPublishedPosts = async (): Promise<(Post | PostWithContent)[]> => {
-  const postsToShow = sortByPublishDate(removePrivateInProduction(await getCollection('posts', isPublished)))
+  const postsToShow = sortByPublishDate(await getCollection('posts', isPublished))
   const postsToShowInline = postsToShow.slice(0, FEATURED_COUNT)
   const postsToShowInList = postsToShow.slice(FEATURED_COUNT)
 
@@ -45,13 +50,11 @@ export const isScheduled = (post: CollectionEntry<'posts'> | Post | PostWithCont
  * Returns all posts scheduled to be published in the future, sorted by last modified date.
  */
 export const getScheduledPosts = async (): Promise<Post[]> =>
-  sortByLastModifiedDate(
-    await addLastModifiedDate(removePrivateInProduction(await getCollection('posts', isScheduled))),
-  )
+  sortByLastModifiedDate(await addLastModifiedDate(await getCollection('posts', isScheduled)))
 
 /**
  * Returns all posts with their last modified date (and the first few with their content), sorted by publish date.
  * In production, only returns published posts (i.e. no scheduled posts).
  */
 export const getPosts = async (): Promise<(Post | PostWithContent)[]> =>
-  sortByLastModifiedDate(await addLastModifiedDate(removePrivateInProduction(await getCollection('posts'))))
+  sortByLastModifiedDate(await addLastModifiedDate(await getCollection('posts')))

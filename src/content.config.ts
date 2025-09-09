@@ -22,10 +22,10 @@ const post = z.object({
   devLink: z.string().optional().nullable(),
   feedId: z.string().optional().nullable(),
   hackerNewsLink: z.string().optional().nullable(),
+  incognito: z.boolean().optional().nullable(), // not included in menus, but URL still there
   linkSharedOnTwitter: z.string().optional().nullable(),
   ogImage: z.string().optional().nullable(),
   parent: z.string().optional().nullable(), // TODO: remove? (will be ignored); legacy from when collection was shared with notes, which were nested
-  private: z.boolean().optional().nullable(),
   redditLink: z.string().optional().nullable(),
   tags: z.array(z.string()).optional().nullable(), // TODO: require? report when < 2?
   title: z.string().nonempty(),
