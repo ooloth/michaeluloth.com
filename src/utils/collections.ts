@@ -2,6 +2,10 @@ import { render, type CollectionEntry } from 'astro:content'
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js'
 // import type { MarkdownHeading } from 'astro'
 
+export type HasCollection = {
+  collection: 'posts' | 'drafts' | 'notes' | 'bookmarks' | 'pages' | 'albums' | 'books' | 'podcasts'
+}
+
 // A generic type that adds a lastModified property to the existing data field
 type WithRemarkFrontmatter<T extends CollectionEntry<'posts' | 'drafts' | 'notes' | 'bookmarks'>> = Omit<T, 'data'> & {
   data: T['data'] & {
@@ -10,19 +14,28 @@ type WithRemarkFrontmatter<T extends CollectionEntry<'posts' | 'drafts' | 'notes
   }
 }
 
-export type HasCollection = {
-  collection: 'posts' | 'drafts' | 'notes' | 'bookmarks' | 'pages' | 'albums' | 'books' | 'podcasts'
+export type HasDate<T extends CollectionEntry<'posts'>> = Omit<T, 'data'> & {
+  data: T['data'] & {
+    date: Date
+  }
 }
 
-export type HasContent = {
+type HasLastModified = {
+  data: {
+    lastModified?: string
+  }
+}
+
+export type HasContent<T extends CollectionEntry<'posts'>> = T & {
   Content: AstroComponentFactory
 }
 
-export type Post = WithRemarkFrontmatter<CollectionEntry<'posts'>>
-export type PostWithContent = Post & HasContent
+export type Bookmark = WithRemarkFrontmatter<CollectionEntry<'bookmarks'>>
 export type Draft = WithRemarkFrontmatter<CollectionEntry<'drafts'>>
 export type Note = WithRemarkFrontmatter<CollectionEntry<'notes'>>
-export type Bookmark = WithRemarkFrontmatter<CollectionEntry<'bookmarks'>>
+export type Post = WithRemarkFrontmatter<CollectionEntry<'posts'>>
+export type PostWithContent = HasContent<Post>
+export type PostWithDate = HasDate<Post>
 export type SinglePage = CollectionEntry<'pages'>
 
 /**
@@ -51,17 +64,8 @@ export async function addLastModifiedDate<T extends CollectionEntry<'posts' | 'd
  * Adds the rendered content to the frontmatter of a post (so it can be shown inline on the home page).
  * See: https://docs.astro.build/en/recipes/modified-time/
  */
-export async function addContent(
-  entries: CollectionEntry<'posts'>[],
-): Promise<(CollectionEntry<'posts'> & HasContent)[]> {
-  return await Promise.all(entries.map(async entry => ({ ...entry, Content: (await render(entry)).Content })))
-}
-
-type HasLastModified = {
-  data: {
-    lastModified?: string
-  }
-}
+export const addContent = async <T extends CollectionEntry<'posts'>>(entries: T[]): Promise<HasContent<T>[]> =>
+  await Promise.all(entries.map(async entry => ({ ...entry, Content: (await render(entry)).Content })))
 
 export const sortByLastModifiedDate = <T extends HasLastModified>(items: T[]): T[] => {
   const sortByDate = (a: T, b: T): number => {

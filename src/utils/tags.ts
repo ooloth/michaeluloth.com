@@ -1,4 +1,4 @@
-import type { Bookmark, Draft, Note, Post } from './collections'
+import type { Bookmark, Draft, Note, Post, HasDate } from './collections'
 
 type HasTags = {
   tags?: string[] | null
@@ -34,12 +34,6 @@ export const filterItemsByTags = <T extends HasTags>(items: T[], tags: string[])
   return items.filter(item => {
     return cleanTags(tags).every(tag => cleanTags(item.data?.tags ?? item.tags).includes(tag))
   })
-}
-
-type HasDate = {
-  data: {
-    date: Date
-  }
 }
 
 /**

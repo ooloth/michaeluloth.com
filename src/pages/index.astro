@@ -2,13 +2,14 @@
 import PrevNext from '../components/PrevNext.astro'
 import site from '../data/site'
 import Main from '../layouts/Main.astro'
-import { type Post, type PostWithContent } from '../utils/collections'
+import { type Post, type PostWithContent, addContent } from '../utils/collections'
 import { getHumanReadableDate, getMachineReadableDate } from '../utils/dates'
-import { FEATURED_COUNT, getPublishedPosts, isAdvertised } from '../utils/posts'
+import { getAdvertisedPosts } from '../utils/posts'
 
-const postsToShowOnHomePage = (await getPublishedPosts()).filter(isAdvertised)
+const postsToShowOnHomePage = await getAdvertisedPosts()
 
-const postsToShowInline = postsToShowOnHomePage.slice(0, FEATURED_COUNT) as PostWithContent[]
+const FEATURED_COUNT = 3
+const postsToShowInline = await addContent(postsToShowOnHomePage.slice(0, FEATURED_COUNT) as PostWithContent[])
 const postsToShowInList = postsToShowOnHomePage.slice(FEATURED_COUNT) as Post[]
 ---
 
