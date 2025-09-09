@@ -31,7 +31,7 @@ export const isPublished = (post: CollectionEntry<'posts'> | Post | PostWithCont
  * full rendered content of the first few so they can be shown inline on the home page.
  */
 export const getPublishedPosts = async (): Promise<(Post | PostWithContent)[]> => {
-  const postsToShow = sortByPublishDate(await getCollection('posts', isPublished))
+  const postsToShow = sortByPublishDate(removePrivateInProduction(await getCollection('posts', isPublished)))
   const postsToShowInline = postsToShow.slice(0, FEATURED_COUNT)
   const postsToShowInList = postsToShow.slice(FEATURED_COUNT)
 
@@ -45,7 +45,9 @@ export const isScheduled = (post: CollectionEntry<'posts'> | Post | PostWithCont
  * Returns all posts scheduled to be published in the future, sorted by last modified date.
  */
 export const getScheduledPosts = async (): Promise<Post[]> =>
-  sortByLastModifiedDate(await addLastModifiedDate(await getCollection('posts', isScheduled)))
+  sortByLastModifiedDate(
+    await addLastModifiedDate(removePrivateInProduction(await getCollection('posts', isScheduled))),
+  )
 
 /**
  * Returns all posts with their last modified date (and the first few with their content), sorted by publish date.
