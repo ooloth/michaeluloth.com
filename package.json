@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "format": "NODE_OPTIONS='--experimental-strip-types' prettier --write .",
+    "format": "prettier --write .",
     "lint": "eslint",
     "start": "next start",
     "typecheck": "tsc"
