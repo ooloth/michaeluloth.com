@@ -1,6 +1,6 @@
 import notion, { APIErrorCode } from './client'
 
-const getPage = async pageId => {
+const getPage = async (pageId: string) => {
   const response = await notion.pages.retrieve({ page_id: pageId })
 
   return response
