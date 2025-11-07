@@ -1,11 +1,13 @@
-import notion from './client'
+import notion, { collectPaginatedAPI } from './client'
 
-// TODO: add pagination logic for pages with more than 100 blocks?
+/**
+ * Get all children blocks of a block (including a page).
+ * @see https://developers.notion.com/reference/get-block-children
+ */
 export default async function getBlockChildren(blockId: string) {
-  const response = await notion.blocks.children.list({
+  const children = await collectPaginatedAPI(notion.blocks.children.list, {
     block_id: blockId,
-    page_size: 100,
   })
 
-  return response.results
+  return children
 }
