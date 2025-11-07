@@ -1,4 +1,4 @@
-import notion from './client'
+import notion, { APIErrorCode } from './client'
 
 const getPage = async pageId => {
   const response = await notion.pages.retrieve({ page_id: pageId })
