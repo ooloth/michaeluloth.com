@@ -1,9 +1,9 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  cacheComponents: true, // see: https://nextjs.org/blog/next-16#cache-components
+  cacheComponents: true,
   experimental: {
-    turbopackFileSystemCacheForDev: true, // see: https://nextjs.org/blog/next-16#turbopack-file-system-caching-beta
+    turbopackFileSystemCacheForDev: false, // was getting stale css in safari
   },
 }
 
