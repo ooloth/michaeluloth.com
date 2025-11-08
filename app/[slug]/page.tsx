@@ -2,14 +2,21 @@
 import getPost from '@/lib/notion/getPost'
 import getPosts from '@/lib/notion/getPosts'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
-import Post from '@/ui/post'
+import Post from './ui/post'
 
-export default async function DynamicRoute({ params }: { params: Promise<{ slug: string }> }) {
+type Props = Readonly<{
+  params: Promise<{
+    slug: string
+  }>
+}>
+
+export default async function DynamicRoute({ params }: Props) {
   // See: https://nextjs.org/docs/messages/next-prerender-current-time
   'use cache'
 
-  const { slug } = await params
+  const slug = (await params).slug
   const post = await getPost(slug)
+
   return <Post post={post} />
 }
 

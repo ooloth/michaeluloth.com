@@ -19,7 +19,6 @@ export default function Post({ post }) {
 
   return (
     <>
-      {/* <Outer narrow> */}
       {/* <ArticleSeo title={title} slug={slug} description={description} featuredImage={featuredImage} date={date} /> */}
 
       <article>
@@ -33,8 +32,7 @@ export default function Post({ post }) {
         </div>
       </article>
       <div className="" />
-      <pre>{JSON.stringify(post, null, 2)}</pre>
-      {/* </Outer> */}
+      <pre className="bg-slate-900">{JSON.stringify(post, null, 2)}</pre>
     </>
   )
 }
