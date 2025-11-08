@@ -9,5 +9,7 @@ export default async function getBlockChildren(blockId: string) {
     block_id: blockId,
   })
 
+  // TODO: parse with zod (here? elsewhere?)
+
   return children
 }

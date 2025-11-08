@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import classNames from 'utils/class-names'
+import classNames from '@/styles/class-names'
 
 export default function Text({ text }) {
   if (!text) return null
@@ -15,11 +15,7 @@ export default function Text({ text }) {
     return (
       <Tag
         key={text.link?.url || text.content}
-        className={classNames([
-          bold && 'font-semibold',
-          strikethrough && 'line-through',
-          underline && 'underline',
-        ])}
+        className={classNames([bold && 'font-semibold', strikethrough && 'line-through', underline && 'underline'])}
       >
         {text.link ? (
           text.link.url.includes('michaeluloth.com') ? (

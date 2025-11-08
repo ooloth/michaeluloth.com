@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { transformCloudinaryImage } from 'lib/cloudinary/utils'
+import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
 import { Fragment } from 'react'
 import Text from './Text'
 

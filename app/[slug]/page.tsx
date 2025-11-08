@@ -1,19 +1,15 @@
 // import Article from 'templates/article'
 import getPost from '@/lib/notion/getPost'
 import getPosts from '@/lib/notion/getPosts'
+import Post from '@/ui/post'
 
 export default async function DynamicRoute({ params }: { params: Promise<{ slug: string }> }) {
   // See: https://nextjs.org/docs/messages/next-prerender-current-time
   'use cache'
 
   const { slug } = await params
-
   const post = await getPost(slug)
-  console.log('post', post)
-
-  // return <Article article={article} />
-
-  return null
+  return <Post post={post} />
 }
 
 /**
