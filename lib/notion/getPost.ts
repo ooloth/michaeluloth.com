@@ -10,6 +10,11 @@ type PostProperties = {}
 
 type PostBlocks = {}
 
+type PostWithBlocks = {
+  properties: PostProperties
+  blocks: PostBlocks
+}
+
 /**
  * Fetches a specific blog post from a Notion data source by its "Slug" property.
  * Optionally includes the post's block children.

@@ -1,4 +1,11 @@
-import { type APIErrorCode, Client, collectPaginatedAPI } from '@notionhq/client'
+import {
+  type APIErrorCode,
+  Client,
+  collectPaginatedAPI,
+  type PageObjectResponse,
+  type BlockObjectResponse,
+  type PropertyItemObjectResponse,
+} from '@notionhq/client'
 
 // See: https://github.com/makenotion/notion-sdk-js
 const notion = new Client({
