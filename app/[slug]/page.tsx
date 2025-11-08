@@ -1,6 +1,7 @@
 // import Article from 'templates/article'
 import getPost from '@/lib/notion/getPost'
 import getPosts from '@/lib/notion/getPosts'
+import getPropertyValue from '@/lib/notion/getPropertyValue'
 import Post from '@/ui/post'
 
 export default async function DynamicRoute({ params }: { params: Promise<{ slug: string }> }) {
@@ -21,7 +22,7 @@ export default async function DynamicRoute({ params }: { params: Promise<{ slug:
  */
 export async function generateStaticParams() {
   const posts = await getPosts()
-  const postSlugs: string[] = posts.map(post => post.properties['Slug'].rich_text[0].plain_text)
+  const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))
 
   return postSlugs.map(slug => ({ slug }))
 }

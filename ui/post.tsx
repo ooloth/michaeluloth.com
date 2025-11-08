@@ -10,7 +10,12 @@ import getPropertyValue from '@/lib/notion/getPropertyValue'
 // import Prism from 'prismjs'
 
 export default function Post({ post }) {
-  const { type, title, slug, description, featuredImage, date } = parsePostProperties(post)
+  const type = getPropertyValue(post.properties, 'Type')
+  const title = getPropertyValue(post.properties, 'Title')
+  const slug = getPropertyValue(post.properties, 'Slug')
+  const description = getPropertyValue(post.properties, 'Description')
+  const featuredImage = getPropertyValue(post.properties, 'Featured image')
+  const date = getPropertyValue(post.properties, 'First published')
 
   return (
     <>
@@ -88,20 +93,6 @@ export default function Post({ post }) {
 //     </>
 //   )
 // }
-
-/**
- * Parses the Notion post metadata
- */
-function parsePostProperties(post: any) {
-  const type = getPropertyValue(post.properties, 'Type')
-  const title = getPropertyValue(post.properties, 'Title')
-  const slug = getPropertyValue(post.properties, 'Slug')
-  const description = getPropertyValue(post.properties, 'Description')
-  const featuredImage = getPropertyValue(post.properties, 'Featured image')
-  const date = getPropertyValue(post.properties, 'First published')
-
-  return { type, title, slug, description, featuredImage, date }
-}
 
 // const discussUrl = slug =>
 //   `https://mobile.twitter.com/search?q=${encodeURIComponent(
