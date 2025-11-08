@@ -1,9 +1,7 @@
 // TODO: use notion sdk types?
+// TODO: how to return type-safe values based on property.type so callers get specific types?
 
-export default function getPropertyValue(
-  properties: any[],
-  property_name: any,
-): string | string[] | number | boolean | null {
+export default function getPropertyValue(properties: any[], property_name: any) {
   const property = properties[property_name]
 
   switch (property.type) {
