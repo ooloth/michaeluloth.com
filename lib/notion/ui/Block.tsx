@@ -2,6 +2,7 @@
 import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
 import { Fragment } from 'react'
 import Text from './Text'
+import { Code } from '@/ui/code'
 
 // TODO: add type definitions for raw Notion blocks + my parsed blocks
 // see: https://github.com/9gustin/react-notion-render/blob/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/types/NotionBlock.ts
@@ -76,13 +77,14 @@ export default function Block({ block }: BlockProps) {
       )
 
     case 'code':
-      return (
-        <pre className={`language-${value.language}`}>
-          <code className={`language-${value.language}`}>
-            <Text text={value.rich_text} />
-          </code>
-        </pre>
-      )
+      // Hijack the caption to use as meta string for rehype-pretty-code if I want to highlight specific lines, etc
+      // See: https://rehype-pretty.pages.dev/#meta-strings
+      const rehypePrettyCodeMetaString = value.caption?.[0]?.plain_text || value.language
+
+      const codeText = value.rich_text.map(textItem => textItem.plain_text).join('\n')
+      const codeAsMarkdown = `\`\`\`${rehypePrettyCodeMetaString}\n${codeText}\n\`\`\``
+
+      return <Code code={codeAsMarkdown} />
 
     case 'toggle':
       return (

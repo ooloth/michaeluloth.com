@@ -1,3 +1,7 @@
+// TODO: preferred: https://rehype-pretty.pages.dev/#react-server-component
+// TODO: backup: https://shiki.style/guide/install
+// TODO: backup: https://shiki.style/packages/next#react-server-component
+
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
@@ -5,19 +9,14 @@ import rehypeStringify from 'rehype-stringify'
 import rehypePrettyCode from 'rehype-pretty-code'
 import { transformerCopyButton } from '@rehype-pretty/transformers'
 
-/**
- * Server Component example
- */
+type Props = Readonly<{
+  code: string
+}>
 
-export async function Code({ code }: { code: string }) {
+export async function Code({ code }: Props) {
   const highlightedCode = await highlightCode(code)
-  return (
-    <section
-      dangerouslySetInnerHTML={{
-        __html: highlightedCode,
-      }}
-    />
-  )
+
+  return <figure dangerouslySetInnerHTML={{ __html: highlightedCode }} />
 }
 
 async function highlightCode(code: string) {
@@ -25,10 +24,12 @@ async function highlightCode(code: string) {
     .use(remarkParse)
     .use(remarkRehype)
     .use(rehypePrettyCode, {
+      defaultLang: 'plaintext',
+      keepBackground: false,
       transformers: [
         transformerCopyButton({
           visibility: 'always',
-          feedbackDuration: 3_000,
+          feedbackDuration: 3_000, // milliseconds
         }),
       ],
     })
