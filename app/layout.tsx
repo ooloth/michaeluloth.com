@@ -7,33 +7,25 @@
 // TODO: read url: https://nextjs.org/docs/app/api-reference/functions/use-search-params
 // TODO: data fetching: https://nextjs.org/docs/app/guides/migrating/app-router-migration#step-6-migrating-data-fetching-methods
 
-import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { type Metadata } from 'next'
+import { type ReactNode } from 'react'
 import '@/styles/globals.css'
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-})
 
 export const metadata: Metadata = {
   title: 'Michael Uloth',
   description: 'Software engineer helping scientists discover new medicines at Recursion.',
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+type Props = Readonly<{
+  children: ReactNode
+}>
+
+export default function RootLayout({ children }: Props) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+    <html lang="en" className="bg-pink-300">
+      <body className="overflow-x-hidden bg-zinc-900 min-h-screen antialiased leading-relaxed text-[1.1rem] text-zinc-400">
+        {children}
+      </body>
     </html>
   )
 }
