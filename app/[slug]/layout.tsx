@@ -5,5 +5,5 @@ type Props = Readonly<{
 }>
 
 export default function PostLayout({ children }: Props) {
-  return <div>{children}</div>
+  return <div className="p-4">{children}</div>
 }
