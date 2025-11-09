@@ -1,6 +1,6 @@
 // import { format } from 'timeago.js'
 
-import Blocks from '@/lib/notion/ui/Blocks'
+import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
 import { Code } from '@/ui/code'
 import Heading from '@/ui/heading'
@@ -19,7 +19,7 @@ export default function Post({ post }) {
         </header>
 
         <div className="mt-8 prose dark:prose-dark lg:prose-lg dark:lg:prose-lg">
-          <Blocks blocks={post.blocks} />
+          <NotionBlocks blocks={post.blocks} />
         </div>
       </article>
 

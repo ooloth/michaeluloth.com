@@ -1,13 +1,13 @@
-import Block from '@/lib/notion/ui/Block'
+import NotionBlock from '@/lib/notion/ui/NotionBlock'
 
 /**
  * Parses and renders the blocks for a Notion page.
  * @see https://github.com/9gustin/react-notion-render/blob/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/components/core/Render/index.tsx
  */
-export default function Blocks({ blocks }) {
+export default function NotionBlocks({ blocks }) {
   const blocksToRender = getBlocksToRender(blocks)
 
-  return blocksToRender.map(block => <Block key={block.id} block={block} />)
+  return blocksToRender.map(block => <NotionBlock key={block.id} block={block} />)
 }
 
 /**
