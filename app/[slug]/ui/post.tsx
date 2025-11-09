@@ -4,8 +4,6 @@ import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
 import { Code } from '@/ui/code'
 import Heading from '@/ui/heading'
-// import Emoji from '@/ui/emoji'
-// import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
 
 export default function Post({ post }) {
   const title = getPropertyValue(post.properties, 'Title')

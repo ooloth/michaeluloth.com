@@ -1,4 +1,7 @@
-function transformCloudinaryImage(url: string, width: number) {
+// TODO: did the astro site improve on these choices?
+// TODO: remove code duplication?
+
+export default function transformCloudinaryImage(url: string, width: number) {
   if (url.includes('cloudinary')) {
     if (url.includes('upload/')) {
       return url.replace('upload/', `upload/w_${width},f_auto,q_auto,dpr_2.0/`)
@@ -13,5 +16,3 @@ function transformCloudinaryImage(url: string, width: number) {
 
   return url
 }
-
-export { transformCloudinaryImage }

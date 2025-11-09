@@ -1,6 +1,5 @@
 import { type ReactElement } from 'react'
 
-import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
 import {
   type NotionAPIBlock,
   type NotionAPIBulletedListItemBlock,
@@ -17,6 +16,7 @@ import NotionRichText from '@/lib/notion/ui/NotionRichText'
 
 import { Code } from '@/ui/code'
 import Heading from '@/ui/heading'
+import Image from '@/ui/image'
 import Paragraph from '@/ui/paragraph'
 
 // TODO: add type definitions for raw Notion blocks + my parsed blocks
@@ -128,12 +128,13 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
     case 'image':
       const image = block['image'] satisfies NotionAPIImageBlock['image']
-      const url = image.type === 'external' ? image.external.url : image.file.url
-      const src = transformCloudinaryImage(url, 624)
 
+      const src = image.type === 'external' ? image.external.url : image.file.url
+
+      // TODO: look up alt, width and height via Cloudinary so caption can be photo credit etc?
       const { alt, width, height } = parseImageCaption(image.caption)
 
-      return <img src={src} alt={alt} width={width} height={height} className="bg-gray-900 rounded" />
+      return <Image src={src} alt={alt} width={width} height={height} />
 
     // FIXME: support video embeds
     case 'video':
@@ -204,8 +205,8 @@ function parseImageCaption(caption: NotionAPIImageBlock['image']['caption']) {
     throw new Error('Image caption must start with valid dimensions: [<width>x<height>]')
   }
 
-  const width = dimensions[0].replace(/x.*/, '')
-  const height = dimensions[0].replace(/.*x/, '')
+  const width = parseInt(dimensions[0].replace(/x.*/, ''))
+  const height = parseInt(dimensions[0].replace(/.*x/, ''))
 
   const alt = caption[0]?.plain_text.replace(/\[\d+x\d+\]/, '').trim()
 

@@ -1,4 +1,4 @@
-import { transformCloudinaryImage } from 'lib/cloudinary/utils'
+import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from 'utils/getImagePlaceholderForEnv'
 
 interface iTunesListItem {
@@ -79,10 +79,7 @@ export default async function fetchItunesItems(
         const link = result.collectionViewUrl || result.trackViewUrl
         // See image srcset URLs used on books.apple.com:
         const imageUrl = transformCloudinaryImage(
-          `https://res.cloudinary.com/ooloth/image/fetch/${result.artworkUrl100.replace(
-            '100x100bb',
-            '400x0w',
-          )}`,
+          `https://res.cloudinary.com/ooloth/image/fetch/${result.artworkUrl100.replace('100x100bb', '400x0w')}`,
           192,
         )
 
