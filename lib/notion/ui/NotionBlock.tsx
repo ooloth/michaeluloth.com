@@ -172,25 +172,8 @@ export default function NotionBlock({ block }: Props): ReactElement {
     //   </details>
     // )
 
-    case 'child_page':
-      throw new Error('Child page blocks not supported yet.')
-
-    // const childPage = block['child_page'] satisfies ChildPageBlock['child_page']
-    //
-    // return (
-    //   <Paragraph>
-    //     <NotionRichText text={childPage.rich_text} />
-    //   </Paragraph>
-    // )
-
     default:
-      return <></>
-
-    // return `❌ Unsupported block (${
-    //   type === 'unsupported'
-    //     ? `The "${type}" type is not supported by the Notion API.`
-    //     : type
-    // })`
+      throw new Error(`Encountered unsupported Notion block type: "${block.type}"`)
   }
 }
 
