@@ -1,6 +1,30 @@
 @import 'tailwindcss';
 
+@layer base {
+  :root {
+    --accent: #ff98a4;
+    --accent-translucent: #ff98a485;
+    /* --moonlight-red: #ff98a4; */
+    /* --moonlight-red-translucent: #ff98a485; */
+  }
+}
+
+@utility bg-accent {
+  background-color: var(--accent);
+}
+
+@utility text-accent {
+  color: var(--accent);
+}
+
+@layer base {
+  ::selection {
+    @apply bg-accent text-black;
+  }
+}
+
 /* Rehype Pretty Code */
+
 /* See: https://rehype-pretty.pages.dev/#styles */
 /* pre { */
 /*   @apply rounded bg-zinc-900 overflow-x-auto py-2; */
@@ -95,3 +119,262 @@
     /* } */
   }
 }
+
+/* TODO: migrate the astro site styles below to component classNames */
+
+/* @import './components/syntax-highlighting'; */
+/**/
+/**/
+/* @layer utilities { */
+/*   .decoration-bright { */
+/*     @apply decoration-white; */
+/*   } */
+/**/
+/*   .text-bright { */
+/*     @apply text-white; */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .heading { */
+/*     @apply text-bright break-after-avoid leading-tight font-semibold; */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .link { */
+/*     @apply box-decoration-clone underline; */
+/*     @apply underline-offset-[0.2em] decoration-[0.1em] decoration-[--moonlight-red-translucent] text-[--moonlight-red]; */
+/**/
+/*     text-decoration-skip-ink: none; */
+/**/
+/*     &:hover, */
+/*     &:focus, */
+/*     &:active { */
+/*       @apply shadow-glow outline-none rounded-[0.75px] bg-[--moonlight-red] text-black; */
+/*     } */
+/**/
+/*     /* group-focus is for instances where I've styled a span inside a flex-child anchor (to avoid full-width stretch) */
+/*     @apply group-focus:shadow-glow group-focus:outline-none group-focus:bg-[--moonlight-red] group-focus:text-black; */
+/*   } */
+/**/
+/*   .link-nav { */
+/*     @apply link underline-offset-[0.2em]; */
+/*     @apply decoration-transparent decoration-solid decoration-[0.15em] text-zinc-300; */
+/**/
+/*     /* the active menu item (set in Header.astro) */
+/*     &[aria-current='page'] { */
+/*       @apply decoration-[--moonlight-red] text-white; */
+/**/
+/*       &:hover, */
+/*       &:focus, */
+/*       &:active { */
+/*         @apply text-black; */
+/*       } */
+/*     } */
+/*   } */
+/**/
+/*   .link-heading { */
+/*     @apply box-decoration-clone underline; */
+/*     @apply underline-offset-[0.2em] decoration-[0.1em] decoration-[--moonlight-red-translucent] text-[--moonlight-red]; */
+/**/
+/*     text-decoration-skip-ink: none; */
+/**/
+/*     &:hover, */
+/*     &:focus, */
+/*     &:active { */
+/*       @apply outline-none decoration-bright text-bright; */
+/*     } */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .list { */
+/*     @apply mt-4 ps-7; */
+/*   } */
+/**/
+/*   .list-notes { */
+/*     @apply columns-2xs lowercase; */
+/**/
+/*     /* fixes list items jumping down on hover in Safari when their box-shadow changes */
+/*     /* see: https://stackoverflow.com/a/73268790/8802485 */
+/*     & * { */
+/*       @apply will-change-opacity; */
+/*     } */
+/*   } */
+/**/
+/*   .list-item { */
+/*     @apply mt-1 leading-normal; */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .image { */
+/*     @apply my-8 rounded-lg; */
+/*     @apply bg-zinc-800; */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .caption { */
+/*     @apply mt-1 text-center text-[0.9rem]; */
+/*     @apply text-zinc-500; */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .timestamp { */
+/*     @apply text-sm uppercase; */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .home-page-full-posts { */
+/*     & .markdown { */
+/*       /* smaller subheadings on the home page */
+/*       & h2 { */
+/*         @apply heading mt-8 text-[1.4rem]; */
+/*       } */
+/*       & h3 { */
+/*         @apply heading mt-8 text-xl; */
+/*       } */
+/*     } */
+/*   } */
+/**/
+/*   .markdown { */
+/*     & h1 { */
+/*       @apply heading mb-8 text-[2.25rem] leading-[1.1] font-bold; */
+/*     } */
+/*     & h2 { */
+/*       @apply heading mt-8 text-[1.6rem]; */
+/*     } */
+/*     & h3 { */
+/*       @apply heading mt-8 text-xl; */
+/*     } */
+/*     & h4 { */
+/*       @apply heading mt-6 text-lg; */
+/*     } */
+/*     & h5 { */
+/*       @apply heading mt-4 text-base; */
+/*     } */
+/*     & h6 { */
+/*       @apply heading mt-4 text-sm; */
+/*     } */
+/**/
+/*     & p { */
+/*       @apply mt-4; */
+/**/
+/*       & + ul, */
+/*       & + ol { */
+/*         @apply mt-3; */
+/*       } */
+/*     } */
+/**/
+/*     & a { */
+/*       @apply link font-medium; */
+/*     } */
+/**/
+/*     & ul, */
+/*     & ol { */
+/*       @apply list; */
+/*       @apply marker:text-[--moonlight-red]; */
+/*     } */
+/**/
+/*     & ul { */
+/*       @apply list-disc; */
+/*     } */
+/**/
+/*     & ol { */
+/*       @apply list-decimal; */
+/*     } */
+/**/
+/*     & li { */
+/*       @apply mt-1; */
+/**/
+/*       & > ul, */
+/*       & > ol, */
+/*       & > p { */
+/*         @apply mt-0; */
+/*       } */
+/*     } */
+/**/
+/*     img { */
+/*       @apply image; */
+/*     } */
+/**/
+/*     figure { */
+/*       & figcaption { */
+/*         @apply caption; */
+/*       } */
+/*     } */
+/**/
+/*     & strong, */
+/*     & em { */
+/*       @apply text-bright; */
+/*     } */
+/**/
+/*     & blockquote { */
+/*       @apply ms-4 border-l-4 pl-3 italic; */
+/*       @apply border-[--moonlight-red] text-bright; */
+/*     } */
+/**/
+/*     & time { */
+/*       @apply timestamp; */
+/*     } */
+/**/
+/*     & table { */
+/*       @apply table-auto my-8 border-collapse; */
+/**/
+/*       & td, */
+/*       & th { */
+/*         @apply px-2 py-1 text-left; */
+/*         @apply border border-zinc-700; */
+/*       } */
+/**/
+/*       & td { */
+/*         &:first-of-type { */
+/*           @apply font-medium text-zinc-300; */
+/*         } */
+/*       } */
+/**/
+/*       & th { */
+/*         @apply sticky top-0; */
+/*         @apply bg-zinc-900 font-semibold text-bright; */
+/*       } */
+/*     } */
+/**/
+/*     /* e.g. YouTube and Twitter embeds */
+/*     & iframe { */
+/*       @apply my-5 aspect-video rounded-lg w-full h-auto; */
+/*     } */
+/**/
+/*     & hr { */
+/*       @apply my-8 border-solid border-zinc-600; */
+/*     } */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .footnotes { */
+/*     @apply mt-8 text-[0.9rem]; */
+/*   } */
+/* } */
+/**/
+/* @layer components { */
+/*   .giscus { */
+/*     @apply mt-16; */
+/*   } */
+/* } */
+/**/
+/* /* see: https://blog.logrocket.com/hide-scrollbar-without-impacting-scrolling-css/ */
+/* @layer utilities { */
+/*   .hide-scrollbar { */
+/*     -ms-overflow-style: none; /* IE and Edge */
+/*     scrollbar-width: none; /* Firefox */
+/**/
+/*     /* For Blink- and WebKit-based browsers (e.g., Chrome, Edge, Opera, Safari, all browsers on iOS, and others). */
+/*     &::-webkit-scrollbar { */
+/*       @apply hidden; */
+/*     } */
+/*   } */
+/* } */
