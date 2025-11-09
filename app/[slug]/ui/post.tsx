@@ -23,7 +23,10 @@ export default function Post({ post }) {
         </div>
       </article>
 
-      <Code code={`\`\`\`json${JSON.stringify(post, null, 2)}\`\`\``} />
+      <details className="my-12">
+        <summary className="font-bold text-white">Notion API response JSON...</summary>
+        <Code code={`\`\`\`json${JSON.stringify(post, null, 2)}\`\`\``} />
+      </details>
     </>
   )
 }
