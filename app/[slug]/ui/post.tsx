@@ -3,12 +3,12 @@
 
 import Blocks from '@/lib/notion/ui/Blocks'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
+import { Code } from '@/ui/code'
 import Heading from '@/ui/heading'
 // import Outer from '@/layouts/outer'
 // import Emoji from '@/ui/emoji'
 // import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
 // import { useEffect } from 'react'
-// import Prism from 'prismjs'
 
 export default function Post({ post }) {
   const type = getPropertyValue(post.properties, 'Type')
@@ -33,8 +33,7 @@ export default function Post({ post }) {
         </div>
       </article>
 
-      <div className="" />
-      <pre className="bg-slate-900">{JSON.stringify(post, null, 2)}</pre>
+      <Code code={`\`\`\`json${JSON.stringify(post, null, 2)}\`\`\``} />
     </>
   )
 }

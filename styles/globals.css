@@ -11,6 +11,15 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+/* Rehype Pretty Code */
+/* See: https://rehype-pretty.pages.dev/#styles */
+/* pre { */
+/*   @apply rounded bg-zinc-900 overflow-x-auto py-2; */
+/**/
+/*   [data-line] { */
+/*     @apply px-4 text-sm; */
+/*   } */
+/* } */
 
 @media (prefers-color-scheme: dark) {
   :root {
