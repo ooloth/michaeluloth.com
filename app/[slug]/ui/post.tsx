@@ -31,6 +31,7 @@ export default function Post({ post }) {
           <Blocks blocks={post.blocks} />
         </div>
       </article>
+
       <div className="" />
       <pre className="bg-slate-900">{JSON.stringify(post, null, 2)}</pre>
     </>

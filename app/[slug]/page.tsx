@@ -1,3 +1,5 @@
+// TODO: metadata: https://nextjs.org/docs/app/api-reference/functions/generate-metadata
+
 import getPost from '@/lib/notion/getPost'
 import getPosts from '@/lib/notion/getPosts'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
@@ -15,6 +17,8 @@ export default async function DynamicRoute({ params }: Props) {
   'use cache'
 
   const slug = (await params).slug
+
+  // TODO: use fetch instead? https://nextjs.org/docs/app/api-reference/functions/fetch
   const post = await getPost({ slug, includeBlocks: true })
 
   return <Post post={post} />
