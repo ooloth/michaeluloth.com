@@ -4,7 +4,6 @@ import Blocks from '@/lib/notion/ui/Blocks'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
 import { Code } from '@/ui/code'
 import Heading from '@/ui/heading'
-// import Outer from '@/layouts/outer'
 // import Emoji from '@/ui/emoji'
 // import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
 
@@ -16,7 +15,7 @@ export default function Post({ post }) {
       <article className="flex flex-col gap-y-4">
         <header>
           <Heading level={1}>{title}</Heading>
-          {/* <p className="mt-3 text-sm text-gray-700 dark:text-gray-500">Updated {format(date)}</p> */}
+          {/* <Paragraph className="mt-3 text-sm text-gray-700 dark:text-gray-500">Updated {format(date)}</p> */}
         </header>
 
         <div className="mt-8 prose dark:prose-dark lg:prose-lg dark:lg:prose-lg">
