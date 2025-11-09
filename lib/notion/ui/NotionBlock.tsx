@@ -1,0 +1,217 @@
+import { type ReactElement } from 'react'
+
+import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
+import {
+  type NotionAPIBlock,
+  type NotionAPIBulletedListItemBlock,
+  type NotionAPICodeBlock,
+  type NotionAPIHeading1Block,
+  type NotionAPIHeading2Block,
+  type NotionAPIHeading3Block,
+  type NotionAPIImageBlock,
+  type NotionAPINumberedListItemBlock,
+  type NotionAPIParagraphBlock,
+  type NotionAPIQuoteBlock,
+} from '@/lib/notion/types'
+import NotionRichText from '@/lib/notion/ui/NotionRichText'
+
+import { Code } from '@/ui/code'
+import Heading from '@/ui/heading'
+import Paragraph from '@/ui/paragraph'
+
+// TODO: add type definitions for raw Notion blocks + my parsed blocks
+// see: https://github.com/9gustin/react-notion-render/blob/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/types/NotionBlock.ts
+type Props = {
+  block: NotionAPIBlock // TODO: receive a confirmed type safe block instead of assuming the types?
+}
+
+export default function NotionBlock({ block }: Props): ReactElement {
+  // TODO: move each markup component into a separate file
+  // see: https://github.com/9gustin/react-notion-render/tree/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/components/common
+  switch (block.type) {
+    case 'paragraph':
+      const paragraph = block['paragraph'] satisfies NotionAPIParagraphBlock['paragraph']
+
+      return (
+        <Paragraph>
+          <NotionRichText text={paragraph.rich_text} />
+        </Paragraph>
+      )
+
+    case 'heading_1':
+      const heading1 = block['heading_1'] satisfies NotionAPIHeading1Block['heading_1']
+
+      return (
+        <Heading level={1}>
+          <NotionRichText text={heading1.rich_text} />
+        </Heading>
+      )
+
+    case 'heading_2':
+      const heading2 = block['heading_2'] satisfies NotionAPIHeading2Block['heading_2']
+
+      return (
+        <Heading level={2}>
+          <NotionRichText text={heading2.rich_text} />
+        </Heading>
+      )
+
+    case 'heading_3':
+      const heading3 = block['heading_3'] satisfies NotionAPIHeading3Block['heading_3']
+
+      return (
+        <Heading level={3}>
+          <NotionRichText text={heading3.rich_text} />
+        </Heading>
+      )
+
+    case 'bulleted_list_item':
+      // TODO: extract into a List component that handles ul, ol, todos and toggles
+      // see: https://github.com/9gustin/react-notion-render/blob/main/src/components/common/List/index.tsx
+
+      // TODO: is "items" something I've inserted?
+      return (
+        <ul>
+          {block.items.map((item, index) => {
+            const bulletedListItem = item[
+              'bulleted_list_item'
+            ] satisfies NotionAPIBulletedListItemBlock['bulleted_list_item']
+
+            return (
+              <li key={index}>
+                <NotionRichText text={bulletedListItem.rich_text} />
+              </li>
+            )
+          })}
+        </ul>
+      )
+
+    case 'numbered_list_item':
+      // TODO: is "items" something I've inserted?
+      return (
+        <ol>
+          {block.items.map((item, index) => {
+            const numberedListItem = item[
+              'numbered_list_item'
+            ] satisfies NotionAPINumberedListItemBlock['numbered_list_item']
+
+            return (
+              <li key={index}>
+                <NotionRichText text={numberedListItem.rich_text} />
+              </li>
+            )
+          })}
+        </ol>
+      )
+
+    case 'quote':
+      const quote = block['quote'] satisfies NotionAPIQuoteBlock['quote']
+
+      return (
+        <blockquote>
+          <NotionRichText text={quote.rich_text} />
+        </blockquote>
+      )
+
+    case 'code':
+      const code = block['code'] satisfies NotionAPICodeBlock['code']
+
+      // Hijack the caption to use as meta string for rehype-pretty-code if I want to highlight specific lines, etc
+      // See: https://rehype-pretty.pages.dev/#meta-strings
+      const rehypePrettyCodeMetaString = code.caption?.[0]?.plain_text || code.language
+
+      const codeText = code.rich_text.map(textItem => textItem.plain_text).join('\n')
+      const codeAsMarkdown = `\`\`\`${rehypePrettyCodeMetaString}\n${codeText}\n\`\`\``
+
+      // TODO: move markdown conversion into the Code component?
+      return <Code code={codeAsMarkdown} />
+
+    case 'image':
+      const image = block['image'] satisfies NotionAPIImageBlock['image']
+      const url = image.type === 'external' ? image.external.url : image.file.url
+      const src = transformCloudinaryImage(url, 624)
+
+      const { alt, width, height } = parseImageCaption(image.caption)
+
+      return <img src={src} alt={alt} width={width} height={height} className="bg-gray-900 rounded" />
+
+    // FIXME: support video embeds
+    case 'video':
+      throw new Error('Video blocks not supported yet.')
+
+    // const video = block['video'] satisfies VideoBlock['video']
+    //
+    // // TODO: extract component
+    // return (
+    //   <figure>
+    //     Hi
+    //     <video src={video.type === 'external' ? video.external.url : video.file.url} />
+    //     <video controls>
+    //       <source src={video.type === 'external' ? video.external.url : video.file.url} />
+    //     </video>
+    //     {video.caption && <figcaption>{video.caption ? video.caption[0]?.plain_text : ''}</figcaption>}
+    //   </figure>
+    // )
+
+    case 'toggle':
+      throw new Error('Toggle blocks not supported yet.')
+
+    // TODO: is "children" something I've inserted?
+
+    // const toggle = block['toggle'] satisfies ToggleBlock['toggle']
+    //
+    // return (
+    //   <details>
+    //     <summary>
+    //       <NotionRichText text={toggle.rich_text} />
+    //     </summary>
+    //     {toggle.children?.map(block => (
+    //       <Fragment key={block.id}>{NotionBlock(block)}</Fragment>
+    //     ))}
+    //   </details>
+    // )
+
+    case 'child_page':
+      throw new Error('Child page blocks not supported yet.')
+
+    // const childPage = block['child_page'] satisfies ChildPageBlock['child_page']
+    //
+    // return (
+    //   <Paragraph>
+    //     <NotionRichText text={childPage.rich_text} />
+    //   </Paragraph>
+    // )
+
+    default:
+      return <></>
+
+    // return `❌ Unsupported block (${
+    //   type === 'unsupported'
+    //     ? `The "${type}" type is not supported by the Notion API.`
+    //     : type
+    // })`
+  }
+}
+
+function parseImageCaption(caption: NotionAPIImageBlock['image']['caption']) {
+  if (!caption) {
+    throw new Error('Image block must include a caption.')
+  }
+
+  const dimensions = caption[0].plain_text.match(/\d+x\d+/)
+
+  if (!dimensions) {
+    throw new Error('Image caption must start with valid dimensions: [<width>x<height>]')
+  }
+
+  const width = dimensions[0].replace(/x.*/, '')
+  const height = dimensions[0].replace(/.*x/, '')
+
+  const alt = caption[0]?.plain_text.replace(/\[\d+x\d+\]/, '').trim()
+
+  if (!alt) {
+    throw new Error('Image caption must end with alt text.')
+  }
+
+  return { alt, width, height }
+}
