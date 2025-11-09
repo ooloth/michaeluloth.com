@@ -1,11 +1,7 @@
-import {
-  type APIErrorCode,
-  Client,
-  collectPaginatedAPI,
-  type PageObjectResponse,
-  type BlockObjectResponse,
-  type PropertyItemObjectResponse,
-} from '@notionhq/client'
+// TODO: notion changelog: https://developers.notion.com/page/changelog
+// TODO: notion mcp server: https://developers.notion.com/docs/mcp
+
+import { Client, collectPaginatedAPI } from '@notionhq/client'
 
 // See: https://github.com/makenotion/notion-sdk-js
 const notion = new Client({
@@ -14,4 +10,4 @@ const notion = new Client({
 })
 
 export default notion
-export { APIErrorCode, collectPaginatedAPI }
+export { collectPaginatedAPI }

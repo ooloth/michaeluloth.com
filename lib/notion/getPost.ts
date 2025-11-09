@@ -20,6 +20,8 @@ type PostWithBlocks = {
  * Optionally includes the post's block children.
  *
  * @see https://github.com/makenotion/notion-sdk-js?tab=readme-ov-file#collectpaginatedapilistfn-firstpageargs
+ * @see https://developers.notion.com/reference/query-a-data-source
+ * @see https://developers.notion.com/reference/filter-data-source-entries
  */
 export default async function getPost(options: Options): Promise<any> {
   const { slug, includeBlocks } = options

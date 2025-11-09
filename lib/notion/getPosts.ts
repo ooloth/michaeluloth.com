@@ -6,6 +6,8 @@ import notion, { collectPaginatedAPI } from './client'
  * Sorts the posts by the first published date in descending order.
  *
  * @see https://github.com/makenotion/notion-sdk-js?tab=readme-ov-file#collectpaginatedapilistfn-firstpageargs
+ * @see https://developers.notion.com/reference/query-a-data-source
+ * @see https://developers.notion.com/reference/filter-data-source-entries
  */
 export default async function getPosts(): Promise<any[]> {
   const posts = await collectPaginatedAPI(notion.dataSources.query, {
