@@ -3,6 +3,7 @@ import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
 import { Fragment } from 'react'
 import Text from './Text'
 import { Code } from '@/ui/code'
+import Headiing from '@/ui/heading'
 
 // TODO: add type definitions for raw Notion blocks + my parsed blocks
 // see: https://github.com/9gustin/react-notion-render/blob/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/types/NotionBlock.ts
@@ -26,23 +27,23 @@ export default function Block({ block }: BlockProps) {
 
     case 'heading_1':
       return (
-        <h1>
+        <Headiing level={1}>
           <Text text={value.rich_text} />
-        </h1>
+        </Headiing>
       )
 
     case 'heading_2':
       return (
-        <h2>
+        <Headiing level={2}>
           <Text text={value.rich_text} />
-        </h2>
+        </Headiing>
       )
 
     case 'heading_3':
       return (
-        <h3>
+        <Headiing level={3}>
           <Text text={value.rich_text} />
-        </h3>
+        </Headiing>
       )
 
     case 'bulleted_list_item':

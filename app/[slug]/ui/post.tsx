@@ -3,6 +3,7 @@
 
 import Blocks from '@/lib/notion/ui/Blocks'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
+import Heading from '@/ui/heading'
 // import Outer from '@/layouts/outer'
 // import Emoji from '@/ui/emoji'
 // import { transformCloudinaryImage } from '@/lib/cloudinary/utils'
@@ -23,7 +24,7 @@ export default function Post({ post }) {
 
       <article>
         <header>
-          <h1 className="mb-0 text-4xl font-extrabold leading-tight">{title}</h1>
+          <Heading level={1}>{title}</Heading>
           {/* <p className="mt-3 text-sm text-gray-700 dark:text-gray-500">Updated {format(date)}</p> */}
         </header>
 
