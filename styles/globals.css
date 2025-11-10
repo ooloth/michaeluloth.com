@@ -60,7 +60,7 @@
 
     /* code block */
     & pre {
-      @apply grid bg-zinc-800;
+      @apply grid bg-zinc-400/5;
 
       /* see: https://rehype-pretty-code.netlify.app */
       & > code {
