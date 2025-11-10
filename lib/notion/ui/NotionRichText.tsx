@@ -15,7 +15,7 @@ function resolveTag(annotations: NotionAPIRichTextItem['annotations']): RichText
 function resolveClasses(annotations: NotionAPIRichTextItem['annotations']): string {
   const classes = []
 
-  if (annotations.bold) classes.push('font-semibold')
+  if (annotations.bold) classes.push('font-semibold text-white')
   if (annotations.italic) classes.push('italic')
   if (annotations.strikethrough) classes.push('line-through')
   if (annotations.underline) classes.push('underline')
