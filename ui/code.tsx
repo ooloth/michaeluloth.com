@@ -18,7 +18,8 @@ type Props = Readonly<{
 export async function Code({ code }: Props) {
   const highlightedCode = await highlightCode(code)
 
-  return <figure dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+  // Rehype pretty code inserts figure, pre and code elements inside this div
+  return <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
 }
 
 async function highlightCode(code: string) {
@@ -27,7 +28,7 @@ async function highlightCode(code: string) {
     .use(remarkRehype)
     .use(rehypePrettyCode, {
       defaultLang: 'plaintext', // if no lang is specified
-      keepBackground: false, // set to false to apply a custom bg color
+      keepBackground: false, // set to false to apply a custom bg color via CSS
       // See: https://rehype-pretty.pages.dev/#theme
       // See: https://shiki.style/themes#themes
       // theme: 'catppuccin-mocha',

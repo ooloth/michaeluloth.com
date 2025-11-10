@@ -59,7 +59,6 @@
       /* see: https://rehype-pretty-code.netlify.app */
       & > code {
         @apply py-[1.1em] text-[0.8em];
-        /* @apply bg-zinc-400/5; */
 
         & [data-line] {
           /* put padding on each line rather than whole container so line highlighting reaches left edge */
