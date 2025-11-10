@@ -31,8 +31,8 @@ async function highlightCode(code: string) {
       keepBackground: false, // set to false to apply a custom bg color via CSS
       // See: https://rehype-pretty.pages.dev/#theme
       // See: https://shiki.style/themes#themes
-      // theme: 'catppuccin-mocha',
-      theme: 'kanagawa-dragon',
+      theme: 'catppuccin-mocha',
+      // theme: 'kanagawa-dragon',
       // theme: 'nord',
       // ],
     })
