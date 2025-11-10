@@ -9,7 +9,7 @@ type Props = Readonly<{
 
 export default function PostLayout({ children }: Props) {
   return (
-    <div className="p-4">
+    <div className="px-4">
       <div className="mx-auto max-w-prose">
         <Header />
         {children}
