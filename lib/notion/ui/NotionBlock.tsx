@@ -37,7 +37,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
       return (
         <Paragraph>
-          <NotionRichText text={paragraph.rich_text} />
+          <NotionRichText richTextItems={paragraph.rich_text} />
         </Paragraph>
       )
 
@@ -46,7 +46,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
       return (
         <Heading level={1}>
-          <NotionRichText text={heading1.rich_text} />
+          <NotionRichText richTextItems={heading1.rich_text} />
         </Heading>
       )
 
@@ -55,7 +55,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
       return (
         <Heading level={2}>
-          <NotionRichText text={heading2.rich_text} />
+          <NotionRichText richTextItems={heading2.rich_text} />
         </Heading>
       )
 
@@ -64,7 +64,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
       return (
         <Heading level={3}>
-          <NotionRichText text={heading3.rich_text} />
+          <NotionRichText richTextItems={heading3.rich_text} />
         </Heading>
       )
 
@@ -77,7 +77,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
           {block['bulleted_list'].children.map(item => {
             return (
               <li key={item.id}>
-                <NotionRichText text={item['bulleted_list_item'].rich_text} />
+                <NotionRichText richTextItems={item['bulleted_list_item'].rich_text} />
               </li>
             )
           })}
@@ -91,7 +91,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
           {block['numbered_list'].children.map(item => {
             return (
               <li key={item.id}>
-                <NotionRichText text={item['numbered_list_item'].rich_text} />
+                <NotionRichText richTextItems={item['numbered_list_item'].rich_text} />
               </li>
             )
           })}

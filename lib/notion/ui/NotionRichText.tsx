@@ -1,7 +1,6 @@
 // TODO: detect inline code and use <Code> to highlight it (as a span)
 // TODO: https://github.com/makenotion/notion-sdk-js/blob/main/examples/parse-text-from-any-block-type/index.ts
 
-import classNames from '@/styles/class-names'
 import Anchor from '@/ui/anchor'
 import { type NotionAPIRichTextItem } from '@/lib/notion/types'
 
@@ -25,26 +24,22 @@ function resolveClasses(annotations: NotionAPIRichTextItem['annotations']): stri
 }
 
 type Props = Readonly<{
-  text: RichTextItemResponse[]
+  richTextItems: NotionAPIRichTextItem[]
 }>
 
-export default function RichText({ text }: Props) {
+export default function RichText({ richTextItems: text }: Props) {
   if (!text) return null
 
-  return text.map(value => {
-    const {
-      annotations: { bold, code, italic, strikethrough, underline },
-      text,
-    } = value
+  return text.map(richTextItem => {
+    const content = richTextItem.type === 'text' ? richTextItem.text.content : ''
+    const link = richTextItem.type === 'text' ? richTextItem.text.link : null
+    const annotations = richTextItem.annotations
 
-    const Tag = code ? 'code' : italic ? 'em' : 'span'
+    const Tag = resolveTag(annotations)
 
     return (
-      <Tag
-        key={text.link?.url || text.content}
-        className={classNames([bold && 'font-semibold', strikethrough && 'line-through', underline && 'underline'])}
-      >
-        {text.link ? <Anchor href={text.link.url}>{text.content}</Anchor> : text.content}
+      <Tag key={link?.url ?? content} className={resolveClasses(annotations)}>
+        {link ? <Anchor href={link.url}>{content}</Anchor> : content}
       </Tag>
     )
   })

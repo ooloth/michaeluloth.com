@@ -24,6 +24,10 @@ import {
   type QuoteBlockObjectResponse,
   type ToggleBlockObjectResponse,
 } from '@notionhq/client'
+import {
+  type RichTextItemResponseCommon,
+  type TextRichTextItemResponse,
+} from '@notionhq/client/build/src/api-endpoints'
 
 // export type BlockObjectResponse = ParagraphBlockObjectResponse | Heading1BlockObjectResponse | Heading2BlockObjectResponse | Heading3BlockObjectResponse | BulletedListItemBlockObjectResponse | NumberedListItemBlockObjectResponse | QuoteBlockObjectResponse | ToDoBlockObjectResponse | ToggleBlockObjectResponse | TemplateBlockObjectResponse | SyncedBlockBlockObjectResponse | ChildPageBlockObjectResponse | ChildDatabaseBlockObjectResponse | EquationBlockObjectResponse | CodeBlockObjectResponse | CalloutBlockObjectResponse | DividerBlockObjectResponse | BreadcrumbBlockObjectResponse | TableOfContentsBlockObjectResponse | ColumnListBlockObjectResponse | ColumnBlockObjectResponse | LinkToPageBlockObjectResponse | TableBlockObjectResponse | TableRowBlockObjectResponse | EmbedBlockObjectResponse | BookmarkBlockObjectResponse | ImageBlockObjectResponse | VideoBlockObjectResponse | PdfBlockObjectResponse | FileBlockObjectResponse | AudioBlockObjectResponse | LinkPreviewBlockObjectResponse | UnsupportedBlockObjectResponse;
 
@@ -39,6 +43,8 @@ export type NotionAPIImageBlock = ImageBlockObjectResponse
 export type NotionAPINumberedListItemBlock = NumberedListItemBlockObjectResponse
 export type NotionAPIParagraphBlock = ParagraphBlockObjectResponse
 export type NotionAPIRichTextItem = RichTextItemResponse
+// export type NotionAPIRichTextItem = RichTextItemResponseCommon & TextRichTextItemResponse
+
 export type NotionAPIQuoteBlock = QuoteBlockObjectResponse
 export type NotionAPIToggleBlock = ToggleBlockObjectResponse
 
