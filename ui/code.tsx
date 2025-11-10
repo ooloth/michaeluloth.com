@@ -20,13 +20,18 @@ type Props = Readonly<{
  * @see https://rehype-pretty.pages.dev/#react-server-component
  */
 export async function Code({ code, inline = false, lang = 'plaintext', meta = '' }: Props) {
-  const markdownCode = convertToMarkdown({ code, lang, meta, inline })
-  const highlightedCode = await highlightCode(markdownCode)
+  const markdown = convertToMarkdown({ code, lang, meta, inline })
+  const html = await highlightCode(markdown)
+  const htmlNoItalics = html.replaceAll('font-style:italic', '') // remove italics added by a theme
 
-  const Tag = inline ? 'span' : 'div'
+  if (inline) {
+    // Remove surrounding <p> tags added by remark-parse for inline code
+    const htmlNoParagraphWrapper = htmlNoItalics.replace(/^<p>/, '').replace(/<\/p>\s*$/, '')
+    return <span className="text-[0.9em]" dangerouslySetInnerHTML={{ __html: htmlNoParagraphWrapper }} />
+  }
 
   // Rehype pretty code inserts figure, pre and code elements inside this div
-  return <Tag dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+  return <div dangerouslySetInnerHTML={{ __html: htmlNoItalics }} />
 }
 
 type ConvertToMarkdownOptions = {

@@ -29,25 +29,9 @@
   }
 }
 
-/* Rehype Pretty Code */
-
-/* See: https://rehype-pretty.pages.dev/#styles */
-/* pre { */
-/*   @apply rounded bg-zinc-900 overflow-x-auto py-2; */
-/**/
-/*   [data-line] { */
-/*     @apply px-4 text-sm; */
-/*   } */
-/* } */
+/* Rehype Pretty Code: https://rehype-pretty.pages.dev/#styles */
 
 @layer components {
-  /* inline code */
-  p > code,
-  li > code,
-  span[data-rehype-pretty-code-fragment] {
-    @apply text-[0.9em];
-  }
-
   /* code blocks */
   figure[data-rehype-pretty-code-figure] {
     @apply my-4 shadow-xl rounded overflow-x-scroll;
