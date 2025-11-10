@@ -12,7 +12,8 @@ export default function Anchor({ href, children }: Props) {
   const isInternalUrl = href.startsWith('/') || href.includes('michaeluloth.com')
 
   if (isInternalUrl) {
-    const internalHref = href.includes('michaeluloth.com') ? href.replace('https://michaeluloth.com', '') : href
+    // Relative, starting and ending with slash
+    const internalHref = `/${href.replace('https://michaeluloth.com/', '')}/`.replace(/\/\/+/g, '/')
 
     return (
       <Link href={internalHref} className={className}>
