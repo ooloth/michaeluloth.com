@@ -2,8 +2,8 @@
 
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 
-const outerStyles = 'mt-6 rounded-lg'
-const imageStyles = 'bg-zinc-800'
+const outerStyles = 'mt-6'
+const imageStyles = 'shadow-xl rounded bg-zinc-800'
 
 type Props = Readonly<{
   alt: string
