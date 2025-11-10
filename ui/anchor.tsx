@@ -6,7 +6,7 @@ type Props = Readonly<{
   children: ReactNode
 }>
 
-const className = 'text-blue-400 underline hover:text-blue-600'
+const className = 'text-accent hover:underline'
 
 export default function Anchor({ href, children }: Props) {
   const isInternalUrl = href.startsWith('/') || href.includes('michaeluloth.com')
