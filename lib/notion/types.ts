@@ -24,7 +24,6 @@ import {
   type QuoteBlockObjectResponse,
   type ToggleBlockObjectResponse,
 } from '@notionhq/client'
-import { type RichTextItemResponseCommon } from '@notionhq/client/build/src/api-endpoints'
 
 // export type BlockObjectResponse = ParagraphBlockObjectResponse | Heading1BlockObjectResponse | Heading2BlockObjectResponse | Heading3BlockObjectResponse | BulletedListItemBlockObjectResponse | NumberedListItemBlockObjectResponse | QuoteBlockObjectResponse | ToDoBlockObjectResponse | ToggleBlockObjectResponse | TemplateBlockObjectResponse | SyncedBlockBlockObjectResponse | ChildPageBlockObjectResponse | ChildDatabaseBlockObjectResponse | EquationBlockObjectResponse | CodeBlockObjectResponse | CalloutBlockObjectResponse | DividerBlockObjectResponse | BreadcrumbBlockObjectResponse | TableOfContentsBlockObjectResponse | ColumnListBlockObjectResponse | ColumnBlockObjectResponse | LinkToPageBlockObjectResponse | TableBlockObjectResponse | TableRowBlockObjectResponse | EmbedBlockObjectResponse | BookmarkBlockObjectResponse | ImageBlockObjectResponse | VideoBlockObjectResponse | PdfBlockObjectResponse | FileBlockObjectResponse | AudioBlockObjectResponse | LinkPreviewBlockObjectResponse | UnsupportedBlockObjectResponse;
 
@@ -43,6 +42,18 @@ export type NotionAPIRichTextItem = RichTextItemResponse
 export type NotionAPIQuoteBlock = QuoteBlockObjectResponse
 export type NotionAPIToggleBlock = ToggleBlockObjectResponse
 
-export const isParagraphBlock = (block: NotionAPIBlock): block is ParagraphBlockObjectResponse => {
-  return block.type === 'paragraph'
+// Created in NotionBlocks.tsx to group list items so they're easier to render
+export type NotionBulletedListBlock = Omit<BulletedListItemBlockObjectResponse, 'bulleted_list_item' | 'type'> & {
+  type: 'bulleted_list'
+  bulleted_list: {
+    children: NotionAPIBulletedListItemBlock[]
+  }
+}
+
+// Created in NotionBlocks.tsx to group list items so they're easier to render
+export type NotionNumberedListBlock = Omit<NumberedListItemBlockObjectResponse, 'numbered_list_item' | 'type'> & {
+  type: 'numbered_list'
+  numbered_list: {
+    children: NotionAPINumberedListItemBlock[]
+  }
 }

@@ -11,6 +11,8 @@ import {
   type NotionAPINumberedListItemBlock,
   type NotionAPIParagraphBlock,
   type NotionAPIQuoteBlock,
+  type NotionBulletedListBlock,
+  type NotionNumberedListBlock,
 } from '@/lib/notion/types'
 import NotionRichText from '@/lib/notion/ui/NotionRichText'
 
@@ -22,7 +24,8 @@ import Paragraph from '@/ui/paragraph'
 // TODO: add type definitions for raw Notion blocks + my parsed blocks
 // see: https://github.com/9gustin/react-notion-render/blob/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/types/NotionBlock.ts
 type Props = {
-  block: NotionAPIBlock // TODO: receive a confirmed type safe block instead of assuming the types?
+  // TODO: receive a confirmed type safe block instead of assuming the types?
+  block: NotionAPIBlock | NotionBulletedListBlock | NotionNumberedListBlock
 }
 
 export default function NotionBlock({ block }: Props): ReactElement {
@@ -65,39 +68,30 @@ export default function NotionBlock({ block }: Props): ReactElement {
         </Heading>
       )
 
-    case 'bulleted_list_item':
+    case 'bulleted_list':
+      // NOTE: I create this new type in NotionBlocks.tsx to group bulleted list items together
       // TODO: extract into a List component that handles ul, ol, todos and toggles
       // see: https://github.com/9gustin/react-notion-render/blob/main/src/components/common/List/index.tsx
-
-      // TODO: is "items" something I've inserted?
       return (
-        <ul>
-          {block.items.map((item, index) => {
-            const bulletedListItem = item[
-              'bulleted_list_item'
-            ] satisfies NotionAPIBulletedListItemBlock['bulleted_list_item']
-
+        <ul className="list-disc flex flex-col gap-1 mt-2 pl-5 leading-snug">
+          {block['bulleted_list'].children.map(item => {
             return (
-              <li key={index}>
-                <NotionRichText text={bulletedListItem.rich_text} />
+              <li key={item.id}>
+                <NotionRichText text={item['bulleted_list_item'].rich_text} />
               </li>
             )
           })}
         </ul>
       )
 
-    case 'numbered_list_item':
-      // TODO: is "items" something I've inserted?
+    case 'numbered_list':
+      // NOTE: I create this type in NotionBlocks.tsx to group numbeed list items together
       return (
         <ol>
-          {block.items.map((item, index) => {
-            const numberedListItem = item[
-              'numbered_list_item'
-            ] satisfies NotionAPINumberedListItemBlock['numbered_list_item']
-
+          {block['numbered_list'].children.map(item => {
             return (
-              <li key={index}>
-                <NotionRichText text={numberedListItem.rich_text} />
+              <li key={item.id}>
+                <NotionRichText text={item['numbered_list_item'].rich_text} />
               </li>
             )
           })}
