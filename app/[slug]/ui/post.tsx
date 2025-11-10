@@ -39,7 +39,7 @@ function Footer({ post }: FooterProps) {
     <footer className="my-12">
       <details>
         <summary className="font-bold text-white">Notion API response JSON...</summary>
-        <Code code={`\`\`\`json${JSON.stringify(post, null, 2)}\`\`\``} />
+        <Code code={JSON.stringify(post, null, 2)} lang="json" />
       </details>
     </footer>
   )

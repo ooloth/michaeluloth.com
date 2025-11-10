@@ -98,27 +98,26 @@ export default function NotionBlock({ block }: Props): ReactElement {
         </ol>
       )
 
-    case 'quote':
-      const quote = block['quote'] satisfies NotionAPIQuoteBlock['quote']
-
-      return (
-        <blockquote>
-          <NotionRichText text={quote.rich_text} />
-        </blockquote>
-      )
-
     case 'code':
       const code = block['code'] satisfies NotionAPICodeBlock['code']
 
       // Hijack the caption to use as meta string for rehype-pretty-code if I want to highlight specific lines, etc
       // See: https://rehype-pretty.pages.dev/#meta-strings
-      const rehypePrettyCodeMetaString = code.caption?.[0]?.plain_text || code.language
+      const rehypePrettyCodeMetaString = code.caption?.[0]?.plain_text
+      // const rehypePrettyCodeMetaString = code.caption?.[0]?.plain_text || code.language
 
       const codeText = code.rich_text.map(textItem => textItem.plain_text).join('\n')
-      const codeAsMarkdown = `\`\`\`${rehypePrettyCodeMetaString}\n${codeText}\n\`\`\``
 
-      // TODO: move markdown conversion into the Code component?
-      return <Code code={codeAsMarkdown} />
+      return <Code code={codeText} lang={code.language} meta={rehypePrettyCodeMetaString} />
+
+    case 'quote':
+      const quote = block['quote'] satisfies NotionAPIQuoteBlock['quote']
+
+      return (
+        <blockquote>
+          <NotionRichText richTextItems={quote.rich_text} />
+        </blockquote>
+      )
 
     case 'image':
       const image = block['image'] satisfies NotionAPIImageBlock['image']
