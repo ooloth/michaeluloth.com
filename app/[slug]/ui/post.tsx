@@ -9,48 +9,55 @@ export default function Post({ post }) {
   const title = getPropertyValue(post.properties, 'Title')
 
   return (
-    <>
-      <article className="flex flex-col gap-y-4">
-        <header>
-          <Heading level={1}>{title}</Heading>
-          {/* <Paragraph className="mt-3 text-sm text-gray-700 dark:text-gray-500">Updated {format(date)}</p> */}
-        </header>
+    <article>
+      <Header title={title} />
+      <NotionBlocks blocks={post.blocks} />
+      <Footer post={post} />
+    </article>
+  )
+}
 
-        <div className="mt-8 prose dark:prose-dark lg:prose-lg dark:lg:prose-lg">
-          <NotionBlocks blocks={post.blocks} />
-        </div>
-      </article>
+type HeaderProps = Readonly<{
+  title: string
+}>
 
-      <details className="my-12">
+function Header({ title }: HeaderProps) {
+  return (
+    <header className="mb-8">
+      <Heading level={1}>{title}</Heading>
+      {/* <Paragraph className="mt-3 text-sm text-gray-700 dark:text-gray-500">Updated {format(date)}</p> */}
+    </header>
+  )
+}
+
+type FooterProps = Readonly<{
+  post: any
+}>
+
+function Footer({ post }: FooterProps) {
+  return (
+    <footer className="my-12">
+      <details>
         <summary className="font-bold text-white">Notion API response JSON...</summary>
         <Code code={`\`\`\`json${JSON.stringify(post, null, 2)}\`\`\``} />
       </details>
-    </>
+    </footer>
   )
+
+  // return (
+  //   <footer className="mt-12 text-sm text-gray-700 dark:text-gray-300">
+  //     <a href={discussUrl(frontMatter.slug)} target="_blank" rel="noopener noreferrer">
+  //       {'Discuss on Twitter'}
+  //     </a>
+  //     {` • `}
+  //     <a href={editUrl(frontMatter.slug)} target="_blank" rel="noopener noreferrer">
+  //       {'Edit on GitHub'}
+  //     </a>
+  //   </footer>
+  // )
 }
 
 // const discussUrl = slug =>
 //   `https://mobile.twitter.com/search?q=${encodeURIComponent(
 //     `https://michaeluloth.com/${slug}`,
 //   )}`
-
-// const editUrl = slug =>
-//   `https://github.com/ooloth/mu-next/edit/master/content/blog/${slug}.mdx`
-
-// function BlogFooter(frontMatter) {
-//   return (
-//     <footer className="mt-12 text-sm text-gray-700 dark:text-gray-300">
-//       <a
-//         href={discussUrl(frontMatter.slug)}
-//         target="_blank"
-//         rel="noopener noreferrer"
-//       >
-//         {'Discuss on Twitter'}
-//       </a>
-//       {` • `}
-//       <a href={editUrl(frontMatter.slug)} target="_blank" rel="noopener noreferrer">
-//         {'Edit on GitHub'}
-//       </a>
-//     </footer>
-//   )
-// }
