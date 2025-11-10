@@ -6,10 +6,10 @@
   :root {
     --accent: #cba6f7; /* mauve (catppuccin mocha) */
     --accent-translucent: #cba6f785; /* mauve (catppuccin mocha) */
-    /* --accent: #b4befe; /* lavender (catppuccin mocha) */
     /* --accent: #f38ba8; /* red (catppuccin mocha) */
-    /* --accent: #74c7ec; /* sapphire blue (catppuccin mocha) */
     /* --accent: #89b4fa; /* blue (catppuccin mocha) */
+    /* --accent: #b4befe; /* lavender (catppuccin mocha) */
+    /* --accent: #74c7ec; /* sapphire blue (catppuccin mocha) */
     /* --moonlight-red: #ff98a4; */
     /* --moonlight-red-translucent: #ff98a485; */
   }
@@ -48,7 +48,7 @@
 
       /* see: https://rehype-pretty-code.netlify.app */
       & > code {
-        @apply py-[1.1em] text-[0.8em];
+        @apply py-[1.1em] text-[0.83em];
 
         & [data-line] {
           /* put padding on each line rather than whole container so line highlighting reaches left edge */
