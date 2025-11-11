@@ -1,7 +1,7 @@
 // TODO: detect inline code and use <Code> to highlight it (as a span)
 // TODO: https://github.com/makenotion/notion-sdk-js/blob/main/examples/parse-text-from-any-block-type/index.ts
 
-import Anchor from '@/ui/anchor'
+import Link from '@/ui/link'
 import { Code } from '@/ui/code'
 import { type NotionAPIRichTextItem } from '@/lib/notion/types'
 
@@ -44,7 +44,7 @@ export default function RichText({ richTextItems: text }: Props) {
 
     return (
       <Tag key={link?.url ?? content} className={resolveClasses(annotations)}>
-        {link ? <Anchor href={link.url}>{content}</Anchor> : content}
+        {link ? <Link href={link.url}>{content}</Link> : content}
       </Tag>
     )
   })

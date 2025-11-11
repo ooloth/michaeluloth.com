@@ -1,29 +1,29 @@
-import Link from 'next/link'
+import NextLink from 'next/link'
 import { type ReactNode } from 'react'
 
 type Props = Readonly<{
   href: string
   children: ReactNode
+  className?: string
 }>
 
-const className = 'text-accent hover:underline'
-
-export default function Anchor({ href, children }: Props) {
+export default function Link({ href, children, className }: Props) {
   const isInternalUrl = href.startsWith('/') || href.includes('michaeluloth.com')
+  const classes = className ? className : 'link'
 
   if (isInternalUrl) {
     // Relative, starting and ending with slash
     const internalHref = `/${href.replace('https://michaeluloth.com/', '')}/`.replace(/\/\/+/g, '/')
 
     return (
-      <Link href={internalHref} className={className}>
+      <NextLink href={internalHref} className={classes}>
         {children}
-      </Link>
+      </NextLink>
     )
   }
 
   return (
-    <a href={href} className={className} rel="noreferrer">
+    <a href={href} className={classes} rel="noreferrer">
       {children}
     </a>
   )

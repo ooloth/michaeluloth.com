@@ -1,5 +1,5 @@
-import Anchor from '@/ui/anchor'
 import Image from '@/ui/image'
+import Link from '@/ui/link'
 
 const nav = [
   { name: 'Home', href: '/' },
@@ -14,7 +14,9 @@ export default function Header() {
       <ul className="flex gap-4">
         {nav.map(item => (
           <li key={item.name}>
-            <Anchor href={item.href}>{item.name}</Anchor>
+            <Link href={item.href} className="link-nav">
+              {item.name}
+            </Link>
           </li>
         ))}
       </ul>

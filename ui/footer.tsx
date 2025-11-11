@@ -1,4 +1,4 @@
-import Anchor from '@/ui/anchor'
+import Link from '@/ui/link'
 
 const nav = [
   { name: 'Projects', href: '/projects' },
@@ -17,7 +17,7 @@ export default function Footer() {
       <ul className="flex gap-4">
         {nav.map(item => (
           <li key={item.name}>
-            <Anchor href={item.href}>{item.name}</Anchor>
+            <Link href={item.href}>{item.name}</Link>
           </li>
         ))}
       </ul>
@@ -25,7 +25,7 @@ export default function Footer() {
       <ul className="flex gap-4">
         {socials.map(item => (
           <li key={item.name}>
-            <Anchor href={item.href}>{item.name}</Anchor>
+            <Link href={item.href}>{item.name}</Link>
           </li>
         ))}
       </ul>
