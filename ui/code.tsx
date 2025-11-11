@@ -1,10 +1,14 @@
 // TODO: backup: https://shiki.style/packages/next#react-server-component
 
+import fs from 'fs'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import rehypePrettyCode from 'rehype-pretty-code'
+
+// See: https://github.com/atomiks/rehype-pretty-code/blob/master/website/assets/moonlight-ii.json
+const moonlightV2 = JSON.parse(fs.readFileSync('./lib/rehype-pretty-code/themes/moonlight-ii.json', 'utf-8'))
 
 type Props = Readonly<{
   code: string
@@ -60,14 +64,21 @@ async function highlightCode(code: string) {
     .use(remarkParse)
     .use(remarkRehype)
     .use(rehypePrettyCode, {
+      // see: https://rehype-pretty.pages.dev/#options
       defaultLang: 'plaintext', // if no lang is specified
       keepBackground: false, // set to false to apply a custom bg color via CSS
       // See: https://rehype-pretty.pages.dev/#theme
       // See: https://shiki.style/themes#themes
-      theme: 'catppuccin-mocha',
-      // theme: 'kanagawa-dragon',
-      // theme: 'nord',
-      // ],
+      // theme: 'catppuccin-mocha',
+      theme: moonlightV2,
+      tokensMap: {
+        fn: 'entity.name.function',
+        kw: 'keyword',
+        key: 'meta.object-literal.key',
+        pm: 'variable.parameter',
+        obj: 'variable.other.object',
+        str: 'string',
+      },
     })
     .use(rehypeStringify)
     .process(code)
