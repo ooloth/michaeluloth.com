@@ -23,7 +23,7 @@ type Props = Readonly<{
 export default function RootLayout({ children }: Props) {
   return (
     <html lang="en" className="bg-accent">
-      <body className="overflow-x-hidden bg-zinc-900 min-h-screen antialiased leading-relaxed text-[1.1rem] text-zinc-400">
+      <body className="overflow-x-hidden bg-zinc-900 min-h-screen antialiased selection:bg-accent selection:text-black leading-relaxed text-[1.1rem] text-zinc-400">
         {children}
       </body>
     </html>
