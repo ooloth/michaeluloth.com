@@ -20,7 +20,17 @@
 
 @utility shadow-glow {
   /* solid shadow, glow shadow */
-  box-shadow: '0 0 0 0.15em var(--accent), 0 0 1.5em 0 var(--accent)';
+  box-shadow:
+    0 0 0 0.15em var(--accent),
+    0 0 1.5em 0 var(--accent);
+}
+
+@utility border-accent {
+  border-color: var(--accent);
+}
+
+@utility bg-accent {
+  background-color: var(--accent);
 }
 
 @utility bg-accent {
@@ -33,6 +43,10 @@
 
 @utility decoration-bright {
   @apply decoration-white;
+}
+
+@utility decoration-accent {
+  text-decoration-color: var(--accent);
 }
 
 @utility decoration-accent-translucent {
@@ -49,27 +63,28 @@
 
 @utility link {
   @apply box-decoration-clone underline;
-  @apply underline-offset-[0.2em] decoration-[0.1em] decoration-[--accent-translucent] text-[--accent];
+  @apply underline-offset-[0.2em] decoration-[0.1em] decoration-accent-translucent text-accent;
 
   text-decoration-skip-ink: none;
 
   &:hover,
   &:focus,
   &:active {
-    @apply shadow-glow outline-none rounded-[0.75px] bg-[--accent] text-black;
+    @apply shadow-glow outline-none rounded-[0.75px] bg-accent text-black;
   }
 
   /* group-focus is for instances where I've styled a span inside a flex-child anchor (to avoid full-width stretch) */
-  @apply group-focus:shadow-glow group-focus:outline-none group-focus:bg-[--accent] group-focus:text-black;
+  @apply group-focus:shadow-glow group-focus:outline-none group-focus:bg-accent group-focus:text-black;
 }
 
 @utility link-nav {
   @apply link underline-offset-[0.2em];
   @apply decoration-transparent decoration-solid decoration-[0.15em] text-zinc-300;
 
+  /* FIXME: how to set current page attribute in next? */
   /* the active menu item (set in Header.astro) */
   &[aria-current='page'] {
-    @apply decoration-[--accent] text-white;
+    @apply decoration-accent text-white;
 
     &:hover,
     &:focus,
@@ -81,7 +96,7 @@
 
 @utility link-heading {
   @apply box-decoration-clone underline;
-  @apply underline-offset-[0.2em] decoration-[0.1em] decoration-[--accent-translucent] text-[--accent];
+  @apply underline-offset-[0.2em] decoration-[0.1em] decoration-accent-translucent text-accent;
 
   text-decoration-skip-ink: none;
 
@@ -162,7 +177,7 @@
   & ul,
   & ol {
     @apply list;
-    @apply marker:text-[--accent];
+    @apply marker:text-accent;
   }
 
   & ul {
@@ -200,7 +215,7 @@
 
   & blockquote {
     @apply ms-4 border-l-4 pl-3 italic;
-    @apply border-[--accent] text-bright;
+    @apply border-accent text-bright;
   }
 
   & time {

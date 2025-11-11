@@ -1,6 +1,6 @@
 import { type JSX, type ReactNode } from 'react'
 
-const baseClasses = 'mb-0 break-after-avoid leading-tight text-white'
+const baseClasses = 'mb-0 break-after-avoid leading-tight text-bright'
 
 const classesByLevel: Record<number, string> = {
   1: 'mt-8 text-[2.25rem] leading-[1.1] font-extrabold',
