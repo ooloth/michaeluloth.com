@@ -1,0 +1,87 @@
+/* see: https://github.com/atomiks/rehype-pretty-code/blob/master/website/src/app/globals.css */
+/* see: https://github.com/atomiks/rehype-pretty-code/blob/master/website/tailwind.config.js */
+
+@layer components {
+  /* inline code with no language annotation (e.g. `true` instead of `true{:js}` */
+  p > code,
+  li > code {
+    color: #c8d3f5;
+  }
+
+  /* code blocks */
+  figure[data-rehype-pretty-code-figure] {
+    @apply my-8 rounded-lg overflow-x-scroll;
+
+    /* title (if any) */
+    [data-rehype-pretty-code-title] {
+      @apply inline-flex rounded-tr-lg py-[0.25em] px-[1.1em] leading-[2.05] font-mono text-[0.75em];
+      @apply bg-zinc-400/5 text-zinc-300;
+    }
+
+    /* code block */
+    & pre {
+      @apply grid;
+
+      /* see: https://rehype-pretty-code.netlify.app */
+      & > code {
+        @apply py-[1.1em] text-[0.8em];
+        @apply bg-zinc-400/5;
+
+        & [data-line] {
+          /* put padding on each line rather than whole container so line highlighting reaches left edge */
+          @apply border-l-2 border-l-transparent px-[1.1rem];
+        }
+
+        & [data-highlighted-line] {
+          @apply border-l-blue-400;
+          background-color: rgb(200 200 255 / 0.1);
+        }
+
+        & [data-highlighted-chars] {
+          @apply rounded;
+          background-color: rgb(200 200 255 / 0.15);
+          box-shadow: 0 0 0 0.24em rgb(200 200 255 / 0.15);
+        }
+      }
+
+      /* display line numbers if code fence includes "showLineNumbers" */
+      & > code[data-line-numbers] {
+        counter-reset: line;
+
+        & > [data-line]::before {
+          /* set the line number */
+          counter-increment: line;
+          content: counter(line);
+
+          /* counter the existing line padding with negative left margin */
+          @apply inline-block -ms-4 me-4 w-4 text-right text-zinc-600;
+        }
+
+        /* make line numbers of highlighted lines a brighter white */
+        & > [data-highlighted-line]::before {
+          @apply text-zinc-400;
+        }
+      }
+
+      /* increase line number width if there are double digits */
+      & code[data-line-numbers-max-digits='2'] > [data-line]::before {
+        width: 2rem;
+      }
+
+      /* increase line number width if there are triple digits */
+      & code[data-line-numbers-max-digits='3'] > [data-line]::before {
+        width: 3rem;
+      }
+
+      /* FIXME: not targeting the button correctly */
+      & .rehype-pretty-copy {
+        @apply !top-28 !mt-52 !pt-52;
+      }
+    }
+
+    /* caption (if any) */
+    [data-rehype-pretty-code-caption] {
+      @apply caption;
+    }
+  }
+}
