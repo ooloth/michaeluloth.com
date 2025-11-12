@@ -13,9 +13,9 @@ type HeaderProps = Readonly<{
 export default function PostHeader({ title, datePublished, dateUpdated }: HeaderProps) {
   return (
     <header className="mb-6">
-      <Paragraph className="mt-0 text-[0.85em] text-zinc-400">
+      <Paragraph className="flex gap-1.5 mt-0 mb-0.5 text-[0.85em] text-zinc-400">
         <span>{getHumanReadableDate(datePublished)}</span>
-        <span className="px-1.5 font-extrabold text-accent">•</span>
+        <span className="font-extrabold text-accent">•</span>
         <span>Updated {format(dateUpdated)}</span>
       </Paragraph>
 
