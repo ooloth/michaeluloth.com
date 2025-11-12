@@ -1,5 +1,3 @@
-// TODO: backup: https://shiki.style/packages/next#react-server-component
-
 import fs from 'fs'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
@@ -68,8 +66,6 @@ async function highlightCode(code: string) {
       defaultLang: 'plaintext', // if no lang is specified
       keepBackground: false, // set to false to apply a custom bg color via CSS
       // See: https://rehype-pretty.pages.dev/#theme
-      // See: https://shiki.style/themes#themes
-      // theme: 'catppuccin-mocha',
       theme: moonlightV2,
       tokensMap: {
         fn: 'entity.name.function',

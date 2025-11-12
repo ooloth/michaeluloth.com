@@ -1,4 +1,4 @@
-/* catppuccin mocha: https://github.com/catppuccin/nvim/blob/main/lua/catppuccin/palettes/mocha.lua */
+/* TODO: migrate more of these inline? */
 
 @import 'tailwindcss';
 
@@ -6,13 +6,6 @@
 
 @layer base {
   :root {
-    /* --accent: #cba6f7; /* mauve (catppuccin mocha) */
-    /* --accent-translucent: #cba6f785; /* mauve (catppuccin mocha) */
-    /* --accent: #f38ba8; /* red (catppuccin mocha) */
-    /* --accent-translucent: #f38ba899; /* mauve (catppuccin mocha) */
-    /* --accent: #b4befe; /* lavender (catppuccin mocha) */
-    /* --accent: #89b4fa; /* blue (catppuccin mocha) */
-    /* --accent: #74c7ec; /* sapphire blue (catppuccin mocha) */
     --accent: #ff98a4;
     --accent-translucent: #ff98a485;
   }
