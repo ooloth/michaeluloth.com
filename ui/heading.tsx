@@ -1,8 +1,8 @@
 import { type JSX, type ReactNode } from 'react'
 
-const baseClasses = 'mb-0 break-after-avoid leading-tight text-bright'
+const baseClasses = 'break-after-avoid leading-tight text-bright'
 
-const verticalSpaceByLevel: Record<number, string> = {
+const topMarginByLevel: Record<number, string> = {
   1: 'mt-8',
   2: 'mt-8',
   3: 'mt-8',
@@ -38,11 +38,16 @@ export default function Heading({ level, children, className }: Props) {
   const Tag = `h${level}` as keyof JSX.IntrinsicElements
 
   let classes = baseClasses + ' ' + typographyByLevel[level]
+
   const classNameIncludesTopMargin = className && (className.includes('mt-') || className.includes('my-'))
+  const classNameIncludesBottomMargin = className && (className.includes('mb-') || className.includes('my-'))
 
   if (!classNameIncludesTopMargin) {
-    // Omit verticalSpaceByLevel if className already includes mt- or my-
-    classes += ' ' + verticalSpaceByLevel[level]
+    classes += ' ' + topMarginByLevel[level] // Only add default top margin if className doesn't include mt-* or my-*
+  }
+
+  if (!classNameIncludesBottomMargin) {
+    classes += ' ' + 'mb-0' // Only add default bottom margin if className doesn't include mb-* or my-*
   }
 
   return <Tag className={classes}>{children}</Tag>
