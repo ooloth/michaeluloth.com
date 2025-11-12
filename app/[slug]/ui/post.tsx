@@ -31,10 +31,12 @@ type HeaderProps = Readonly<{
 function Header({ title, datePublished, dateUpdated }: HeaderProps) {
   return (
     <header className="mb-6">
-      <Heading level={1}>{title}</Heading>
       <Paragraph className="mt-0 text-[0.9em] text-zinc-400">
         {getHumanReadableDate(datePublished)} • Updated {format(dateUpdated)}
       </Paragraph>
+      <Heading level={1} className="mt-0">
+        {title}
+      </Heading>
     </header>
   )
 }
