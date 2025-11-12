@@ -15,6 +15,11 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
   ]),
+  {
+    rules: {
+      'jsx-a11y/alt-text': 'off', // enforced by cloudinary fetch helper
+    },
+  },
 ])
 
 export default eslintConfig
