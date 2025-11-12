@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+// TODO: handle non-Cloudinary images?
 
 import fetchCloudinaryImageMetadata from '@/lib/cloudinary/fetchCloudinaryImageMetadata'
 
@@ -11,8 +12,6 @@ type Props = Readonly<{
   imageStyles?: string
   outerStyles?: string
 }>
-
-// TODO: handle Cloudinary and non-Cloudinary images differently
 
 /**
  * Fetches metadata for a Cloudinary image and renders it with optimization features.

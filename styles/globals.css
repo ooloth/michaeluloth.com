@@ -77,7 +77,7 @@
   /* FIXME: how to set current page attribute in next? */
   /* the active menu item (set in Header.astro) */
   &[aria-current='page'] {
-    @apply decoration-accent text-white;
+    @apply decoration-accent font-medium text-white;
 
     &:hover,
     &:focus,
