@@ -2,13 +2,11 @@ import { type ReactElement } from 'react'
 
 import {
   type NotionAPIBlock,
-  type NotionAPIBulletedListItemBlock,
   type NotionAPICodeBlock,
   type NotionAPIHeading1Block,
   type NotionAPIHeading2Block,
   type NotionAPIHeading3Block,
   type NotionAPIImageBlock,
-  type NotionAPINumberedListItemBlock,
   type NotionAPIParagraphBlock,
   type NotionAPIQuoteBlock,
   type NotionBulletedListBlock,

@@ -13,6 +13,10 @@ export type CloudinaryImageMetadata = {
   width: number
 }
 
+/**
+ * Fetches Cloudinary image metadata including alt text, caption, dimensions, and responsive image attributes.
+ *
+ */
 export default async function fetchCloudinaryImageMetadata(url: string): Promise<CloudinaryImageMetadata> {
   console.log(`📥 Fetching Cloudinary image metadata for "${url}"`)
 
@@ -22,13 +26,10 @@ export default async function fetchCloudinaryImageMetadata(url: string): Promise
   }
   console.log(`Parsed Cloudinary public ID: "${publicId}"`)
 
-  // Fetch image details from Cloudinary Admin API
+  // Fetch image details from Cloudinary Admin API, including contextual metadata
+  // See: https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
   const cloudinaryImage: CloudinaryResource = await cloudinary.api
-    .resource(publicId, {
-      metadata: true, // include the metadata fields and values set for each asset
-      context: true, //  include any key-value pairs of contextual metadata associated with each asset
-      tags: true, // include the list of tag names assigned to each asset
-    })
+    .resource(publicId, { context: true })
     .catch(error => {
       throw Error(`🚨 Error fetching Cloudinary image: "${publicId}":\n\n${getErrorDetails(error)}\n`)
     })
