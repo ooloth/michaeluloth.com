@@ -1,3 +1,5 @@
+// TODO: replace text with icons?
+
 import Link from '@/ui/link'
 import { type NavItem } from '@/ui/nav/types'
 

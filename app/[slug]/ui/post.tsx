@@ -17,12 +17,13 @@ export default function Post({ post }: Props) {
     <article>
       <PostHeader title={title} datePublished={datePublished} dateUpdated={post.last_edited_time} />
       <NotionBlocks blocks={post.blocks} />
-      <PostFooter />
 
-      <details className="mt-10">
+      <details className="my-10">
         <summary className="font-bold text-white">Notion API response JSON...</summary>
         <Code code={JSON.stringify(post, null, 2)} lang="json" />
       </details>
+
+      <PostFooter />
     </article>
   )
 }
