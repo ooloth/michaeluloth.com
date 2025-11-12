@@ -8,7 +8,7 @@ export default function Header() {
       <PrimaryNav />
       <Image
         url="https://res.cloudinary.com/ooloth/image/upload/v1645057009/mu/michael-landscape.jpg"
-        imageStyles="object-cover rounded-full w-10 h-10"
+        imageStyles="object-cover object-[56%_0%] rounded-full w-[2.2em] h-[2.2em]"
         outerStyles="mt-0 mb-0" // override default margins
       />
     </header>
