@@ -122,12 +122,9 @@ export default function NotionBlock({ block }: Props): ReactElement {
     case 'image':
       const image = block['image'] satisfies NotionAPIImageBlock['image']
 
-      const src = image.type === 'external' ? image.external.url : image.file.url
+      const url = image.type === 'external' ? image.external.url : image.file.url
 
-      // TODO: look up alt, width and height via Cloudinary so caption can be photo credit etc?
-      const { alt, width, height } = parseImageCaption(image.caption)
-
-      return <Image src={src} alt={alt} width={width} height={height} />
+      return <Image url={url} /> // eslint-disable-line jsx-a11y/alt-text
 
     // FIXME: support video embeds
     case 'video':
@@ -168,27 +165,4 @@ export default function NotionBlock({ block }: Props): ReactElement {
     default:
       throw new Error(`Encountered unsupported Notion block type: "${block.type}"`)
   }
-}
-
-function parseImageCaption(caption: NotionAPIImageBlock['image']['caption']) {
-  if (!caption) {
-    throw new Error('Image block must include a caption.')
-  }
-
-  const dimensions = caption[0].plain_text.match(/\d+x\d+/)
-
-  if (!dimensions) {
-    throw new Error('Image caption must start with valid dimensions: [<width>x<height>]')
-  }
-
-  const width = parseInt(dimensions[0].replace(/x.*/, ''))
-  const height = parseInt(dimensions[0].replace(/.*x/, ''))
-
-  const alt = caption[0]?.plain_text.replace(/\[\d+x\d+\]/, '').trim()
-
-  if (!alt) {
-    throw new Error('Image caption must end with alt text.')
-  }
-
-  return { alt, width, height }
 }
