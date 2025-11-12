@@ -1,12 +1,11 @@
 import Image from '@/ui/image'
 
-import NavTop from './nav-top'
+import PrimaryNav from '@/ui/nav/primary'
 
 export default function Header() {
   return (
     <header className="flex items-center justify-between mb-8 pt-4">
-      <NavTop />
-
+      <PrimaryNav />
       <Image
         url="https://res.cloudinary.com/ooloth/image/upload/v1645057009/mu/michael-landscape.jpg"
         imageStyles="object-cover rounded-full w-10 h-10"
