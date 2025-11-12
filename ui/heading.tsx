@@ -12,7 +12,7 @@ const topMarginByLevel: Record<number, string> = {
 }
 
 const typographyByLevel: Record<number, string> = {
-  1: 'text-[2.25rem] leading-[1.1] font-extrabold',
+  1: 'text-[2.25rem] leading-[1.1] font-bold',
   2: 'text-[1.6rem] font-semibold',
   3: 'text-xl font-semibold',
   4: 'text-lg font-semibold',
