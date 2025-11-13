@@ -27,7 +27,7 @@ export default function Post({ post, prevPost, nextPost }: Props) {
       </details>
 
       <PostFooter />
-      {/* <PaginationLinks prev={prevPost} next={nextPost} /> */}
+      <PaginationLinks prevPost={prevPost} nextPost={nextPost} />
     </article>
   )
 }

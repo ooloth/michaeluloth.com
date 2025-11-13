@@ -1,18 +1,25 @@
 import notion from './client'
-import getBlockChildren from './getBlockChildren'
+import getBlockChildren from '@/lib/notion/getBlockChildren'
+import getPosts from '@/lib/notion/getPosts'
+import getPropertyValue from '@/lib/notion/getPropertyValue'
 
 type Options = {
   slug: string | null
   includeBlocks?: boolean
+  includePrevAndNext?: boolean
 }
 
 type PostProperties = {}
 
 type PostBlocks = {}
 
-type PostWithBlocks = {
-  properties: PostProperties
+type WithBlocks<T> = T & {
   blocks: PostBlocks
+}
+
+type WithPrevAndNext<T> = T & {
+  prevSlug: PostProperties | null
+  nextSlug: PostProperties | null
 }
 
 /**
@@ -23,10 +30,16 @@ type PostWithBlocks = {
  * @see https://developers.notion.com/reference/query-a-data-source
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
-export default async function getPost({ slug, includeBlocks = false }: Options): Promise<any> {
+export default async function getPost({
+  slug,
+  includeBlocks = false,
+  includePrevAndNext = false,
+}: Options): Promise<any> {
   if (!slug) {
     return null
   }
+  console.log(`Fetching post with slug: ${slug}`)
+  console.log(`Type of slug: ${typeof slug}`)
 
   const response = await notion.dataSources.query({
     data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
@@ -43,13 +56,28 @@ export default async function getPost({ slug, includeBlocks = false }: Options):
     throw Error(`Multiple posts found for slug: ${slug}\n${JSON.stringify(response.results)}`)
   }
 
-  const post = response.results[0]
+  let post: WithPrevAndNext<any> = response.results[0]
   // TODO: parse with zod
+
+  if (includePrevAndNext) {
+    const posts = await getPosts()
+    // TODO: parse with zod
+
+    const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))
+    const index = postSlugs.indexOf(slug)
+
+    post = {
+      ...post,
+      prevPost: index > 0 ? posts[index - 1] : null,
+      nextPost: index < postSlugs.length - 1 ? posts[index + 1] : null,
+    }
+  }
 
   if (includeBlocks) {
     const blocks = await getBlockChildren(post.id)
     // TODO: parse with zod
-    return { ...post, blocks }
+
+    post = { ...post, blocks }
   }
 
   return post

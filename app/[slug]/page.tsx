@@ -6,8 +6,6 @@ import Post from './ui/post'
 
 type Params = {
   slug: string
-  prevSlug: string | null
-  nextSlug: string | null
 }
 
 type Props = Readonly<{
@@ -18,12 +16,10 @@ export default async function DynamicRoute({ params }: Props) {
   // See: https://nextjs.org/docs/messages/next-prerender-current-time
   'use cache'
 
-  const { slug, prevSlug, nextSlug } = await params
+  const slug = (await params).slug
 
   // TODO: use fetch instead? https://nextjs.org/docs/app/api-reference/functions/fetch
-  const post = await getPost({ slug, includeBlocks: true })
-  const prevPost = getPost({ slug: prevSlug })
-  const nextPost = getPost({ slug: nextSlug })
+  const post = await getPost({ slug, includeBlocks: true, includePrevAndNext: true })
 
   // TODO: metadata: https://nextjs.org/docs/app/api-reference/functions/generate-metadata
   // const type = getPropertyValue(post.properties, 'Type')
@@ -31,10 +27,9 @@ export default async function DynamicRoute({ params }: Props) {
   // const description = getPropertyValue(post.properties, 'Description')
   // const featuredImage = getPropertyValue(post.properties, 'Featured image')
   // const date = getPropertyValue(post.properties, 'First published')
-
   // <ArticleSeo title={title} slug={slug} description={description} featuredImage={featuredImage} date={date} />
 
-  return <Post post={post} prevPost={prevPost} nextPost={nextPost} />
+  return <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
 }
 
 // const ArticleSeo = ({ title, slug, description, featuredImage, date }) => {
@@ -99,19 +94,5 @@ export async function generateStaticParams(): Promise<Params[]> {
   const posts = await getPosts()
   const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))
 
-  const prevSlug = (slug: string) => {
-    const index = postSlugs.indexOf(slug)
-    return index > 0 ? postSlugs[index - 1] : null
-  }
-
-  const nextSlug = (slug: string) => {
-    const index = postSlugs.indexOf(slug)
-    return index < postSlugs.length - 1 ? postSlugs[index + 1] : null
-  }
-
-  return postSlugs.map(slug => ({
-    slug,
-    prevSlug: prevSlug(slug),
-    nextSlug: nextSlug(slug),
-  }))
+  return postSlugs.map(slug => ({ slug }))
 }
