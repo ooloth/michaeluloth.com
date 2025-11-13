@@ -1,15 +1,18 @@
 import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
 import { Code } from '@/ui/code'
+import PaginationLinks from '@/ui/nav/pagination'
 
 import PostHeader from './post-header'
 import PostFooter from './post-footer'
 
 type Props = Readonly<{
   post: any
+  prevPost: any | null
+  nextPost: any | null
 }>
 
-export default function Post({ post }: Props) {
+export default function Post({ post, prevPost, nextPost }: Props) {
   const title = getPropertyValue(post.properties, 'Title')
   const datePublished = getPropertyValue(post.properties, 'First published')
 
@@ -24,6 +27,7 @@ export default function Post({ post }: Props) {
       </details>
 
       <PostFooter />
+      {/* <PaginationLinks prev={prevPost} next={nextPost} /> */}
     </article>
   )
 }

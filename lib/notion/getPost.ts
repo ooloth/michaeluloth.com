@@ -2,8 +2,8 @@ import notion from './client'
 import getBlockChildren from './getBlockChildren'
 
 type Options = {
-  slug: string
-  includeBlocks: boolean
+  slug: string | null
+  includeBlocks?: boolean
 }
 
 type PostProperties = {}
@@ -23,8 +23,10 @@ type PostWithBlocks = {
  * @see https://developers.notion.com/reference/query-a-data-source
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
-export default async function getPost(options: Options): Promise<any> {
-  const { slug, includeBlocks } = options
+export default async function getPost({ slug, includeBlocks = false }: Options): Promise<any> {
+  if (!slug) {
+    return null
+  }
 
   const response = await notion.dataSources.query({
     data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',

@@ -1,5 +1,7 @@
 import notion, { collectPaginatedAPI } from './client'
 
+type SortDirection = 'ascending' | 'descending'
+
 /**
  * Fetches published blog posts from a Notion data source.
  * Filters posts by destination, status, title, slug, description, and publication date.
@@ -9,13 +11,13 @@ import notion, { collectPaginatedAPI } from './client'
  * @see https://developers.notion.com/reference/query-a-data-source
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
-export default async function getPosts(): Promise<any[]> {
+export default async function getPosts(sortDirection: SortDirection = 'descending'): Promise<any[]> {
   const posts = await collectPaginatedAPI(notion.dataSources.query, {
     data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
     filter: {
       and: [
         { property: 'Destination', multi_select: { contains: 'blog' } },
-        { property: 'Status', status: { equals: 'Published' } },
+        { property: 'Status', status: { equals: 'Published' } }, // redundant if "First published" also used?
         { property: 'Title', title: { is_not_empty: true } },
         { property: 'Slug', rich_text: { is_not_empty: true } },
         { property: 'Description', rich_text: { is_not_empty: true } },
@@ -24,7 +26,7 @@ export default async function getPosts(): Promise<any[]> {
         { property: 'First published', date: { on_or_before: new Date().toISOString() } },
       ],
     },
-    sorts: [{ property: 'First published', direction: 'descending' }],
+    sorts: [{ property: 'First published', direction: sortDirection }],
   })
 
   // TODO: parse with zod
