@@ -11,7 +11,7 @@ type SortDirection = 'ascending' | 'descending'
  * @see https://developers.notion.com/reference/query-a-data-source
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
-export default async function getPosts(sortDirection: SortDirection = 'descending'): Promise<any[]> {
+export default async function getPosts(sortDirection: SortDirection = 'ascending'): Promise<any[]> {
   const posts = await collectPaginatedAPI(notion.dataSources.query, {
     data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
     filter: {

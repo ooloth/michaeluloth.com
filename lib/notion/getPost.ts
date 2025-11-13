@@ -38,8 +38,6 @@ export default async function getPost({
   if (!slug) {
     return null
   }
-  console.log(`Fetching post with slug: ${slug}`)
-  console.log(`Type of slug: ${typeof slug}`)
 
   const response = await notion.dataSources.query({
     data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
