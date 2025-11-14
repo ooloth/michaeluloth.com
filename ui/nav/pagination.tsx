@@ -2,17 +2,7 @@
 // TODO: I think we want to render this on [slug]/ui/post.tsx
 
 import getPropertyValue from '@/lib/notion/getPropertyValue'
-
-const emojiByDirection = {
-  Previous: {
-    symbol: '👈',
-    ariaLabel: 'A finger pointing left.',
-  },
-  Next: {
-    symbol: '👉',
-    ariaLabel: 'A finger pointing right.',
-  },
-}
+import Emoji from '@/ui/emoji'
 
 type Props = Readonly<{
   prevPost: any | null
@@ -42,6 +32,7 @@ function PaginationLink({ post, direction }: PaginationLinkProps) {
   }
 
   const href = `/${slug}/`
+  const emoji = direction === 'Previous' ? '👈' : '👉'
 
   return (
     <a
@@ -49,14 +40,43 @@ function PaginationLink({ post, direction }: PaginationLinkProps) {
       className={`basis-1/2 flex items-center ${direction === 'Next' ? 'justify-end' : null} shadow-2xl border border-zinc-700 hover:border-zinc-300 rounded-xl py-3 px-4`}
     >
       <span className={`flex gap-4 items-center ${direction === 'Next' ? 'flex-row-reverse' : null}`}>
-        <span role="img" aria-label={emojiByDirection[direction].ariaLabel} className="text-2xl">
-          {emojiByDirection[direction].symbol}
-        </span>
+        <Emoji symbol={emoji} className="text-2xl" />
         <span className={`${direction === 'Next' ? 'text-right' : null}`}>
           <span className="block capitalize text-[0.95em]">{direction}</span>
           <span className="block leading-snug font-light text-lg text-bright">{title}</span>
         </span>
       </span>
     </a>
+  )
+}
+
+type CardProps = Readonly<{
+  title: string
+  direction: 'Previous' | 'Next'
+  href?: string
+}>
+
+function Card({ title, direction, href }: CardProps) {
+  const content = (
+    <span className={`flex gap-4 items-center ${direction === 'Next' ? 'flex-row-reverse' : null}`}>
+      <span role="img" aria-label={emojiByDirection[direction].ariaLabel} className="text-2xl">
+        {emojiByDirection[direction].symbol}
+      </span>
+      <span className={`${direction === 'Next' ? 'text-right' : null}`}>
+        <span className="block capitalize text-[0.95em]">{direction}</span>
+        <span className="block leading-snug font-light text-lg text-bright">{title}</span>
+      </span>
+    </span>
+  )
+
+  const Tag = href ? 'a' : 'div'
+
+  return (
+    <Tag
+      href={href || undefined}
+      className={`basis-1/2 flex items-center ${direction === 'Next' ? 'justify-end' : null} shadow-2xl border border-zinc-700 hover:border-zinc-300 rounded-xl py-3 px-4`}
+    >
+      {content}
+    </Tag>
   )
 }

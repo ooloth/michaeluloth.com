@@ -11,22 +11,29 @@ const emojiLabel = {
   '☀️': 'An emoji of a sun.',
   '🌙️': 'An emoji of a crescent moon.',
   '🔖': 'An emoji of a bookmark.',
-}
+  '👈': 'A finger pointing left.',
+  '👉': 'A finger pointing right.',
+} as const
 
-export type EmojiPicture = keyof typeof emojiLabel
+export type EmojiSymbol = keyof typeof emojiLabel
 
 export type EmojiProps = {
-  picture: EmojiPicture
-  label?: string
+  symbol: EmojiSymbol
   className?: string
 }
 
-export default function Emoji({ picture, label, className, ...props }: EmojiProps) {
-  const ariaLabel = label ?? emojiLabel[picture] ?? ''
+export default function Emoji({ symbol, className }: EmojiProps) {
+  const ariaLabel = emojiLabel[symbol]
+
+  if (!ariaLabel) {
+    // TODO: throw in dev, log in prod?
+    // console.error(`No aria-label found for emoji: ${symbol}`)
+    throw new Error(`No aria-label found for emoji: ${symbol}`)
+  }
 
   return (
-    <span role="img" aria-label={ariaLabel} className={`flex-none ${className || ''}`} {...props}>
-      {picture}
+    <span role="img" aria-label={ariaLabel} className={`flex-none ${className ?? ''}`}>
+      {symbol}
     </span>
   )
 }
