@@ -1,20 +1,23 @@
 import { type ReactNode } from 'react'
 
-import Footer from '@/ui/footer'
-import Header from '@/ui/header'
+// import Footer from '@/ui/footer'
+// import Header from '@/ui/header'
 
 type Props = Readonly<{
   children: ReactNode
 }>
 
 export default function PostLayout({ children }: Props) {
-  return (
-    <div className="px-4">
-      <div className="mx-auto max-w-prose">
-        <Header />
-        {children}
-        <Footer />
-      </div>
-    </div>
-  )
+  return children
+
+  // Any actual difference we want? Reserve readable width for posts only?
+  // return (
+  //   <div className="px-4">
+  //     <div className="mx-auto max-w-prose">
+  //       <Header />
+  //       {children}
+  //       <Footer />
+  //     </div>
+  //   </div>
+  // )
 }

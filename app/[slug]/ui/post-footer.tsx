@@ -1,6 +1,5 @@
 'use client'
 
-import Script from 'next/script'
 import Giscus from '@giscus/react'
 
 export default function PostFooter() {
