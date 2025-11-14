@@ -9,6 +9,7 @@ const imageStylesDefault = 'shadow-xl rounded bg-zinc-800'
 type Props = Readonly<{
   loading?: 'eager' | 'lazy'
   url: string
+  showCaption?: boolean
   imageStyles?: string
   outerStyles?: string
 }>
@@ -19,7 +20,7 @@ type Props = Readonly<{
  * @throws Will throw an error if the provided URL is not a Cloudinary URL.
  * @returns A JSX element containing the optimized image, optionally wrapped in a figure with a caption.
  */
-export default async function Image({ loading = 'eager', url, imageStyles, outerStyles }: Props) {
+export default async function Image({ loading = 'eager', url, showCaption, imageStyles, outerStyles }: Props) {
   'use cache'
 
   if (!url.includes('cloudinary')) {
@@ -44,7 +45,7 @@ export default async function Image({ loading = 'eager', url, imageStyles, outer
     />
   )
 
-  return caption ? (
+  return caption && showCaption ? (
     <figure className={outerClasses}>
       {image}
       <figcaption className="caption">{caption}</figcaption>
