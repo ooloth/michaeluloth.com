@@ -71,7 +71,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
       // TODO: extract into a List component that handles ul, ol, todos and toggles
       // see: https://github.com/9gustin/react-notion-render/blob/main/src/components/common/List/index.tsx
       return (
-        <ul className="list-disc flex flex-col gap-1 mt-2 pl-5 leading-snug">
+        <ul className="list-disc marker:text-accent flex flex-col gap-1 mt-2 pl-5 leading-snug">
           {block['bulleted_list'].children.map(item => {
             return (
               <li key={item.id}>
@@ -85,7 +85,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
     case 'numbered_list':
       // NOTE: I create this type in NotionBlocks.tsx to group numbeed list items together
       return (
-        <ol>
+        <ol className="list-decimal marker:text-accent flex flex-col gap-1 mt-2 pl-5 leading-snug">
           {block['numbered_list'].children.map(item => {
             return (
               <li key={item.id}>
