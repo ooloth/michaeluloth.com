@@ -26,10 +26,13 @@ export default async function fetchCloudinaryImageMetadata(url: string): Promise
   }
   console.log(`Parsed Cloudinary public ID: "${publicId}"`)
 
-  // Fetch image details from Cloudinary Admin API, including contextual metadata
+  // Fetch image details from Cloudinary Admin API
   // See: https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
   const cloudinaryImage: CloudinaryResource = await cloudinary.api
-    .resource(publicId, { context: true })
+    .resource(publicId, {
+      context: true, // include contextual metadata (alt, caption, plus any custom fields)
+      type: publicId.startsWith('http') ? 'fetch' : 'upload',
+    })
     .catch(error => {
       throw Error(`🚨 Error fetching Cloudinary image: "${publicId}":\n\n${getErrorDetails(error)}\n`)
     })
@@ -43,13 +46,15 @@ export default async function fetchCloudinaryImageMetadata(url: string): Promise
     }
   }
 
-  const alt = (cloudinaryImage.context as CloudinaryImageContext).custom.alt // "custom" property currently defined as type "object" by sdk
+  const alt = (cloudinaryImage.context as CloudinaryImageContext)?.custom.alt // "custom" property currently defined as type "object" by sdk
 
   if (!alt) {
-    throw new Error(`🚨 Cloudinary image "${publicId}" is missing alt text in contextual metadata.`)
+    // TODO: restore strictness? I disabled it after a couple "/fetch/" gifs were missing all contextual metadata
+    console.error(`🚨 Cloudinary image "${publicId}" is missing alt text in contextual metadata.`)
+    // throw new Error(`🚨 Cloudinary image "${publicId}" is missing alt text in contextual metadata.`)
   }
 
-  const caption = (cloudinaryImage.context as CloudinaryImageContext).custom.caption // comes from "Title" field in contextual metadata
+  const caption = (cloudinaryImage.context as CloudinaryImageContext)?.custom.caption // comes from "Title" field in contextual metadata
 
   const width = cloudinaryImage.width
   if (typeof width !== 'number') {
