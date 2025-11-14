@@ -9,6 +9,9 @@
 
 import { type Metadata } from 'next'
 import { type ReactNode } from 'react'
+
+import Footer from '@/ui/footer'
+import Header from '@/ui/header'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
@@ -23,8 +26,12 @@ type Props = Readonly<{
 export default function RootLayout({ children }: Props) {
   return (
     <html lang="en" className="bg-accent">
-      <body className="overflow-x-hidden bg-zinc-900 min-h-screen antialiased selection:bg-accent selection:text-black leading-relaxed text-[1.1rem] text-zinc-400">
-        {children}
+      <body className="overflow-x-hidden bg-zinc-900 px-4 min-h-screen antialiased selection:bg-accent selection:text-black leading-relaxed text-[1.1rem] text-zinc-400">
+        <div className="flex flex-col mx-auto max-w-prose min-h-screen">
+          <Header />
+          {children}
+          <Footer />
+        </div>
       </body>
     </html>
   )

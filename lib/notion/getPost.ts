@@ -47,7 +47,8 @@ export default async function getPost({
   })
 
   if (response.results.length === 0) {
-    throw Error(`No post found for slug: ${slug}`)
+    console.error(`No post found for slug: ${slug}`)
+    return null
   }
 
   if (response.results.length > 1) {

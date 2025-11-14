@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation'
+
 import getPost from '@/lib/notion/getPost'
 import getPosts from '@/lib/notion/getPosts'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
@@ -20,6 +22,9 @@ export default async function DynamicRoute({ params }: Props) {
 
   // TODO: use fetch instead? https://nextjs.org/docs/app/api-reference/functions/fetch
   const post = await getPost({ slug, includeBlocks: true, includePrevAndNext: true })
+  if (!post) {
+    notFound()
+  }
 
   // TODO: metadata: https://nextjs.org/docs/app/api-reference/functions/generate-metadata
   // const type = getPropertyValue(post.properties, 'Type')
