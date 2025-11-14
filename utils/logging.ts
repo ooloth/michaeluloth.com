@@ -1,8 +1,7 @@
 export function getErrorDetails(error: unknown): string {
   if (error instanceof Error) return error.stack ?? error.message
 
-  // TODO: use JSON.stringify() for non-Error errors instead of String()?
-  return String(error)
+  return JSON.stringify(error, null, 2)
 }
 
 export function logError(summary: string, error?: unknown): void {
