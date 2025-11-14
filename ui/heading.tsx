@@ -3,7 +3,7 @@ import { type JSX, type ReactNode } from 'react'
 const baseClasses = 'break-after-avoid leading-tight text-bright'
 
 const topMarginByLevel: Record<number, string> = {
-  1: 'mt-8',
+  1: 'mt-0', // let page header determine consistent top-of-page spacing
   2: 'mt-8',
   3: 'mt-8',
   4: 'mt-6',
