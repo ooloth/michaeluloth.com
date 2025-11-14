@@ -122,7 +122,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
       const url = image.type === 'external' ? image.external.url : image.file.url
 
-      return <Image url={url} /> // eslint-disable-line jsx-a11y/alt-text
+      return <Image url={url} />
 
     // FIXME: support video embeds
     case 'video':
@@ -159,6 +159,10 @@ export default function NotionBlock({ block }: Props): ReactElement {
     //     ))}
     //   </details>
     // )
+
+    case 'embed':
+      console.error('Embed blocks not supported yet. Skipping.')
+      return <></>
 
     default:
       throw new Error(`Encountered unsupported Notion block type: "${block.type}"`)
