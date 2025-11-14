@@ -5,8 +5,9 @@ import { type NavItem } from '@/ui/nav/types'
 
 const socials: NavItem[] = [
   { text: 'RSS', href: '/rss.xml' },
-  { text: 'Twitter', href: 'https://twitter.com/yourprofile' },
+  { text: 'YouTube', href: 'https://youtube.com/michaeluloth' },
   { text: 'GitHub', href: 'https://github.com/ooloth' },
+  { text: 'Twitter', href: 'https://twitter.com/yourprofile' },
   { text: 'LinkedIn', href: 'https://www.linkedin.com/in/yourprofile' },
 ]
 
