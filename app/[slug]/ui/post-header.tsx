@@ -2,6 +2,7 @@ import { format } from 'timeago.js'
 
 import Heading from '@/ui/heading'
 import Paragraph from '@/ui/paragraph'
+import Dot from '@/ui/dot'
 import { getHumanReadableDate } from '@/utils/dates'
 
 type HeaderProps = Readonly<{
@@ -15,7 +16,7 @@ export default function PostHeader({ title, datePublished, dateUpdated }: Header
     <header className="mb-6">
       <Paragraph className="flex gap-1.5 mt-0 mb-0.5 text-[0.85em] text-zinc-400">
         <span>{getHumanReadableDate(datePublished)}</span>
-        <span className="font-extrabold text-accent">•</span>
+        <Dot />
         <span>Updated {format(dateUpdated)}</span>
       </Paragraph>
 
