@@ -18,18 +18,20 @@ export default function Post({ post, prevPost, nextPost }: Props) {
   const datePublished = getPropertyValue(post.properties, 'First published')
 
   return (
-    <article className="markdown">
-      <PostHeader title={title} datePublished={datePublished} dateUpdated={post.last_edited_time} />
-      <NotionBlocks blocks={post.blocks} />
+    <main className="flex_auto">
+      <article>
+        <PostHeader title={title} datePublished={datePublished} dateUpdated={post.last_edited_time} />
+        <NotionBlocks blocks={post.blocks} />
 
-      {/* <details className="my-10"> */}
-      {/*   <summary className="font-bold text-white">Notion API response JSON...</summary> */}
-      {/*   <Code code={JSON.stringify(post, null, 2)} lang="json" /> */}
-      {/* </details> */}
+        {/* <details className="my-10"> */}
+        {/*   <summary className="font-bold text-white">Notion API response JSON...</summary> */}
+        {/*   <Code code={JSON.stringify(post, null, 2)} lang="json" /> */}
+        {/* </details> */}
 
-      <PostFooter />
-      <Subscribe />
-      <PaginationLinks prevPost={prevPost} nextPost={nextPost} />
-    </article>
+        <PostFooter />
+        <Subscribe />
+        <PaginationLinks prevPost={prevPost} nextPost={nextPost} />
+      </article>
+    </main>
   )
 }

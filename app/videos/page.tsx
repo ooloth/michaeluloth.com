@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
 
 export default function Videos(): ReactElement {
-  return <div>videos</div>
+  return <main className="flex-auto">videos</main>
 }
