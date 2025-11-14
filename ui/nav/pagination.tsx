@@ -36,19 +36,16 @@ function PaginationLink({ post, direction }: PaginationLinkProps) {
   const emoji = direction === 'Previous' ? '👈' : '👉'
 
   return (
-    <Card
-      href={href}
-      content={
-        <div className={`basis-1/2 flex items-center ${direction === 'Next' ? 'justify-end' : null}`}>
-          <span className={`flex gap-4 items-center ${direction === 'Next' ? 'flex-row-reverse' : null}`}>
-            <Emoji symbol={emoji} className="text-2xl" />
-            <span className={`${direction === 'Next' ? 'text-right' : null}`}>
-              <span className="block capitalize text-[0.95em]">{direction}</span>
-              <span className="block leading-snug font-light text-lg text-bright">{title}</span>
-            </span>
+    <Card href={href}>
+      <div className={`basis-1/2 flex items-center ${direction === 'Next' ? 'justify-end' : null}`}>
+        <span className={`flex gap-4 items-center ${direction === 'Next' ? 'flex-row-reverse' : null}`}>
+          <Emoji symbol={emoji} className="text-2xl" />
+          <span className={`${direction === 'Next' ? 'text-right' : null}`}>
+            <span className="block capitalize text-[0.95em]">{direction}</span>
+            <span className="block leading-snug font-light text-lg text-bright">{title}</span>
           </span>
-        </div>
-      }
-    />
+        </span>
+      </div>
+    </Card>
   )
 }
