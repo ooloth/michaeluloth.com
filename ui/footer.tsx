@@ -3,7 +3,7 @@ import SocialNav from '@/ui/nav/socials'
 
 export default function Footer() {
   return (
-    <footer className="flex items-center justify-between mt-24 pb-6">
+    <footer className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-24 pb-6">
       <SecondaryNav />
       <SocialNav />
     </footer>
