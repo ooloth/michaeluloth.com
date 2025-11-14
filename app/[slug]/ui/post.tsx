@@ -18,7 +18,7 @@ export default function Post({ post, prevPost, nextPost }: Props) {
   const datePublished = getPropertyValue(post.properties, 'First published')
 
   return (
-    <article>
+    <article className="markdown">
       <PostHeader title={title} datePublished={datePublished} dateUpdated={post.last_edited_time} />
       <NotionBlocks blocks={post.blocks} />
 

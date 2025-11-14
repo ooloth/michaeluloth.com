@@ -39,6 +39,8 @@ export default async function getPost({
     return null
   }
 
+  console.info(`Fetching post with slug: ${slug}`)
+
   const response = await notion.dataSources.query({
     data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
     filter: {
