@@ -1,3 +1,4 @@
+import { getCached, setCached } from '@/lib/cache/filesystem'
 import cloudinary from '@/lib/cloudinary/client'
 import { type CloudinaryResource } from '@/lib/cloudinary/types'
 import { getErrorDetails } from '@/utils/logging'
@@ -103,5 +104,18 @@ export default async function fetchCloudinaryImageMetadata(url: string): Promise
 
   const sizes = '(min-width: 768px) 768px, 100vw'
 
-  return { alt, caption, height, sizes, src, srcSet, width }
+  const metadata: CloudinaryImageMetadata = {
+    alt: alt ?? '',
+    caption: caption ?? '',
+    height,
+    sizes,
+    src,
+    srcSet,
+    width,
+  }
+
+  // Cache the result (dev mode only)
+  await setCached(publicId, metadata, 'cloudinary')
+
+  return metadata
 }
