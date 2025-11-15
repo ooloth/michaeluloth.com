@@ -24,7 +24,6 @@ export default async function fetchCloudinaryImageMetadata(url: string): Promise
   if (!publicId) {
     throw new Error(`🚨 Could not parse Cloudinary public ID from URL: "${url}"`)
   }
-  console.log(`Parsed Cloudinary public ID: "${publicId}"`)
 
   // Fetch image details from Cloudinary Admin API
   // See: https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
@@ -66,7 +65,7 @@ export default async function fetchCloudinaryImageMetadata(url: string): Promise
     throw new Error(`🚨 Cloudinary image "${publicId}" is missing height metadata.`)
   }
 
-  console.log(`✅ Fetched Cloudinary image metadata for "${url}"`)
+  // console.log(`✅ Fetched Cloudinary image metadata for "${url}"`)
 
   // TODO: separate into multiple functions: (1) fetch cloudinary image metadata from (2) update image metadata logic
   const widths = [
