@@ -16,7 +16,7 @@ export default async function Blog(): Promise<ReactElement> {
     <main className="flex-auto">
       <Heading level={1}>Blog</Heading>
 
-      <ul className="mt-6 grid gap-4">
+      <ul className="mt-6 grid md:grid-cols-2 gap-4">
         {posts.map(post => {
           const title = getPropertyValue(post.properties, 'Title')
           const slug = getPropertyValue(post.properties, 'Slug')
@@ -26,11 +26,18 @@ export default async function Blog(): Promise<ReactElement> {
           return (
             <li key={post.id} className="grid">
               <Card href={`/${slug}/`}>
-                {image ? <Image url={image} showCaption={false} /> : null}
+                {image ? (
+                  <Image
+                    url={image}
+                    showCaption={false}
+                    outerStyles="my-0!"
+                    imageStyles="rounded-t-xl rounded-b-none"
+                  />
+                ) : null}
 
-                <div className="flex items-center gap-2">
-                  <Emoji symbol={type === 'reaction' ? '🔖' : '✍'} />
-                  {title}
+                <div className="flex gap-3 py-3 px-4">
+                  <Emoji symbol={type === 'reaction' ? '🔖' : '✍'} className="text-2xl" />
+                  <p className="text-xl font-medium md:text-lg">{title}</p>
                 </div>
               </Card>
             </li>

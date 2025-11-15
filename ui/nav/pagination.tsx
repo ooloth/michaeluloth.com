@@ -37,7 +37,7 @@ function PaginationLink({ post, direction }: PaginationLinkProps) {
 
   return (
     <Card href={href}>
-      <div className={`basis-1/2 flex items-center ${direction === 'Next' ? 'justify-end' : null}`}>
+      <div className={`basis-1/2 flex items-center ${direction === 'Next' ? 'justify-end' : null} py-3 px-4`}>
         <span className={`flex gap-4 items-center ${direction === 'Next' ? 'flex-row-reverse' : null}`}>
           <Emoji symbol={emoji} className="text-2xl" />
           <span className={`${direction === 'Next' ? 'text-right' : null}`}>
