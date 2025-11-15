@@ -19,12 +19,18 @@ export type CloudinaryImageMetadata = {
  *
  */
 export default async function fetchCloudinaryImageMetadata(url: string): Promise<CloudinaryImageMetadata> {
-  console.log(`📥 Fetching Cloudinary image metadata for "${url}"`)
-
   const publicId = parsePublicIdFromCloudinaryUrl(url)
   if (!publicId) {
     throw new Error(`🚨 Could not parse Cloudinary public ID from URL: "${url}"`)
   }
+
+  // Check cache first (dev mode only)
+  const cached = await getCached<CloudinaryImageMetadata>(publicId, 'cloudinary')
+  if (cached) {
+    return cached
+  }
+
+  console.log(`📥 Fetching Cloudinary image metadata from API for "${publicId}"`)
 
   // Fetch image details from Cloudinary Admin API
   // See: https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
