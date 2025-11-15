@@ -8,8 +8,6 @@ import Image from '@/ui/image'
 import Heading from '@/ui/heading'
 
 export default async function Blog(): Promise<ReactElement> {
-  'use cache'
-
   const posts = await getPosts('descending')
 
   return (

@@ -21,8 +21,6 @@ type Props = Readonly<{
  * @returns A JSX element containing the optimized image, optionally wrapped in a figure with a caption.
  */
 export default async function Image({ loading = 'eager', url, showCaption, imageStyles, outerStyles }: Props) {
-  'use cache'
-
   if (!url.includes('cloudinary')) {
     throw new Error(`🚨 Image URL is not a Cloudinary URL: "${url}"`)
   }

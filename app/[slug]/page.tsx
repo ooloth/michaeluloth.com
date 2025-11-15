@@ -15,9 +15,6 @@ type Props = Readonly<{
 }>
 
 export default async function DynamicRoute({ params }: Props) {
-  // See: https://nextjs.org/docs/messages/next-prerender-current-time
-  'use cache'
-
   const slug = (await params).slug
 
   // TODO: use fetch instead? https://nextjs.org/docs/app/api-reference/functions/fetch
