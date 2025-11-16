@@ -61,7 +61,7 @@ export default async function getPost({
   // TODO: parse with zod
 
   if (includePrevAndNext) {
-    const posts = await getPosts()
+    const posts = await getPosts({ sortDirection: 'ascending' })
     // TODO: parse with zod
 
     const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))

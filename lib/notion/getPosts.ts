@@ -1,6 +1,12 @@
+import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
 
 type SortDirection = 'ascending' | 'descending'
+
+type Options = {
+  sortDirection?: SortDirection
+  skipCache?: boolean
+}
 
 /**
  * Fetches published blog posts from a Notion data source.
@@ -11,7 +17,20 @@ type SortDirection = 'ascending' | 'descending'
  * @see https://developers.notion.com/reference/query-a-data-source
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
-export default async function getPosts(sortDirection: SortDirection = 'ascending'): Promise<any[]> {
+export default async function getPosts(options: Options = {}): Promise<any[]> {
+  const { sortDirection = 'ascending', skipCache = false } = options
+
+  // Check cache first (cache utility handles dev mode check)
+  const cacheKey = `posts-list-${sortDirection}`
+  if (!skipCache) {
+    const cached = await getCached<any[]>(cacheKey, 'notion')
+    if (cached) {
+      return cached
+    }
+  }
+
+  console.log(`📥 Fetching posts from Notion API`)
+
   const posts = await collectPaginatedAPI(notion.dataSources.query, {
     data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
     filter: {
@@ -30,6 +49,9 @@ export default async function getPosts(sortDirection: SortDirection = 'ascending
   })
 
   // TODO: parse with zod
+
+  // Cache the result (cache utility handles dev mode check)
+  await setCached(cacheKey, posts, 'notion')
 
   return posts
 }

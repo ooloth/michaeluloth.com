@@ -93,7 +93,7 @@ export default async function DynamicRoute({ params }: Props) {
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-static-params
  */
 export async function generateStaticParams(): Promise<Params[]> {
-  const posts = await getPosts()
+  const posts = await getPosts({ sortDirection: 'ascending' })
   const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))
 
   return postSlugs.map(slug => ({ slug }))

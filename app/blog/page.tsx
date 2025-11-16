@@ -8,7 +8,7 @@ import Image from '@/ui/image'
 import Heading from '@/ui/heading'
 
 export default async function Blog(): Promise<ReactElement> {
-  const posts = await getPosts('descending')
+  const posts = await getPosts({ sortDirection: 'descending' })
 
   return (
     <main className="flex-auto">
