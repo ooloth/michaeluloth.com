@@ -93,7 +93,8 @@ export default async function getPost({
     post = { ...post, blocks }
   }
 
-  // Cache the result (cache utility handles dev mode check)
+  // Cache the result (always caches, even when skipCache=true)
+  // This ensures ?nocache=true refreshes the cache with latest data
   await setCached(cacheKey, post, 'notion')
 
   return post

@@ -50,7 +50,8 @@ export default async function getPosts(options: Options = {}): Promise<any[]> {
 
   // TODO: parse with zod
 
-  // Cache the result (cache utility handles dev mode check)
+  // Cache the result (always caches, even when skipCache=true)
+  // This ensures ?nocache=true refreshes the cache with latest data
   await setCached(cacheKey, posts, 'notion')
 
   return posts
