@@ -1,3 +1,4 @@
+import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
@@ -7,6 +8,7 @@ type Options = {
   slug: string | null
   includeBlocks?: boolean
   includePrevAndNext?: boolean
+  skipCache?: boolean
 }
 
 type PostProperties = {}
@@ -34,12 +36,22 @@ export default async function getPost({
   slug,
   includeBlocks = false,
   includePrevAndNext = false,
+  skipCache = false,
 }: Options): Promise<any> {
   if (!slug) {
     return null
   }
 
-  console.info(`Fetching post with slug: ${slug}`)
+  // Check cache first (cache utility handles dev mode check)
+  const cacheKey = `post-${slug}-blocks-${includeBlocks}-nav-${includePrevAndNext}`
+  if (!skipCache) {
+    const cached = await getCached<any>(cacheKey, 'notion')
+    if (cached) {
+      return cached
+    }
+  }
+
+  console.info(`📥 Fetching post from Notion API: ${slug}`)
 
   const response = await notion.dataSources.query({
     data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
@@ -80,6 +92,9 @@ export default async function getPost({
 
     post = { ...post, blocks }
   }
+
+  // Cache the result (cache utility handles dev mode check)
+  await setCached(cacheKey, post, 'notion')
 
   return post
 }
