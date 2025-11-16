@@ -2,17 +2,18 @@
 
 ## Problem
 
-During local development, Next.js 16 is making repeated Cloudinary API calls for the same images, hitting rate limits within 5-10 minutes of normal dev work. The `Image` component has `'use cache'` directive, but the underlying `fetchCloudinaryImageMetadata` function doesn't cache its responses.
+During local development, Next.js 16 is making repeated Cloudinary API calls for the same images, hitting rate limits within 5-10 minutes of normal dev work. The `Image` component calls the `fetchCloudinaryImageMetadata` function, but it doesn't cache its responses.
 
 ## Current Implementation
 
-- `ui/image.tsx`: Has `'use cache'` directive (line 24)
+- `ui/image.tsx`: calls `lib/cloudinary/fetchCloudinaryImageMetadata.ts`
 - `lib/cloudinary/fetchCloudinaryImageMetadata.ts`: Makes API calls via `cloudinary.api.resource()` with no caching
 - Each page refresh triggers fresh API calls for all images
 
 ## Solution: Filesystem Cache for Dev Mode
 
 Implement a filesystem cache that:
+
 1. Stores Cloudinary API responses in `.local-cache/cloudinary/` directory
 2. Keys cache files by public ID (e.g., `{publicId}.json`)
 3. Checks cache before making API calls
@@ -33,6 +34,7 @@ export async function setCached<T>(key: string, data: T, dir: string = '.local-c
 ```
 
 Features:
+
 - Sanitize cache keys (replace `/` with `_`, handle special chars)
 - Store in `.local-cache/{dir}/{key}.json`
 - Return `null` on cache miss or read errors
@@ -42,6 +44,7 @@ Features:
 ### 2. Update `fetchCloudinaryImageMetadata`
 
 Add caching layer:
+
 ```typescript
 const cacheKey = publicId.replace(/\//g, '_')
 const cached = await getCached<CloudinaryImageMetadata>(cacheKey, 'cloudinary')
@@ -63,6 +66,7 @@ Add `.local-cache/` to prevent committing cached responses.
 ### 4. Add Cache Bust Mechanism (Optional)
 
 Consider adding a way to invalidate cache:
+
 - npm script: `"cache:clear": "rm -rf .local-cache"`
 - Or TTL-based invalidation (check file mtime)
 
@@ -78,16 +82,19 @@ Consider adding a way to invalidate cache:
 ## Alternative Approaches Considered
 
 ### Option A: Add `'use cache'` to `fetchCloudinaryImageMetadata`
+
 - **Pro**: Uses Next.js 16 built-in caching
 - **Con**: Dev mode often bypasses/invalidates cache during hot reloads
 - **Con**: Less control over cache behavior
 
 ### Option B: Use Next.js `unstable_cache`
+
 - **Pro**: More explicit than `'use cache'` directive
 - **Con**: Still subject to Next.js dev mode cache invalidation
 - **Con**: API is marked as unstable
 
 ### Option C: Redis or in-memory cache
+
 - **Pro**: Very fast
 - **Con**: Overkill for dev mode, requires additional setup
 - **Con**: In-memory cache lost on server restart

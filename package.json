@@ -7,6 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "cache:clear": "rm -rf .local-cache",
+    "cache:clear:cloudinary": "rm -rf .local-cache/cloudinary",
+    "cache:clear:notion": "rm -rf .local-cache/notion",
     "format": "prettier --write .",
     "lint": "eslint",
     "start": "next start",

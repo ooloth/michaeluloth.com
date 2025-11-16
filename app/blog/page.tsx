@@ -7,8 +7,15 @@ import Emoji from '@/ui/emoji'
 import Image from '@/ui/image'
 import Heading from '@/ui/heading'
 
-export default async function Blog(): Promise<ReactElement> {
-  const posts = await getPosts('descending')
+type Props = Readonly<{
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}>
+
+export default async function Blog({ searchParams }: Props): Promise<ReactElement> {
+  const params = await searchParams
+  const skipCache = params.nocache === 'true'
+
+  const posts = await getPosts({ sortDirection: 'descending', skipCache })
 
   return (
     <main className="flex-auto">

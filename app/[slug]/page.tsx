@@ -12,13 +12,16 @@ type Params = {
 
 type Props = Readonly<{
   params: Promise<Params>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }>
 
-export default async function DynamicRoute({ params }: Props) {
+export default async function DynamicRoute({ params, searchParams }: Props) {
   const slug = (await params).slug
+  const search = await searchParams
+  const skipCache = search.nocache === 'true'
 
   // TODO: use fetch instead? https://nextjs.org/docs/app/api-reference/functions/fetch
-  const post = await getPost({ slug, includeBlocks: true, includePrevAndNext: true })
+  const post = await getPost({ slug, includeBlocks: true, includePrevAndNext: true, skipCache })
   if (!post) {
     notFound()
   }
@@ -93,7 +96,7 @@ export default async function DynamicRoute({ params }: Props) {
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-static-params
  */
 export async function generateStaticParams(): Promise<Params[]> {
-  const posts = await getPosts()
+  const posts = await getPosts({ sortDirection: 'ascending' })
   const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))
 
   return postSlugs.map(slug => ({ slug }))
