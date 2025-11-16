@@ -73,7 +73,8 @@ export default async function getPost({
   // TODO: parse with zod
 
   if (includePrevAndNext) {
-    const posts = await getPosts({ sortDirection: 'ascending' })
+    // Pass skipCache through to ensure consistent cache behavior
+    const posts = await getPosts({ sortDirection: 'ascending', skipCache })
     // TODO: parse with zod
 
     const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))
