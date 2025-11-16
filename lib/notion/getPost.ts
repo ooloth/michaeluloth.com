@@ -73,7 +73,6 @@ export default async function getPost({
   // TODO: parse with zod
 
   if (includePrevAndNext) {
-    // Pass skipCache through to ensure consistent cache behavior
     const posts = await getPosts({ sortDirection: 'ascending', skipCache })
     // TODO: parse with zod
 

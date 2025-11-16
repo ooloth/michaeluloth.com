@@ -1,10 +1,8 @@
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
 
-type SortDirection = 'ascending' | 'descending'
-
 type Options = {
-  sortDirection?: SortDirection
+  sortDirection?: 'ascending' | 'descending'
   skipCache?: boolean
 }
 
