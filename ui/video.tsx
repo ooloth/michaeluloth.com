@@ -44,8 +44,7 @@ export default function Video({ url, showCaption, caption, videoStyles, outerSty
   if (isYouTubeUrl(url)) {
     const videoId = getYouTubeVideoId(url)
     if (!videoId) {
-      console.error(`Failed to extract YouTube video ID from URL: ${url}`)
-      return <div className={outerClasses}>Unable to load video</div>
+      throw new Error(`Failed to extract YouTube video ID from URL: ${url}`)
     }
 
     const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}`
