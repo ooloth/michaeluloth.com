@@ -23,6 +23,7 @@ import {
   type RichTextItemResponse,
   type QuoteBlockObjectResponse,
   type ToggleBlockObjectResponse,
+  type VideoBlockObjectResponse,
 } from '@notionhq/client'
 import {
   type RichTextItemResponseCommon,
@@ -47,6 +48,7 @@ export type NotionAPIRichTextItem = RichTextItemResponse
 
 export type NotionAPIQuoteBlock = QuoteBlockObjectResponse
 export type NotionAPIToggleBlock = ToggleBlockObjectResponse
+export type NotionAPIVideoBlock = VideoBlockObjectResponse
 
 // Created in NotionBlocks.tsx to group list items so they're easier to render
 export type NotionBulletedListBlock = Omit<BulletedListItemBlockObjectResponse, 'bulleted_list_item' | 'type'> & {
