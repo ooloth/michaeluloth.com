@@ -17,19 +17,9 @@ type Props = Readonly<{
  * Supports: youtube.com/watch?v=, youtu.be/, youtube.com/embed/, etc.
  */
 function getYouTubeVideoId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-    /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
-  ]
-
-  for (const pattern of patterns) {
-    const match = url.match(pattern)
-    if (match && match[1]) {
-      return match[1]
-    }
-  }
-
-  return null
+  const pattern = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
+  const match = url.match(pattern)
+  return match?.[1] ?? null
 }
 
 /**
@@ -46,7 +36,7 @@ function isYouTubeUrl(url: string): boolean {
  *
  * @returns A JSX element containing the video, optionally wrapped in a figure with a caption.
  */
-export default function Video({ url, showCaption, caption, videoStyles, outerStyles }: Props) {
+export default function Video({ url, showCaption, caption, videoStyles, outerStyles }: Props): ReactElement {
   const outerClasses = outerStyles ? `${outerStylesDefault} ${outerStyles}` : outerStylesDefault
 
   let videoElement: ReactElement
@@ -66,6 +56,8 @@ export default function Video({ url, showCaption, caption, videoStyles, outerSty
         src={embedUrl}
         title={caption || 'YouTube video'}
         allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        sandbox="allow-scripts allow-same-origin allow-presentation"
+        loading="lazy"
         allowFullScreen
         className={iframeClasses}
       />
@@ -74,7 +66,7 @@ export default function Video({ url, showCaption, caption, videoStyles, outerSty
     const videoClasses = videoStyles ? `${videoStylesDefault} ${videoStyles}` : videoStylesDefault
 
     videoElement = (
-      <video controls className={videoClasses}>
+      <video controls preload="metadata" playsInline className={videoClasses}>
         <source src={url} />
         Your browser does not support the video tag.
       </video>
