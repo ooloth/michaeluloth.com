@@ -9,6 +9,7 @@ import {
   type NotionAPIImageBlock,
   type NotionAPIParagraphBlock,
   type NotionAPIQuoteBlock,
+  type NotionAPIVideoBlock,
   type NotionBulletedListBlock,
   type NotionNumberedListBlock,
 } from '@/lib/notion/types'
@@ -18,6 +19,7 @@ import { Code } from '@/ui/code'
 import Heading from '@/ui/heading'
 import Image from '@/ui/image'
 import Paragraph from '@/ui/paragraph'
+import Video from '@/ui/video'
 
 // TODO: add type definitions for raw Notion blocks + my parsed blocks
 // see: https://github.com/9gustin/react-notion-render/blob/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/types/NotionBlock.ts
@@ -124,23 +126,13 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
       return <Image url={url} />
 
-    // FIXME: support video embeds
     case 'video':
-      throw new Error('Video blocks not supported yet.')
+      const video = block['video'] satisfies NotionAPIVideoBlock['video']
 
-    // const video = block['video'] satisfies VideoBlock['video']
-    //
-    // // TODO: extract component
-    // return (
-    //   <figure>
-    //     Hi
-    //     <video src={video.type === 'external' ? video.external.url : video.file.url} />
-    //     <video controls>
-    //       <source src={video.type === 'external' ? video.external.url : video.file.url} />
-    //     </video>
-    //     {video.caption && <figcaption>{video.caption ? video.caption[0]?.plain_text : ''}</figcaption>}
-    //   </figure>
-    // )
+      const videoUrl = video.type === 'external' ? video.external.url : video.file.url
+      const videoCaption = video.caption?.[0]?.plain_text
+
+      return <Video url={videoUrl} caption={videoCaption} showCaption={!!videoCaption} />
 
     case 'toggle':
       throw new Error('Toggle blocks not supported yet.')
