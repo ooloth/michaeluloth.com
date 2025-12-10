@@ -34,6 +34,14 @@ function isYouTubeUrl(url: string): boolean {
  * Automatically detects YouTube URLs and renders them as iframes.
  * Other video URLs are rendered as HTML5 video elements.
  *
+ * @example
+ * // YouTube video
+ * <Video url="https://youtube.com/watch?v=abc123" caption="Tutorial" showCaption={true} />
+ *
+ * @example
+ * // Direct video file
+ * <Video url="https://example.com/video.mp4" />
+ *
  * @returns A JSX element containing the video, optionally wrapped in a figure with a caption.
  */
 export default function Video({ url, showCaption, caption, videoStyles, outerStyles }: Props): ReactElement {
