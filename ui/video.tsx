@@ -58,7 +58,7 @@ export default function Video({ url, showCaption, caption, videoStyles, outerSty
       return <div className={outerClasses}>Unable to load video</div>
     }
 
-    const embedUrl = `https://www.youtube.com/embed/${videoId}`
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}`
     const iframeClasses = videoStyles ? `${iframeStylesDefault} ${videoStyles}` : iframeStylesDefault
 
     videoElement = (
