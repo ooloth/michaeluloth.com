@@ -21,9 +21,7 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
 
   return (
     <section>
-      <Heading level={2} className="mt-0 mb-0">
-        {title}
-      </Heading>
+      <Heading level={2}>{title}</Heading>
 
       <ul className="flex gap-10 overflow-x-auto hide-scrollbar list-none">
         {items.map(item => {
