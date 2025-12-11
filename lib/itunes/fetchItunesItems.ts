@@ -19,9 +19,11 @@ const iTunesApiResultSchema = z
     trackViewUrl: z.string().url().optional(),
   })
   .refine(data => data.collectionId || data.trackId, {
+    // Albums have collectionId, Books have trackId, Podcasts have both
     message: 'iTunes result must have either collectionId or trackId',
   })
   .refine(data => data.collectionViewUrl || data.trackViewUrl, {
+    // Albums have collectionViewUrl, Books have trackViewUrl, Podcasts have both
     message: 'iTunes result must have either collectionViewUrl or trackViewUrl',
   })
 
