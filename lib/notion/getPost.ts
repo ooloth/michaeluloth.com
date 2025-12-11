@@ -3,6 +3,7 @@ import notion from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
+import { env } from '@/lib/env'
 
 type Options = {
   slug: string | null
@@ -54,7 +55,7 @@ export default async function getPost({
   console.info(`📥 Fetching post from Notion API: ${slug}`)
 
   const response = await notion.dataSources.query({
-    data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
+    data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
     filter: {
       and: [{ property: 'Slug', rich_text: { equals: slug } }],
     },

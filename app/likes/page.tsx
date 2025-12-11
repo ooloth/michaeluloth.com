@@ -4,9 +4,10 @@ import Heading from '@/ui/heading'
 import fetchTmdbList, { type TmdbItem } from '@/lib/tmdb/fetchTmdbList'
 import getMediaItems from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
+import { env } from '@/lib/env'
 
-const TMDB_TV_LIST_ID = process.env.TMDB_TV_LIST_ID ?? ''
-const TMDB_MOVIE_LIST_ID = process.env.TMDB_MOVIE_LIST_ID ?? ''
+const TMDB_TV_LIST_ID = env.TMDB_TV_LIST_ID
+const TMDB_MOVIE_LIST_ID = env.TMDB_MOVIE_LIST_ID
 
 type MediaSectionProps = {
   title: string

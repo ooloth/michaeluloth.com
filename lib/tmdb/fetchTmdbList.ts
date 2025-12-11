@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
+import { env } from '@/lib/env'
 
 // Schema for raw TMDB API response item
 const TmdbApiResultSchema = z.object({
@@ -43,7 +44,7 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
       {
         headers: {
           Accept: 'application/json',
-          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${env.TMDB_READ_ACCESS_TOKEN}`,
         },
       },
     )

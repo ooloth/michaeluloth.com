@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
 import getPropertyValue from './getPropertyValue'
+import { env } from '@/lib/env'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'
 
@@ -60,9 +61,9 @@ export function transformNotionPagesToMediaItems(
 }
 
 const DATA_SOURCE_IDS: Record<MediaCategory, string> = {
-  books: process.env.NOTION_DATA_SOURCE_ID_BOOKS ?? '',
-  albums: process.env.NOTION_DATA_SOURCE_ID_ALBUMS ?? '',
-  podcasts: process.env.NOTION_DATA_SOURCE_ID_PODCASTS ?? '',
+  books: env.NOTION_DATA_SOURCE_ID_BOOKS,
+  albums: env.NOTION_DATA_SOURCE_ID_ALBUMS,
+  podcasts: env.NOTION_DATA_SOURCE_ID_PODCASTS,
 }
 
 /**
