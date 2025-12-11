@@ -30,7 +30,7 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
     <section>
       <Heading level={2}>{title}</Heading>
 
-      <ul className="flex gap-10 overflow-x-auto hide-scrollbar list-none mt-4">
+      <ul className="flex gap-10 overflow-x-auto hide-scrollbar list-none mt-4" aria-label={`${title} list`}>
         {items.map(item => {
           const isItunesItem = 'artist' in item
           const year = item.date.split('-')[0]
