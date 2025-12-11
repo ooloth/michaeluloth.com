@@ -2,6 +2,7 @@
 node_modules/
 .netlify/
 .next/
+.playwright-mcp/
 .vercel/
 build/
 out/
