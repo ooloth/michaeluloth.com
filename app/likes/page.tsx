@@ -20,8 +20,8 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
   }
 
   return (
-    <section className="mt-12">
-      <Heading level={2} className="mb-6">
+    <section>
+      <Heading level={2} className="mt-0 mb-0">
         {title}
       </Heading>
       <div className="flex gap-10 overflow-x-auto hide-scrollbar">
@@ -37,7 +37,7 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
               rel="noopener noreferrer"
               className="group flex-none w-48"
             >
-              <div className={`relative ${height} mb-4 rounded-lg overflow-hidden shadow-md group-hover:shadow-glow transition-shadow`}>
+              <div className={`relative ${height} overflow-hidden group-hover:shadow-glow transition-shadow`}>
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
@@ -45,15 +45,15 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
                   sizes="192px"
                   placeholder="blur"
                   blurDataURL={item.imagePlaceholder}
-                  className="object-cover"
+                  className="object-cover rounded-lg"
                 />
               </div>
               <div className="text-center">
-                <div className="text-bright text-sm font-medium mb-1">{item.title}</div>
+                <div className="mt-3 mb-0 text-[1.05rem] font-semibold text-zinc-300">{item.title}</div>
                 {isItunesItem && item.artist && (
-                  <div className="text-zinc-500 text-xs mb-1">{item.artist}</div>
+                  <div className="text-zinc-300 text-sm">{item.artist}</div>
                 )}
-                <div className="text-zinc-500 text-xs">{year}</div>
+                <div className="text-zinc-300 text-sm">{year}</div>
               </div>
             </a>
           )
