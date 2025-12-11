@@ -1,4 +1,4 @@
 import { vi } from 'vitest'
 
 // Make vi globally available
-global.vi = vi
+;(global as any).vi = vi

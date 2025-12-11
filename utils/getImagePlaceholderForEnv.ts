@@ -1,4 +1,4 @@
-import { getPlaiceholder } from 'plaiceholder'
+import { getPlaiceholder, type GetPlaiceholderSrc } from 'plaiceholder'
 
 /**
  * Generates image placeholders with environment-aware behavior.
@@ -8,10 +8,7 @@ import { getPlaiceholder } from 'plaiceholder'
  * @param imageUrl - The image URL to generate placeholder for
  * @param size - Placeholder size (must be between 4 and 64)
  */
-export default async function getImagePlaceholderForEnv(
-  imageUrl: string,
-  size: number = 4,
-): Promise<string> {
+export default async function getImagePlaceholderForEnv(imageUrl: string, size: number = 4): Promise<string> {
   // Validate size argument
   if ((size && size < 4) || (size && size > 64)) {
     throw Error('[getImagePlaceholderForEnv]: size argument must be an integer between 4 and 64')
@@ -19,7 +16,9 @@ export default async function getImagePlaceholderForEnv(
 
   if (process.env.NODE_ENV === 'production') {
     // Generate a real placeholder in production
-    const { base64 } = await getPlaiceholder(imageUrl, { size })
+    // plaiceholder v3 requires a Buffer, not a URL string
+    const buffer = await fetch(imageUrl).then(async res => Buffer.from(await res.arrayBuffer()))
+    const { base64 } = await getPlaiceholder(buffer, { size })
     return base64
   } else {
     // Make development faster by using a fake placeholder
