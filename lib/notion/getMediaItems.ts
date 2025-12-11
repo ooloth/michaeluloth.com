@@ -1,19 +1,62 @@
+import { z } from 'zod'
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
 import getPropertyValue from './getPropertyValue'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'
 
-export type NotionMediaItem = {
-  id: string
-  name: string
-  appleId: number
-  date: string
-}
+// Zod schema for runtime validation at API boundary
+const NotionMediaItemSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  appleId: z.number().int().positive(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+})
+
+// Infer TypeScript type from Zod schema (single source of truth)
+export type NotionMediaItem = z.infer<typeof NotionMediaItemSchema>
 
 type Options = {
   category: MediaCategory
   skipCache?: boolean
+}
+
+/**
+ * Pure function: transforms Notion API pages to validated media items.
+ * Validates data at the API boundary using Zod schema.
+ * Can be tested without mocking I/O.
+ */
+export function transformNotionPagesToMediaItems(
+  pages: unknown[],
+  category: MediaCategory,
+): NotionMediaItem[] {
+  return pages
+    .map(page => {
+      // Type guard for pages with properties
+      if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
+        return null
+      }
+
+      const name = getPropertyValue(page.properties as any, 'Title')
+      const appleId = getPropertyValue(page.properties as any, 'Apple ID')
+      const date = getPropertyValue(page.properties as any, 'Date')
+
+      // Parse and validate using Zod schema
+      const parsed = NotionMediaItemSchema.safeParse({
+        id: page.id,
+        name,
+        appleId,
+        date,
+      })
+
+      if (!parsed.success) {
+        console.log(`Skipping invalid ${category} item:`, parsed.error.format())
+        return null
+      }
+
+      return parsed.data
+    })
+    .filter((item): item is NotionMediaItem => item !== null)
 }
 
 const DATA_SOURCE_IDS: Record<MediaCategory, string> = {
@@ -58,32 +101,8 @@ export default async function getMediaItems(options: Options): Promise<NotionMed
     sorts: [{ property: 'Date', direction: 'descending' }],
   })
 
-  // Transform to format expected by iTunes API
-  const items: NotionMediaItem[] = pages
-    .map(page => {
-      // Type guard for pages with properties
-      if (!('properties' in page)) {
-        return null
-      }
-
-      const name = getPropertyValue(page.properties as any, 'Title')
-      const appleId = getPropertyValue(page.properties as any, 'Apple ID')
-      const date = getPropertyValue(page.properties as any, 'Date')
-
-      // Validate required fields
-      if (!name || !appleId || !date) {
-        console.log(`Skipping ${category} item with missing data:`, { name, appleId, date })
-        return null
-      }
-
-      return {
-        id: page.id,
-        name,
-        appleId,
-        date,
-      }
-    })
-    .filter((item): item is NotionMediaItem => item !== null)
+  // Transform and validate external data at boundary
+  const items = transformNotionPagesToMediaItems(pages, category)
 
   // Cache the result (always caches, even when skipCache=true)
   // This ensures ?nocache=true refreshes the cache with latest data
