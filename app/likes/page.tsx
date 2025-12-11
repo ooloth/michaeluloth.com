@@ -24,41 +24,36 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
       <Heading level={2} className="mt-0 mb-0">
         {title}
       </Heading>
-      <div className="flex gap-10 overflow-x-auto hide-scrollbar">
+
+      <ul className="flex gap-10 overflow-x-auto hide-scrollbar list-none">
         {items.map(item => {
           const isItunesItem = 'artist' in item
           const year = item.date.split('-')[0]
 
           return (
-            <a
-              key={item.id}
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex-none w-48"
-            >
-              <div className={`relative ${height} overflow-hidden group-hover:shadow-glow transition-shadow`}>
-                <Image
-                  src={item.imageUrl}
-                  alt={item.title}
-                  fill
-                  sizes="192px"
-                  placeholder="blur"
-                  blurDataURL={item.imagePlaceholder}
-                  className="object-cover rounded-lg"
-                />
-              </div>
-              <div className="text-center">
-                <div className="mt-3 mb-0 text-[1.05rem] font-semibold text-zinc-300">{item.title}</div>
-                {isItunesItem && item.artist && (
-                  <div className="text-zinc-300 text-sm">{item.artist}</div>
-                )}
-                <div className="text-zinc-300 text-sm">{year}</div>
-              </div>
-            </a>
+            <li key={item.id} className="flex-none w-48">
+              <a href={item.link} target="_blank" rel="noopener noreferrer" className="group block">
+                <div className={`relative ${height} overflow-hidden group-hover:shadow-glow transition-shadow`}>
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.title}
+                    fill
+                    sizes="192px"
+                    placeholder="blur"
+                    blurDataURL={item.imagePlaceholder}
+                    className="object-cover rounded-lg"
+                  />
+                </div>
+                <div className="text-center">
+                  <div className="mt-3 mb-0 text-[1.05rem] font-semibold text-zinc-300">{item.title}</div>
+                  {isItunesItem && item.artist && <div className="text-zinc-300 text-sm">{item.artist}</div>}
+                  <div className="text-zinc-300 text-sm">{year}</div>
+                </div>
+              </a>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </section>
   )
 }
