@@ -1,5 +1,5 @@
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
-import getImagePlaceholderForEnv from 'utils/getImagePlaceholderForEnv'
+import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
 
 export interface TmdbItem {
   id: string
