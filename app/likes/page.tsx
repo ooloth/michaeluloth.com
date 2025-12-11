@@ -23,30 +23,32 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
     <section>
       <Heading level={2}>{title}</Heading>
 
-      <ul className="flex gap-10 overflow-x-auto hide-scrollbar list-none">
+      <ul className="flex gap-10 overflow-x-auto hide-scrollbar list-none mt-4">
         {items.map(item => {
           const isItunesItem = 'artist' in item
           const year = item.date.split('-')[0]
 
           return (
             <li key={item.id} className="flex-none w-48">
-              <a href={item.link} target="_blank" rel="noopener noreferrer" className="group block">
-                <div className={`relative ${height} overflow-hidden group-hover:shadow-glow transition-shadow`}>
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.title}
-                    fill
-                    sizes="192px"
-                    placeholder="blur"
-                    blurDataURL={item.imagePlaceholder}
-                    className="object-cover rounded-lg"
-                  />
-                </div>
-                <div className="text-center">
-                  <div className="mt-3 mb-0 text-[1.05rem] font-semibold text-zinc-300">{item.title}</div>
-                  {isItunesItem && item.artist && <div className="text-zinc-300 text-sm">{item.artist}</div>}
-                  <div className="text-zinc-300 text-sm">{year}</div>
-                </div>
+              <a href={item.link} target="_blank" rel="noopener noreferrer" className="block">
+                <figure>
+                  <div className={`relative ${height} overflow-hidden`}>
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.title}
+                      fill
+                      sizes="192px"
+                      placeholder="blur"
+                      blurDataURL={item.imagePlaceholder}
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
+                  <figcaption className="text-center">
+                    <p className="mt-4 leading-tight text-[1.05rem] font-semibold text-zinc-200">{item.title}</p>
+                    {isItunesItem && item.artist && <p className="mt-1 text-zinc-400 text-[1rem]">{item.artist}</p>}
+                    <p className="mt-0.5 text-zinc-400 text-[0.95rem]">{year}</p>
+                  </figcaption>
+                </figure>
               </a>
             </li>
           )
@@ -95,11 +97,13 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
     <main className="flex-auto">
       <Heading level={1}>Likes</Heading>
 
-      <MediaSection title="TV Shows" items={tv} height="h-72" />
-      <MediaSection title="Movies" items={movies} height="h-72" />
-      <MediaSection title="Books" items={books} height="h-72" />
-      <MediaSection title="Albums" items={albums} height="h-48" />
-      <MediaSection title="Podcasts" items={podcasts} height="h-48" />
+      <div className="pt-8">
+        <MediaSection title="TV Shows" items={tv} height="h-72" />
+        <MediaSection title="Movies" items={movies} height="h-72" />
+        <MediaSection title="Books" items={books} height="h-72" />
+        <MediaSection title="Albums" items={albums} height="h-48" />
+        <MediaSection title="Podcasts" items={podcasts} height="h-48" />
+      </div>
     </main>
   )
 }
