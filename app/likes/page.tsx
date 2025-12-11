@@ -1,5 +1,112 @@
 import { type ReactElement } from 'react'
+import Image from 'next/image'
+import Heading from '@/ui/heading'
+import fetchTmdbList, { type TmdbItem } from '@/lib/tmdb/fetchTmdbList'
+import getMediaItems from '@/lib/notion/getMediaItems'
+import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
 
-export default function Likes(): ReactElement {
-  return <main className="flex-auto">likes</main>
+const TMDB_TV_LIST_ID = process.env.TMDB_TV_LIST_ID ?? ''
+const TMDB_MOVIE_LIST_ID = process.env.TMDB_MOVIE_LIST_ID ?? ''
+
+type MediaSectionProps = {
+  title: string
+  items: (TmdbItem | iTunesItem)[]
+  height: 'h-72' | 'h-48'
+}
+
+function MediaSection({ title, items, height }: MediaSectionProps): ReactElement | null {
+  if (items.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="mt-12">
+      <Heading level={2} className="mb-6">
+        {title}
+      </Heading>
+      <div className="flex gap-10 overflow-x-auto hide-scrollbar">
+        {items.map(item => {
+          const isItunesItem = 'artist' in item
+          const year = item.date.split('-')[0]
+
+          return (
+            <a
+              key={item.id}
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex-none w-48"
+            >
+              <div className={`relative ${height} mb-4 rounded-lg overflow-hidden shadow-md group-hover:shadow-glow transition-shadow`}>
+                <Image
+                  src={item.imageUrl}
+                  alt={item.title}
+                  fill
+                  sizes="192px"
+                  placeholder="blur"
+                  blurDataURL={item.imagePlaceholder}
+                  className="object-cover"
+                />
+              </div>
+              <div className="text-center">
+                <div className="text-bright text-sm font-medium mb-1">{item.title}</div>
+                {isItunesItem && item.artist && (
+                  <div className="text-zinc-500 text-xs mb-1">{item.artist}</div>
+                )}
+                <div className="text-zinc-500 text-xs">{year}</div>
+              </div>
+            </a>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+type PageProps = {
+  searchParams: Promise<{ nocache?: string }>
+}
+
+export default async function Likes({ searchParams }: PageProps): Promise<ReactElement> {
+  const params = await searchParams
+  const skipCache = params.nocache === 'true'
+
+  // Fetch all categories in parallel
+  const [tv, movies, books, albums, podcasts] = await Promise.all([
+    fetchTmdbList(TMDB_TV_LIST_ID, 'tv'),
+    fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie'),
+    getMediaItems({ category: 'books', skipCache }).then(items =>
+      fetchItunesItems(
+        items.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+        'ebook',
+        'ebook',
+      ),
+    ),
+    getMediaItems({ category: 'albums', skipCache }).then(items =>
+      fetchItunesItems(
+        items.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+        'music',
+        'album',
+      ),
+    ),
+    getMediaItems({ category: 'podcasts', skipCache }).then(items =>
+      fetchItunesItems(
+        items.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+        'podcast',
+        'podcast',
+      ),
+    ),
+  ])
+
+  return (
+    <main className="flex-auto">
+      <Heading level={1}>Likes</Heading>
+
+      <MediaSection title="TV Shows" items={tv} height="h-72" />
+      <MediaSection title="Movies" items={movies} height="h-72" />
+      <MediaSection title="Books" items={books} height="h-72" />
+      <MediaSection title="Albums" items={albums} height="h-48" />
+      <MediaSection title="Podcasts" items={podcasts} height="h-48" />
+    </main>
+  )
 }
