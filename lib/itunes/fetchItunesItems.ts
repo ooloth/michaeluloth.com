@@ -9,14 +9,21 @@ interface iTunesListItem {
 }
 
 // Schema for raw iTunes API response
-const iTunesApiResultSchema = z.object({
-  artistName: z.string().optional(),
-  artworkUrl100: z.string().url(),
-  collectionId: z.number().optional(),
-  collectionViewUrl: z.string().url().optional(),
-  trackId: z.number(),
-  trackViewUrl: z.string().url().optional(),
-})
+const iTunesApiResultSchema = z
+  .object({
+    artistName: z.string().optional(),
+    artworkUrl100: z.string().url(),
+    collectionId: z.number().optional(),
+    collectionViewUrl: z.string().url().optional(),
+    trackId: z.number().optional(),
+    trackViewUrl: z.string().url().optional(),
+  })
+  .refine(data => data.collectionId || data.trackId, {
+    message: 'iTunes result must have either collectionId or trackId',
+  })
+  .refine(data => data.collectionViewUrl || data.trackViewUrl, {
+    message: 'iTunes result must have either collectionViewUrl or trackViewUrl',
+  })
 
 // Schema for our internal iTunesItem type
 const iTunesItemSchema = z.object({
@@ -65,7 +72,7 @@ export default async function fetchItunesItems(
           return null
         }
 
-        const { artistName, artworkUrl100, collectionId, trackId, collectionViewUrl, trackViewUrl } =
+        const { artistName, artworkUrl100, collectionId, collectionViewUrl, trackId, trackViewUrl } =
           parsedResult.data
 
         const resultID = collectionId || trackId
@@ -82,10 +89,6 @@ export default async function fetchItunesItems(
         }
 
         const link = collectionViewUrl || trackViewUrl
-        if (!link) {
-          console.log('iTunes result missing link:', resultID)
-          return null
-        }
 
         // See image srcset URLs used on books.apple.com:
         const imageUrl = transformCloudinaryImage(
