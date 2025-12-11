@@ -32,6 +32,7 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
   }
 
   const items = []
+  const seenIds = new Set<number>()
   let page = 1
   let totalPages = 999 // will be updated after the first API response
 
@@ -66,6 +67,12 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
 
           const { id, title, name, release_date, first_air_date, poster_path } = parsedResult.data
 
+          // Skip duplicates
+          if (seenIds.has(id)) {
+            console.log('Duplicate TMDB result:', id)
+            continue
+          }
+
           // Extract required fields (TV shows use 'name' and 'first_air_date', movies use 'title' and 'release_date')
           const itemTitle = title || name
           const itemDate = release_date || first_air_date
@@ -97,6 +104,7 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
             continue
           }
 
+          seenIds.add(id)
           items.push(parsedItem.data)
         }
       }
