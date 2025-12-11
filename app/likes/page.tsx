@@ -1,3 +1,4 @@
+import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 import Image from 'next/image'
 import Heading from '@/ui/heading'
@@ -5,6 +6,11 @@ import fetchTmdbList, { type TmdbItem } from '@/lib/tmdb/fetchTmdbList'
 import getMediaItems from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
 import { env } from '@/lib/env'
+
+export const metadata: Metadata = {
+  title: 'Likes - Michael Uloth',
+  description: 'My favorite TV shows, movies, books, albums, and podcasts',
+}
 
 const TMDB_TV_LIST_ID = env.TMDB_TV_LIST_ID
 const TMDB_MOVIE_LIST_ID = env.TMDB_MOVIE_LIST_ID
