@@ -12,6 +12,9 @@
     "format": "prettier --write .",
     "lint": "eslint",
     "start": "next start",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "test:ui": "vitest --ui",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -19,25 +22,30 @@
     "@notionhq/client": "^5.3.0",
     "cloudinary": "^2.8.0",
     "next": "16.0.1",
+    "plaiceholder": "^3.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "rehype-pretty-code": "^0.14.1",
     "rehype-stringify": "^10.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
-    "timeago.js": "^4.0.2"
+    "sharp": "^0.34.5",
+    "timeago.js": "^4.0.2",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/ui": "^4.0.15",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.6.2",
     "shiki": "^3.15.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.15"
   }
 }

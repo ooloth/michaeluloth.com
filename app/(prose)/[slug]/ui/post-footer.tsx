@@ -17,8 +17,6 @@ export default function PostFooter() {
         inputPosition="bottom"
         theme="dark"
         lang="en"
-        crossorigin="anonymous"
-        async
         loading="lazy"
       />
     </footer>

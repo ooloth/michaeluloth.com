@@ -1,14 +1,29 @@
+import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
-import getImagePlaceholderForEnv from 'utils/getImagePlaceholderForEnv'
+import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
+import { env } from '@/lib/env'
 
-export interface TmdbItem {
-  id: string
-  imageUrl: string
-  imagePlaceholder: string
-  date: string
-  link: string
-  title: string
-}
+// Schema for raw TMDB API response item
+const TmdbApiResultSchema = z.object({
+  id: z.number(),
+  title: z.string().optional(),
+  name: z.string().optional(),
+  release_date: z.string().optional(),
+  first_air_date: z.string().optional(),
+  poster_path: z.string().min(1),
+})
+
+// Schema for our internal TmdbItem type
+const TmdbItemSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  imageUrl: z.string().url(),
+  imagePlaceholder: z.string(),
+  link: z.string().url(),
+})
+
+export type TmdbItem = z.infer<typeof TmdbItemSchema>
 
 export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie'): Promise<TmdbItem[]> {
   if (!listId) {
@@ -17,6 +32,7 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
   }
 
   const items = []
+  const seenIds = new Set<number>()
   let page = 1
   let totalPages = 999 // will be updated after the first API response
 
@@ -29,7 +45,7 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
       {
         headers: {
           Accept: 'application/json',
-          Authorization: `Bearer ${process.env.TMDB_READ_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${env.TMDB_READ_ACCESS_TOKEN}`,
         },
       },
     )
@@ -42,23 +58,54 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
 
       if (data.results && data.results.length > 0) {
         for (const result of data.results) {
-          const title = result.title || result.name
-          const id = result.id
-          const date = result.release_date || result.first_air_date
-          const imageUrl = transformCloudinaryImage(
-            `https://res.cloudinary.com/ooloth/image/fetch/https://image.tmdb.org/t/p/original${result.poster_path}`,
-            192,
-          )
-          const link = `https://www.themoviedb.org/${api}/${id}`
-
-          if (!title || !id || !date || !result.poster_path) {
-            console.log(`Removed TMDB result:`, title || result)
+          // Validate raw TMDB data at API boundary
+          const parsedResult = TmdbApiResultSchema.safeParse(result)
+          if (!parsedResult.success) {
+            console.log('Skipping invalid TMDB result:', parsedResult.error.format())
             continue
           }
 
-          const imagePlaceholder = await getImagePlaceholderForEnv(imageUrl, 4)
+          const { id, title, name, release_date, first_air_date, poster_path } = parsedResult.data
 
-          items.push({ title, id, date, imageUrl, imagePlaceholder, link })
+          // Skip duplicates
+          if (seenIds.has(id)) {
+            console.log('Duplicate TMDB result:', id)
+            continue
+          }
+
+          // Extract required fields (TV shows use 'name' and 'first_air_date', movies use 'title' and 'release_date')
+          const itemTitle = title || name
+          const itemDate = release_date || first_air_date
+
+          if (!itemTitle || !itemDate) {
+            console.log(`Skipping TMDB result with missing title or date:`, parsedResult.data)
+            continue
+          }
+
+          const imageUrl = transformCloudinaryImage(
+            `https://res.cloudinary.com/ooloth/image/fetch/https://image.tmdb.org/t/p/original${poster_path}`,
+            192,
+          )
+          const imagePlaceholder = await getImagePlaceholderForEnv(imageUrl, 4)
+          const link = `https://www.themoviedb.org/${api}/${id}`
+
+          // Validate final item before adding to results
+          const parsedItem = TmdbItemSchema.safeParse({
+            id: String(id),
+            title: itemTitle,
+            date: itemDate,
+            imageUrl,
+            imagePlaceholder,
+            link,
+          })
+
+          if (!parsedItem.success) {
+            console.log('Skipping invalid TMDB item:', parsedItem.error.format())
+            continue
+          }
+
+          seenIds.add(id)
+          items.push(parsedItem.data)
         }
       }
     } catch (error) {

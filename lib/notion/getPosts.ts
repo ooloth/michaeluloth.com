@@ -1,5 +1,6 @@
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
+import { env } from '@/lib/env'
 
 type Options = {
   sortDirection?: 'ascending' | 'descending'
@@ -30,7 +31,7 @@ export default async function getPosts(options: Options = {}): Promise<any[]> {
   console.log(`📥 Fetching posts from Notion API`)
 
   const posts = await collectPaginatedAPI(notion.dataSources.query, {
-    data_source_id: process.env.NOTION_DATA_SOURCE_ID_WRITING ?? '',
+    data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
     filter: {
       and: [
         { property: 'Destination', multi_select: { contains: 'blog' } },

@@ -1,5 +1,6 @@
+import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
-import getImagePlaceholderForEnv from 'utils/getImagePlaceholderForEnv'
+import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
 
 interface iTunesListItem {
   date: string
@@ -7,35 +8,40 @@ interface iTunesListItem {
   name: string
 }
 
-export interface iTunesItem {
-  artist: string
-  title: string
-  id: string
-  date: string
-  link: string
-  imageUrl: string
-  imagePlaceholder: string
-}
+// Schema for raw iTunes API response
+const iTunesApiResultSchema = z
+  .object({
+    artistName: z.string().optional(),
+    artworkUrl100: z.string().url(),
+    collectionId: z.number().optional(),
+    collectionViewUrl: z.string().url().optional(),
+    trackId: z.number().optional(),
+    trackViewUrl: z.string().url().optional(),
+  })
+  .refine(data => data.collectionId || data.trackId, {
+    // Albums have collectionId, Books have trackId, Podcasts have both
+    message: 'iTunes result must have either collectionId or trackId',
+  })
+  .refine(data => data.collectionViewUrl || data.trackViewUrl, {
+    // Albums have collectionViewUrl, Books have trackViewUrl, Podcasts have both
+    message: 'iTunes result must have either collectionViewUrl or trackViewUrl',
+  })
+
+// Schema for our internal iTunesItem type
+const iTunesItemSchema = z.object({
+  artist: z.string().optional(),
+  title: z.string().min(1),
+  id: z.string(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  link: z.string().url(),
+  imageUrl: z.string().url(),
+  imagePlaceholder: z.string(),
+})
+
+export type iTunesItem = z.infer<typeof iTunesItemSchema>
 
 type iTunesMedium = 'ebook' | 'music' | 'podcast'
 type iTunesEntity = 'album' | 'ebook' | 'podcast'
-
-// FIXME: separate by result type
-interface iTunesResult {
-  artistName?: string
-  artworkUrl100: string
-  collectionId?: number
-  collectionViewUrl?: string
-  date: string
-  name: string
-  trackId: number
-  trackViewUrl?: string
-}
-interface iTunesAlbumResult extends iTunesResult {}
-interface iTunesBookResult extends iTunesResult {}
-interface iTunesPodcastResult extends iTunesResult {}
-
-type Result = iTunesAlbumResult | iTunesBookResult | iTunesPodcastResult
 
 export default async function fetchItunesItems(
   items: iTunesListItem[],
@@ -56,43 +62,62 @@ export default async function fetchItunesItems(
     const data = await response.json()
 
     formattedResults = await Promise.all(
-      data.results.map(async (result: Result) => {
+      data.results.map(async (result: unknown) => {
         if (!result) {
           return null
         }
 
-        const resultID: number = result.collectionId || result.trackId
+        // Validate raw iTunes API data at boundary
+        const parsedResult = iTunesApiResultSchema.safeParse(result)
+        if (!parsedResult.success) {
+          console.log('Skipping invalid iTunes result:', parsedResult.error.format())
+          return null
+        }
+
+        const { artistName, artworkUrl100, collectionId, collectionViewUrl, trackId, trackViewUrl } =
+          parsedResult.data
+
+        const resultID = collectionId || trackId
         const matchingItem: iTunesListItem | undefined = items.find(item => item.id === resultID)
 
         if (!matchingItem) {
-          console.log('No matching item...')
-          console.log('matchingItem', matchingItem)
-          console.log('result', result)
-          console.log('resultID', resultID)
+          console.log('No matching item for iTunes result:', resultID)
           return null
         }
 
-        const artist = result.artistName
-        const title = matchingItem.name
-        const id = resultID
-        const date = matchingItem.date
-        const link = result.collectionViewUrl || result.trackViewUrl
+        if (includedIds.has(resultID)) {
+          console.log('Duplicate iTunes result:', resultID)
+          return null
+        }
+
+        const link = collectionViewUrl || trackViewUrl
+
         // See image srcset URLs used on books.apple.com:
         const imageUrl = transformCloudinaryImage(
-          `https://res.cloudinary.com/ooloth/image/fetch/${result.artworkUrl100.replace('100x100bb', '400x0w')}`,
+          `https://res.cloudinary.com/ooloth/image/fetch/${artworkUrl100.replace('100x100bb', '400x0w')}`,
           192,
         )
+        const imagePlaceholder = await getImagePlaceholderForEnv(imageUrl, 4)
 
-        if (!title || !id || !date || !link || !imageUrl || includedIds.has(id)) {
-          console.log(`Removed iTunes result:`, result)
+        // Validate final item before adding to results
+        const parsedItem = iTunesItemSchema.safeParse({
+          artist: artistName,
+          title: matchingItem.name,
+          id: String(resultID),
+          date: matchingItem.date,
+          link,
+          imageUrl,
+          imagePlaceholder,
+        })
+
+        if (!parsedItem.success) {
+          console.log('Skipping invalid iTunes item:', parsedItem.error.format())
           return null
         }
 
-        const imagePlaceholder = await getImagePlaceholderForEnv(imageUrl, 4)
+        includedIds.add(resultID)
 
-        includedIds.add(id)
-
-        return { artist, title, id, date, link, imageUrl, imagePlaceholder }
+        return parsedItem.data
       }),
     )
 
