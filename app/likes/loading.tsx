@@ -5,20 +5,17 @@ function SkeletonCard({ height }: { height: 'h-72' | 'h-48' }): ReactElement {
   return (
     <div className="flex-none w-48">
       <div className={`${height} bg-zinc-800 rounded-lg animate-pulse`} />
-      <div className="mt-4 h-5 bg-zinc-800 rounded animate-pulse" />
-      <div className="mt-1 h-4 w-3/4 bg-zinc-800 rounded animate-pulse" />
-      <div className="mt-0.5 h-4 w-1/2 bg-zinc-800 rounded animate-pulse" />
+
+      <div className="flex flex-col items-center">
+        <div className="mt-4 h-5 w-full bg-zinc-800 rounded animate-pulse" />
+        <div className="mt-2 h-4 w-3/4 bg-zinc-800 rounded animate-pulse" />
+        <div className="mt-2 h-4 w-1/2 bg-zinc-800 rounded animate-pulse" />
+      </div>
     </div>
   )
 }
 
-function SkeletonSection({
-  title,
-  height,
-}: {
-  title: string
-  height: 'h-72' | 'h-48'
-}): ReactElement {
+function SkeletonSection({ title, height }: { title: string; height: 'h-72' | 'h-48' }): ReactElement {
   return (
     <section>
       <Heading level={2}>{title}</Heading>
