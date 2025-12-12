@@ -263,4 +263,7 @@ export type NumberedListBlock = {
   items: { richText: RichTextItem[] }[]
 }
 
-export type GroupedBlock = Exclude<Block, { type: 'bulleted_list_item' } | { type: 'numbered_list_item' }> | BulletedListBlock | NumberedListBlock
+export type GroupedBlock =
+  | Exclude<Block, { type: 'bulleted_list_item' } | { type: 'numbered_list_item' }>
+  | BulletedListBlock
+  | NumberedListBlock
