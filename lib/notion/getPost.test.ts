@@ -108,91 +108,13 @@ describe('transformNotionPageToPost', () => {
     expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_DETAILS_ERROR)
   })
 
-  it('throws on posts with missing slug', () => {
-    const page = {
-      id: '123',
-      last_edited_time: '2024-01-01T00:00:00.000Z',
-      properties: {
-        Slug: {},
-        Title: {},
-        'First published': {},
-      },
-    }
-
-    mockGetPropertyValue
-      .mockReturnValueOnce(null) // Missing slug
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_DETAILS_ERROR)
-  })
-
-  it('throws on posts with missing title', () => {
-    const page = {
-      id: '123',
-      last_edited_time: '2024-01-01T00:00:00.000Z',
-      properties: {
-        Slug: {},
-        Title: {},
-        'First published': {},
-      },
-    }
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('valid-slug')
-      .mockReturnValueOnce(null) // Missing title
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_DETAILS_ERROR)
-  })
-
-  it('throws on posts with missing firstPublished', () => {
-    const page = {
-      id: '123',
-      last_edited_time: '2024-01-01T00:00:00.000Z',
-      properties: {
-        Slug: {},
-        Title: {},
-        'First published': {},
-      },
-    }
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('valid-slug')
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce(null) // Missing firstPublished
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_DETAILS_ERROR)
-  })
-
-  it('throws on posts with invalid date format', () => {
-    const page = {
-      id: '123',
-      last_edited_time: '2024-01-01T00:00:00.000Z',
-      properties: {
-        Slug: {},
-        Title: {},
-        'First published': {},
-      },
-    }
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('valid-slug')
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('01/15/2024') // Invalid date format
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_DETAILS_ERROR)
-  })
-
-  it('throws on posts with invalid featuredImage URL', () => {
+  it.each([
+    { case: 'missing slug', mocks: [null, 'Valid Title', null, '2024-01-15', null] },
+    { case: 'missing title', mocks: ['valid-slug', null, null, '2024-01-15', null] },
+    { case: 'missing firstPublished', mocks: ['valid-slug', 'Valid Title', null, null, null] },
+    { case: 'invalid date format', mocks: ['valid-slug', 'Valid Title', null, '01/15/2024', null] },
+    { case: 'invalid featuredImage URL', mocks: ['valid-slug', 'Valid Title', null, '2024-01-15', 'not-a-url'] },
+  ])('throws on posts with $case', ({ mocks }) => {
     const page = {
       id: '123',
       last_edited_time: '2024-01-01T00:00:00.000Z',
@@ -204,12 +126,7 @@ describe('transformNotionPageToPost', () => {
       },
     }
 
-    mockGetPropertyValue
-      .mockReturnValueOnce('valid-slug')
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce('not-a-url') // Invalid URL
+    mocks.forEach(val => mockGetPropertyValue.mockReturnValueOnce(val))
 
     expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_DETAILS_ERROR)
   })

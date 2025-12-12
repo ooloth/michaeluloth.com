@@ -90,117 +90,14 @@ describe('transformNotionPagesToPostListItems', () => {
     expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 
-  it('throws on posts with missing slug', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
-        },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce(null) // Missing slug
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
-  })
-
-  it('throws on posts with empty slug', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
-        },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('') // Empty slug
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
-  })
-
-  it('throws on posts with missing title', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
-        },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('valid-slug')
-      .mockReturnValueOnce(null) // Missing title
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
-  })
-
-  it('throws on posts with missing firstPublished', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
-        },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('valid-slug')
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce(null) // Missing firstPublished
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
-  })
-
-  it('throws on posts with invalid date format', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
-        },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('valid-slug')
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('01/15/2024') // Invalid date format
-      .mockReturnValueOnce(null)
-
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
-  })
-
-  it('throws on posts with invalid featuredImage URL', () => {
+  it.each([
+    { case: 'missing slug', mocks: [null, 'Valid Title', null, '2024-01-15', null] },
+    { case: 'empty slug', mocks: ['', 'Valid Title', null, '2024-01-15', null] },
+    { case: 'missing title', mocks: ['valid-slug', null, null, '2024-01-15', null] },
+    { case: 'missing firstPublished', mocks: ['valid-slug', 'Valid Title', null, null, null] },
+    { case: 'invalid date format', mocks: ['valid-slug', 'Valid Title', null, '01/15/2024', null] },
+    { case: 'invalid featuredImage URL', mocks: ['valid-slug', 'Valid Title', null, '2024-01-15', 'not-a-url'] },
+  ])('throws on posts with $case', ({ mocks }) => {
     const pages = [
       {
         id: '123',
@@ -213,12 +110,7 @@ describe('transformNotionPagesToPostListItems', () => {
       },
     ]
 
-    mockGetPropertyValue
-      .mockReturnValueOnce('valid-slug')
-      .mockReturnValueOnce('Valid Title')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce('not-a-url') // Invalid URL
+    mocks.forEach(val => mockGetPropertyValue.mockReturnValueOnce(val))
 
     expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })

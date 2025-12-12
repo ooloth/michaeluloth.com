@@ -19,10 +19,10 @@ const NotionMediaItemSchema = z.object({
 export type NotionMediaItem = z.infer<typeof NotionMediaItemSchema>
 
 export const INVALID_MEDIA_ITEM_ERROR = {
-  book: 'Invalid book data - build aborted',
-  album: 'Invalid album data - build aborted',
-  podcast: 'Invalid podcast data - build aborted',
-} as const
+  books: 'Invalid book data - build aborted',
+  albums: 'Invalid album data - build aborted',
+  podcasts: 'Invalid podcast data - build aborted',
+} satisfies Record<MediaCategory, string>
 
 type Options = {
   category: MediaCategory
