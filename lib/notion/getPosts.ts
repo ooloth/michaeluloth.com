@@ -10,6 +10,8 @@ type Options = {
   skipCache?: boolean
 }
 
+export const INVALID_POST_ERROR = 'Invalid post data - build aborted'
+
 /**
  * Pure function: transforms Notion API pages to validated post list items.
  * Validates data at the API boundary using Zod schema.
@@ -19,7 +21,7 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
   return pages.map(page => {
     // Type guard for pages with properties
     if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
-      throw new Error('Invalid post data - build aborted')
+      throw new Error(INVALID_POST_ERROR)
     }
 
     const slug = getPropertyValue(page.properties as any, 'Slug')
@@ -40,7 +42,7 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
 
     if (!parsed.success) {
       logValidationError(parsed.error, 'post')
-      throw new Error(`Invalid post data - build aborted`)
+      throw new Error(INVALID_POST_ERROR)
     }
 
     return parsed.data

@@ -18,6 +18,12 @@ const NotionMediaItemSchema = z.object({
 // Infer TypeScript type from Zod schema (single source of truth)
 export type NotionMediaItem = z.infer<typeof NotionMediaItemSchema>
 
+export const INVALID_MEDIA_ITEM_ERROR = {
+  book: 'Invalid book data - build aborted',
+  album: 'Invalid album data - build aborted',
+  podcast: 'Invalid podcast data - build aborted',
+} as const
+
 type Options = {
   category: MediaCategory
   skipCache?: boolean
@@ -28,14 +34,11 @@ type Options = {
  * Validates data at the API boundary using Zod schema.
  * Can be tested without mocking I/O.
  */
-export function transformNotionPagesToMediaItems(
-  pages: unknown[],
-  category: MediaCategory,
-): NotionMediaItem[] {
+export function transformNotionPagesToMediaItems(pages: unknown[], category: MediaCategory): NotionMediaItem[] {
   return pages.map(page => {
     // Type guard for pages with properties
     if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
-      throw new Error(`Invalid ${category} item data - build aborted`)
+      throw new Error(INVALID_MEDIA_ITEM_ERROR[category])
     }
 
     const name = getPropertyValue(page.properties as any, 'Title')
@@ -52,7 +55,7 @@ export function transformNotionPagesToMediaItems(
 
     if (!parsed.success) {
       logValidationError(parsed.error, `${category} item`)
-      throw new Error(`Invalid ${category} item data - build aborted`)
+      throw new Error(INVALID_MEDIA_ITEM_ERROR[category])
     }
 
     return parsed.data

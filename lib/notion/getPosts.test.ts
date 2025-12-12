@@ -5,7 +5,7 @@ vi.mock('./getPropertyValue', () => ({
   default: mockGetPropertyValue,
 }))
 
-import { transformNotionPagesToPostListItems } from './getPosts'
+import { transformNotionPagesToPostListItems, INVALID_POST_ERROR } from './getPosts'
 
 describe('transformNotionPagesToPostListItems', () => {
   beforeEach(() => {
@@ -87,7 +87,7 @@ describe('transformNotionPagesToPostListItems', () => {
       { id: '123' }, // No properties
     ]
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow('Invalid post data - build aborted')
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 
   it('throws on posts with missing slug', () => {
@@ -109,7 +109,7 @@ describe('transformNotionPagesToPostListItems', () => {
       .mockReturnValueOnce('2024-01-15')
       .mockReturnValueOnce(null)
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow('Invalid post data - build aborted')
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 
   it('throws on posts with empty slug', () => {
@@ -131,7 +131,7 @@ describe('transformNotionPagesToPostListItems', () => {
       .mockReturnValueOnce('2024-01-15')
       .mockReturnValueOnce(null)
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow('Invalid post data - build aborted')
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 
   it('throws on posts with missing title', () => {
@@ -153,7 +153,7 @@ describe('transformNotionPagesToPostListItems', () => {
       .mockReturnValueOnce('2024-01-15')
       .mockReturnValueOnce(null)
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow('Invalid post data - build aborted')
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 
   it('throws on posts with missing firstPublished', () => {
@@ -175,7 +175,7 @@ describe('transformNotionPagesToPostListItems', () => {
       .mockReturnValueOnce(null) // Missing firstPublished
       .mockReturnValueOnce(null)
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow('Invalid post data - build aborted')
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 
   it('throws on posts with invalid date format', () => {
@@ -197,7 +197,7 @@ describe('transformNotionPagesToPostListItems', () => {
       .mockReturnValueOnce('01/15/2024') // Invalid date format
       .mockReturnValueOnce(null)
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow('Invalid post data - build aborted')
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 
   it('throws on posts with invalid featuredImage URL', () => {
@@ -220,7 +220,7 @@ describe('transformNotionPagesToPostListItems', () => {
       .mockReturnValueOnce('2024-01-15')
       .mockReturnValueOnce('not-a-url') // Invalid URL
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow('Invalid post data - build aborted')
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 
   it('processes multiple valid posts', () => {
@@ -294,6 +294,6 @@ describe('transformNotionPagesToPostListItems', () => {
       .mockReturnValueOnce('2024-02-02')
       .mockReturnValueOnce(null)
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow('Invalid post data - build aborted')
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })
 })

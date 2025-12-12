@@ -5,7 +5,7 @@ vi.mock('./getPropertyValue', () => ({
   default: mockGetPropertyValue,
 }))
 
-import { transformNotionPagesToMediaItems, type NotionMediaItem } from './getMediaItems'
+import { transformNotionPagesToMediaItems, INVALID_MEDIA_ITEM_ERROR, type NotionMediaItem } from './getMediaItems'
 
 describe('transformNotionPagesToMediaItems', () => {
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('transformNotionPagesToMediaItems', () => {
       { id: '123' }, // No properties
     ]
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
   })
 
   it('throws on items with missing name', () => {
@@ -58,7 +58,7 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce(12345)
       .mockReturnValueOnce('2024-01-15')
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
   })
 
   it('throws on items with missing appleId', () => {
@@ -74,7 +74,7 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce(null) // Missing appleId
       .mockReturnValueOnce('2024-01-15')
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
   })
 
   it('throws on items with missing date', () => {
@@ -85,12 +85,9 @@ describe('transformNotionPagesToMediaItems', () => {
       },
     ]
 
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce(12345)
-      .mockReturnValueOnce(null) // Missing date
+    mockGetPropertyValue.mockReturnValueOnce('Valid Book').mockReturnValueOnce(12345).mockReturnValueOnce(null) // Missing date
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
   })
 
   it('throws on items with invalid appleId (not a number)', () => {
@@ -106,7 +103,7 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce('not-a-number') // Invalid appleId
       .mockReturnValueOnce('2024-01-15')
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
   })
 
   it('throws on items with invalid date format', () => {
@@ -117,12 +114,9 @@ describe('transformNotionPagesToMediaItems', () => {
       },
     ]
 
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce(12345)
-      .mockReturnValueOnce('01/15/2024') // Invalid date format
+    mockGetPropertyValue.mockReturnValueOnce('Valid Book').mockReturnValueOnce(12345).mockReturnValueOnce('01/15/2024') // Invalid date format
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
   })
 
   it('throws on items with negative appleId', () => {
@@ -138,7 +132,7 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce(-12345) // Negative appleId
       .mockReturnValueOnce('2024-01-15')
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
   })
 
   it('processes multiple valid items', () => {
