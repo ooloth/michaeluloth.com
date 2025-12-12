@@ -68,7 +68,7 @@ describe('transformNotionPageToPost', () => {
   it('throws on pages without properties', () => {
     const page = { id: '123', last_edited_time: '2024-01-01T00:00:00.000Z' }
 
-    expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_DETAILS_ERROR)
+    expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_PROPERTIES_ERROR)
   })
 
   it('throws on pages without id', () => {

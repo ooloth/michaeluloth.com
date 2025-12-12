@@ -1,6 +1,7 @@
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
 import { PostListItemSchema, PostPropertiesSchema, type PostListItem } from './schemas/post'
+import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
@@ -19,13 +20,15 @@ export const INVALID_POST_PROPERTIES_ERROR = 'Invalid post properties - build ab
  */
 export function transformNotionPagesToPostListItems(pages: unknown[]): PostListItem[] {
   return pages.map(page => {
-    // Type guard for pages with properties
-    if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
+    // Validate page metadata structure
+    const pageMetadata = PageMetadataSchema.safeParse(page)
+    if (!pageMetadata.success) {
+      logValidationError(pageMetadata.error, 'page metadata')
       throw new Error(INVALID_POST_ERROR)
     }
 
     // Validate and extract property values at I/O boundary
-    const propertiesParsed = PostPropertiesSchema.safeParse(page.properties)
+    const propertiesParsed = PostPropertiesSchema.safeParse(pageMetadata.data.properties)
     if (!propertiesParsed.success) {
       logValidationError(propertiesParsed.error, 'post properties')
       throw new Error(INVALID_POST_PROPERTIES_ERROR)
@@ -35,7 +38,7 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
 
     // Parse and validate the final post object
     const parsed = PostListItemSchema.safeParse({
-      id: page.id,
+      id: pageMetadata.data.id,
       slug: properties.Slug,
       title: properties.Title,
       description: properties.Description,

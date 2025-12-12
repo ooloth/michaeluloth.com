@@ -3,6 +3,7 @@ import notion from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
 import { PostListItemSchema, PostPropertiesSchema, type Post, type PostListItem } from './schemas/post'
+import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
@@ -22,13 +23,20 @@ export const INVALID_POST_PROPERTIES_ERROR = 'Invalid post properties - build ab
  * Can be tested without mocking I/O.
  */
 export function transformNotionPageToPost(page: unknown): Post {
-  // Type guard for pages with properties
-  if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page) || !('last_edited_time' in page)) {
+  // Validate page metadata structure
+  const pageMetadata = PageMetadataSchema.safeParse(page)
+  if (!pageMetadata.success) {
+    logValidationError(pageMetadata.error, 'page metadata')
+    throw new Error(INVALID_POST_DETAILS_ERROR)
+  }
+
+  // Validate last_edited_time exists (required for posts)
+  if (!pageMetadata.data.last_edited_time) {
     throw new Error(INVALID_POST_DETAILS_ERROR)
   }
 
   // Validate and extract property values at I/O boundary
-  const propertiesParsed = PostPropertiesSchema.safeParse(page.properties)
+  const propertiesParsed = PostPropertiesSchema.safeParse(pageMetadata.data.properties)
   if (!propertiesParsed.success) {
     logValidationError(propertiesParsed.error, 'post properties')
     throw new Error(INVALID_POST_PROPERTIES_ERROR)
@@ -38,7 +46,7 @@ export function transformNotionPageToPost(page: unknown): Post {
 
   // Parse and validate post list item fields using Zod schema
   const parsed = PostListItemSchema.safeParse({
-    id: page.id,
+    id: pageMetadata.data.id,
     slug: properties.Slug,
     title: properties.Title,
     description: properties.Description,
@@ -55,7 +63,7 @@ export function transformNotionPageToPost(page: unknown): Post {
   // Blocks are validated separately in getBlockChildren
   return {
     ...parsed.data,
-    lastEditedTime: (page as any).last_edited_time,
+    lastEditedTime: pageMetadata.data.last_edited_time,
     blocks: [],
     prevPost: null,
     nextPost: null,

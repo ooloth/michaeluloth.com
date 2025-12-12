@@ -7,6 +7,7 @@ import {
   NumberPropertySchema,
   DatePropertySchema,
 } from './schemas/properties'
+import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
@@ -57,13 +58,15 @@ type Options = {
  */
 export function transformNotionPagesToMediaItems(pages: unknown[], category: MediaCategory): NotionMediaItem[] {
   return pages.map(page => {
-    // Type guard for pages with properties
-    if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
+    // Validate page metadata structure
+    const pageMetadata = PageMetadataSchema.safeParse(page)
+    if (!pageMetadata.success) {
+      logValidationError(pageMetadata.error, 'page metadata')
       throw new Error(INVALID_MEDIA_ITEM_ERROR[category])
     }
 
     // Validate and extract property values at I/O boundary
-    const propertiesParsed = MediaPropertiesSchema.safeParse(page.properties)
+    const propertiesParsed = MediaPropertiesSchema.safeParse(pageMetadata.data.properties)
     if (!propertiesParsed.success) {
       logValidationError(propertiesParsed.error, `${category} item`)
       throw new Error(INVALID_MEDIA_PROPERTIES_ERROR[category])
@@ -73,7 +76,7 @@ export function transformNotionPagesToMediaItems(pages: unknown[], category: Med
 
     // Parse and validate using Zod schema
     const parsed = NotionMediaItemSchema.safeParse({
-      id: page.id,
+      id: pageMetadata.data.id,
       name: properties.Title,
       appleId: properties['Apple ID'],
       date: properties.Date,

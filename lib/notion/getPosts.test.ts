@@ -68,7 +68,7 @@ describe('transformNotionPagesToPostListItems', () => {
       { id: '123' }, // No properties
     ]
 
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_PROPERTIES_ERROR)
   })
 
   it.each([
