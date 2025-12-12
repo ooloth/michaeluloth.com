@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { BlockSchema } from './block'
 
 // Post list item (used by getPosts and for prev/next navigation)
 export const PostListItemSchema = z.object({
@@ -15,7 +16,7 @@ export type PostListItem = z.infer<typeof PostListItemSchema>
 
 // Full post (includes blocks and all metadata)
 export const PostSchema = PostListItemSchema.extend({
-  blocks: z.array(z.unknown()), // Will be validated separately in getBlockChildren
+  blocks: z.array(BlockSchema),
   lastEditedTime: z.string(), // ISO 8601 datetime from Notion
   prevPost: PostListItemSchema.nullable(),
   nextPost: PostListItemSchema.nullable(),
