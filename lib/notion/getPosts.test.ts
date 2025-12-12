@@ -1,48 +1,10 @@
 import { transformNotionPagesToPostListItems, INVALID_POST_ERROR, INVALID_POST_PROPERTIES_ERROR } from './getPosts'
-
-// Helper functions to create valid Notion property structures
-function createRichTextProperty(text: string | null) {
-  if (text === null) {
-    return {
-      type: 'rich_text' as const,
-      rich_text: [],
-    }
-  }
-  return {
-    type: 'rich_text' as const,
-    rich_text: [{ plain_text: text }],
-  }
-}
-
-function createTitleProperty(text: string | null) {
-  if (text === null) {
-    return {
-      type: 'title' as const,
-      title: [],
-    }
-  }
-  return {
-    type: 'title' as const,
-    title: [{ plain_text: text }],
-  }
-}
-
-function createDateProperty(date: string | null) {
-  return {
-    type: 'date' as const,
-    date: date ? { start: date } : null,
-  }
-}
-
-function createFilesProperty(urls: string[]) {
-  return {
-    type: 'files' as const,
-    files: urls.map(url => ({
-      type: 'external' as const,
-      external: { url },
-    })),
-  }
-}
+import {
+  createRichTextProperty,
+  createTitleProperty,
+  createDateProperty,
+  createFilesProperty,
+} from './testing/property-factories'
 
 describe('transformNotionPagesToPostListItems', () => {
   it('transforms valid Notion pages to post list items', () => {

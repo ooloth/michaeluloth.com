@@ -4,34 +4,7 @@ import {
   INVALID_MEDIA_PROPERTIES_ERROR,
   type NotionMediaItem,
 } from './getMediaItems'
-
-// Helper functions to create valid Notion property structures
-function createTitleProperty(text: string | null) {
-  if (text === null) {
-    return {
-      type: 'title' as const,
-      title: [],
-    }
-  }
-  return {
-    type: 'title' as const,
-    title: [{ plain_text: text }],
-  }
-}
-
-function createNumberProperty(num: number | null) {
-  return {
-    type: 'number' as const,
-    number: num,
-  }
-}
-
-function createDateProperty(date: string | null) {
-  return {
-    type: 'date' as const,
-    date: date ? { start: date } : null,
-  }
-}
+import { createTitleProperty, createNumberProperty, createDateProperty } from './testing/property-factories'
 
 describe('transformNotionPagesToMediaItems', () => {
   it('transforms valid Notion pages to media items', () => {

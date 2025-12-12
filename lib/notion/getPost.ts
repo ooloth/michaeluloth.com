@@ -2,14 +2,7 @@ import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
-import { PostListItemSchema, type Post, type PostListItem } from './schemas/post'
-import {
-  createPropertiesSchema,
-  RichTextPropertySchema,
-  TitlePropertySchema,
-  DatePropertySchema,
-  FeaturedImagePropertySchema,
-} from './schemas/properties'
+import { PostListItemSchema, PostPropertiesSchema, type Post, type PostListItem } from './schemas/post'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
@@ -22,18 +15,6 @@ type Options = {
 
 export const INVALID_POST_DETAILS_ERROR = 'Invalid post details data - build aborted'
 export const INVALID_POST_PROPERTIES_ERROR = 'Invalid post properties - build aborted'
-
-/**
- * Schema for validating and transforming post properties from Notion API.
- * Validates structure and extracts values in one step.
- */
-const PostPropertiesSchema = createPropertiesSchema({
-  Slug: RichTextPropertySchema,
-  Title: TitlePropertySchema,
-  Description: RichTextPropertySchema,
-  'First published': DatePropertySchema,
-  'Featured image': FeaturedImagePropertySchema,
-})
 
 /**
  * Pure function: transforms a Notion API page to a validated Post.
