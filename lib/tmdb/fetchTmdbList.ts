@@ -18,9 +18,9 @@ const TmdbItemSchema = z.object({
   id: z.string(),
   title: z.string().min(1),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  imageUrl: z.string().url(),
+  imageUrl: z.url(),
   imagePlaceholder: z.string(),
-  link: z.string().url(),
+  link: z.url(),
 })
 
 export type TmdbItem = z.infer<typeof TmdbItemSchema>

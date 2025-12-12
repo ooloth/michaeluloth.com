@@ -10,7 +10,7 @@ export const RichTextItemSchema = z
       content: z.string(),
       link: z
         .object({
-          url: z.string().url(),
+          url: z.url(),
         })
         .nullable()
         .optional(),
@@ -132,11 +132,11 @@ const ImageBlockSchema = z
     image: z.union([
       z.object({
         type: z.literal('external'),
-        external: z.object({ url: z.string().url() }),
+        external: z.object({ url: z.url() }),
       }),
       z.object({
         type: z.literal('file'),
-        file: z.object({ url: z.string().url() }),
+        file: z.object({ url: z.url() }),
       }),
     ]),
   })
@@ -154,12 +154,12 @@ const VideoBlockSchema = z
     video: z.union([
       z.object({
         type: z.literal('external'),
-        external: z.object({ url: z.string().url() }),
+        external: z.object({ url: z.url() }),
         caption: z.array(RichTextItemSchema),
       }),
       z.object({
         type: z.literal('file'),
-        file: z.object({ url: z.string().url() }),
+        file: z.object({ url: z.url() }),
         caption: z.array(RichTextItemSchema),
       }),
     ]),

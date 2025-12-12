@@ -72,7 +72,7 @@ export const DatePropertySchema = z
 export const UrlPropertySchema = z
   .object({
     type: z.literal('url'),
-    url: z.string().url().nullable(),
+    url: z.url().nullable(),
   })
   .transform(prop => prop.url)
 
@@ -84,13 +84,13 @@ const FileItemSchema = z.union([
   z.object({
     type: z.literal('external'),
     external: z.object({
-      url: z.string().url(),
+      url: z.url(),
     }),
   }),
   z.object({
     type: z.literal('file'),
     file: z.object({
-      url: z.string().url(),
+      url: z.url(),
     }),
   }),
 ])
@@ -107,7 +107,7 @@ export const FilesPropertySchema = z
       } else {
         return item.file.url
       }
-    })
+    }),
   )
 
 /**
@@ -120,7 +120,7 @@ export const FeaturedImagePropertySchema = z
     z
       .object({
         type: z.literal('url'),
-        url: z.string().url().nullable(),
+        url: z.url().nullable(),
       })
       .transform(prop => prop.url),
     // Files property type (other posts use this)
@@ -149,7 +149,7 @@ export const FeaturedImagePropertySchema = z
  * })
  */
 export function createPropertiesSchema<T extends Record<string, z.ZodTypeAny>>(
-  propertySchemas: T
+  propertySchemas: T,
 ): z.ZodType<{ [K in keyof T]: z.infer<T[K]> }> {
   return z.object(propertySchemas as any) as any
 }
