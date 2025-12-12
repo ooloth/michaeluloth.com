@@ -37,27 +37,15 @@ describe('transformNotionPagesToMediaItems', () => {
     ])
   })
 
-  it('filters out pages without properties', () => {
+  it('throws on pages without properties', () => {
     const pages = [
       { id: '123' }, // No properties
-      {
-        id: '456',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
-      },
     ]
 
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce(67890)
-      .mockReturnValueOnce('2024-02-20')
-
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toHaveLength(1)
-    expect(result[0].id).toBe('456')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
   })
 
-  it('filters out items with missing name', () => {
+  it('throws on items with missing name', () => {
     const pages = [
       {
         id: '123',
@@ -70,12 +58,10 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce(12345)
       .mockReturnValueOnce('2024-01-15')
 
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
   })
 
-  it('filters out items with missing appleId', () => {
+  it('throws on items with missing appleId', () => {
     const pages = [
       {
         id: '123',
@@ -88,12 +74,10 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce(null) // Missing appleId
       .mockReturnValueOnce('2024-01-15')
 
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
   })
 
-  it('filters out items with missing date', () => {
+  it('throws on items with missing date', () => {
     const pages = [
       {
         id: '123',
@@ -106,12 +90,10 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce(12345)
       .mockReturnValueOnce(null) // Missing date
 
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
   })
 
-  it('filters out items with invalid appleId (not a number)', () => {
+  it('throws on items with invalid appleId (not a number)', () => {
     const pages = [
       {
         id: '123',
@@ -124,12 +106,10 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce('not-a-number') // Invalid appleId
       .mockReturnValueOnce('2024-01-15')
 
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
   })
 
-  it('filters out items with invalid date format', () => {
+  it('throws on items with invalid date format', () => {
     const pages = [
       {
         id: '123',
@@ -142,12 +122,10 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce(12345)
       .mockReturnValueOnce('01/15/2024') // Invalid date format
 
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
   })
 
-  it('filters out items with negative appleId', () => {
+  it('throws on items with negative appleId', () => {
     const pages = [
       {
         id: '123',
@@ -160,9 +138,7 @@ describe('transformNotionPagesToMediaItems', () => {
       .mockReturnValueOnce(-12345) // Negative appleId
       .mockReturnValueOnce('2024-01-15')
 
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow('Invalid books item data - build aborted')
   })
 
   it('processes multiple valid items', () => {

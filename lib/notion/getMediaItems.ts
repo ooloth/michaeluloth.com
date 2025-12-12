@@ -32,33 +32,31 @@ export function transformNotionPagesToMediaItems(
   pages: unknown[],
   category: MediaCategory,
 ): NotionMediaItem[] {
-  return pages
-    .map(page => {
-      // Type guard for pages with properties
-      if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
-        return null
-      }
+  return pages.map(page => {
+    // Type guard for pages with properties
+    if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
+      throw new Error(`Invalid ${category} item data - build aborted`)
+    }
 
-      const name = getPropertyValue(page.properties as any, 'Title')
-      const appleId = getPropertyValue(page.properties as any, 'Apple ID')
-      const date = getPropertyValue(page.properties as any, 'Date')
+    const name = getPropertyValue(page.properties as any, 'Title')
+    const appleId = getPropertyValue(page.properties as any, 'Apple ID')
+    const date = getPropertyValue(page.properties as any, 'Date')
 
-      // Parse and validate using Zod schema
-      const parsed = NotionMediaItemSchema.safeParse({
-        id: page.id,
-        name,
-        appleId,
-        date,
-      })
-
-      if (!parsed.success) {
-        logValidationError(parsed.error, `${category} item`)
-        return null
-      }
-
-      return parsed.data
+    // Parse and validate using Zod schema
+    const parsed = NotionMediaItemSchema.safeParse({
+      id: page.id,
+      name,
+      appleId,
+      date,
     })
-    .filter((item): item is NotionMediaItem => item !== null)
+
+    if (!parsed.success) {
+      logValidationError(parsed.error, `${category} item`)
+      throw new Error(`Invalid ${category} item data - build aborted`)
+    }
+
+    return parsed.data
+  })
 }
 
 const DATA_SOURCE_IDS: Record<MediaCategory, string> = {
