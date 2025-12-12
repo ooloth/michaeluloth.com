@@ -3,7 +3,7 @@ import notion from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
 import getPropertyValue from '@/lib/notion/getPropertyValue'
-import { PostSchema, type Post } from './schemas/post'
+import { PostListItemSchema, type Post, type PostListItem } from './schemas/post'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
@@ -33,18 +33,14 @@ export function transformNotionPageToPost(page: unknown): Post {
   const firstPublished = getPropertyValue(page.properties as any, 'First published')
   const featuredImage = getPropertyValue(page.properties as any, 'Featured image')
 
-  // Parse and validate using Zod schema
-  const parsed = PostSchema.safeParse({
+  // Parse and validate post list item fields using Zod schema
+  const parsed = PostListItemSchema.safeParse({
     id: page.id,
     slug,
     title,
     description,
     firstPublished,
     featuredImage,
-    lastEditedTime: (page as any).last_edited_time,
-    blocks: [],
-    prevPost: null,
-    nextPost: null,
   })
 
   if (!parsed.success) {
@@ -52,7 +48,15 @@ export function transformNotionPageToPost(page: unknown): Post {
     throw new Error(INVALID_POST_DETAILS_ERROR)
   }
 
-  return parsed.data
+  // Return full Post with additional fields
+  // Blocks are validated separately in getBlockChildren
+  return {
+    ...parsed.data,
+    lastEditedTime: (page as any).last_edited_time,
+    blocks: [],
+    prevPost: null,
+    nextPost: null,
+  }
 }
 
 /**

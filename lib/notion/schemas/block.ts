@@ -231,9 +231,10 @@ const ChildPageBlockSchema = z
   }))
 
 /**
- * Main block schema - discriminated union of all block types
+ * Main block schema - union of all block types
+ * Note: Using z.union instead of z.discriminatedUnion due to recursive toggle schema
  */
-export const BlockSchema = z.discriminatedUnion('type', [
+export const BlockSchema = z.union([
   ParagraphBlockSchema,
   Heading1BlockSchema,
   Heading2BlockSchema,

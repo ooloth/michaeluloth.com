@@ -42,7 +42,7 @@ describe('transformNotionPagesToMediaItems', () => {
       { id: '123' }, // No properties
     ]
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.books)
   })
 
   it.each([
@@ -62,7 +62,7 @@ describe('transformNotionPagesToMediaItems', () => {
 
     mocks.forEach(val => mockGetPropertyValue.mockReturnValueOnce(val))
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.book)
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.books)
   })
 
   it('processes multiple valid items', () => {
