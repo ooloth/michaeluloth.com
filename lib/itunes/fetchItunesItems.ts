@@ -12,11 +12,11 @@ interface iTunesListItem {
 const iTunesApiResultSchema = z
   .object({
     artistName: z.string().optional(),
-    artworkUrl100: z.string().url(),
+    artworkUrl100: z.url(),
     collectionId: z.number().optional(),
-    collectionViewUrl: z.string().url().optional(),
+    collectionViewUrl: z.url().optional(),
     trackId: z.number().optional(),
-    trackViewUrl: z.string().url().optional(),
+    trackViewUrl: z.url().optional(),
   })
   .refine(data => data.collectionId || data.trackId, {
     // Albums have collectionId, Books have trackId, Podcasts have both
@@ -33,8 +33,8 @@ const iTunesItemSchema = z.object({
   title: z.string().min(1),
   id: z.string(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  link: z.string().url(),
-  imageUrl: z.string().url(),
+  link: z.url(),
+  imageUrl: z.url(),
   imagePlaceholder: z.string(),
 })
 

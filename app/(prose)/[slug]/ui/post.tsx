@@ -1,5 +1,5 @@
 import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
-import getPropertyValue from '@/lib/notion/getPropertyValue'
+import type { Post as PostType, PostListItem } from '@/lib/notion/schemas/post'
 // import { Code } from '@/ui/code'
 import PaginationLinks from '@/ui/nav/pagination'
 
@@ -8,19 +8,16 @@ import PostFooter from './post-footer'
 import Subscribe from './subscribe'
 
 type Props = Readonly<{
-  post: any
-  prevPost: any | null
-  nextPost: any | null
+  post: PostType
+  prevPost: PostListItem | null
+  nextPost: PostListItem | null
 }>
 
 export default function Post({ post, prevPost, nextPost }: Props) {
-  const title = getPropertyValue(post.properties, 'Title')
-  const datePublished = getPropertyValue(post.properties, 'First published')
-
   return (
     <main className="flex_auto">
       <article>
-        <PostHeader title={title} datePublished={datePublished} dateUpdated={post.last_edited_time} />
+        <PostHeader title={post.title} datePublished={post.firstPublished} dateUpdated={post.lastEditedTime} />
         <NotionBlocks blocks={post.blocks} />
 
         {/* <details className="my-10"> */}

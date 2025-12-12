@@ -1,7 +1,14 @@
 import { z } from 'zod'
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
-import getPropertyValue from './getPropertyValue'
+import {
+  createPropertiesSchema,
+  TitlePropertySchema,
+  NumberPropertySchema,
+  DatePropertySchema,
+} from './schemas/properties'
+import { PageMetadataSchema } from './schemas/page'
+import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'
@@ -17,6 +24,28 @@ const NotionMediaItemSchema = z.object({
 // Infer TypeScript type from Zod schema (single source of truth)
 export type NotionMediaItem = z.infer<typeof NotionMediaItemSchema>
 
+export const INVALID_MEDIA_ITEM_ERROR = {
+  books: 'Invalid book data - build aborted',
+  albums: 'Invalid album data - build aborted',
+  podcasts: 'Invalid podcast data - build aborted',
+} satisfies Record<MediaCategory, string>
+
+export const INVALID_MEDIA_PROPERTIES_ERROR = {
+  books: 'Invalid book properties - build aborted',
+  albums: 'Invalid album properties - build aborted',
+  podcasts: 'Invalid podcast properties - build aborted',
+} satisfies Record<MediaCategory, string>
+
+/**
+ * Schema for validating and transforming media item properties from Notion API.
+ * Validates structure and extracts values in one step.
+ */
+const MediaPropertiesSchema = createPropertiesSchema({
+  Title: TitlePropertySchema,
+  'Apple ID': NumberPropertySchema,
+  Date: DatePropertySchema,
+})
+
 type Options = {
   category: MediaCategory
   skipCache?: boolean
@@ -27,37 +56,39 @@ type Options = {
  * Validates data at the API boundary using Zod schema.
  * Can be tested without mocking I/O.
  */
-export function transformNotionPagesToMediaItems(
-  pages: unknown[],
-  category: MediaCategory,
-): NotionMediaItem[] {
-  return pages
-    .map(page => {
-      // Type guard for pages with properties
-      if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
-        return null
-      }
+export function transformNotionPagesToMediaItems(pages: unknown[], category: MediaCategory): NotionMediaItem[] {
+  return pages.map(page => {
+    // Validate page metadata structure
+    const pageMetadata = PageMetadataSchema.safeParse(page)
+    if (!pageMetadata.success) {
+      logValidationError(pageMetadata.error, 'page metadata')
+      throw new Error(INVALID_MEDIA_ITEM_ERROR[category])
+    }
 
-      const name = getPropertyValue(page.properties as any, 'Title')
-      const appleId = getPropertyValue(page.properties as any, 'Apple ID')
-      const date = getPropertyValue(page.properties as any, 'Date')
+    // Validate and extract property values at I/O boundary
+    const propertiesParsed = MediaPropertiesSchema.safeParse(pageMetadata.data.properties)
+    if (!propertiesParsed.success) {
+      logValidationError(propertiesParsed.error, `${category} item`)
+      throw new Error(INVALID_MEDIA_PROPERTIES_ERROR[category])
+    }
 
-      // Parse and validate using Zod schema
-      const parsed = NotionMediaItemSchema.safeParse({
-        id: page.id,
-        name,
-        appleId,
-        date,
-      })
+    const properties = propertiesParsed.data
 
-      if (!parsed.success) {
-        console.log(`Skipping invalid ${category} item:`, parsed.error.format())
-        return null
-      }
-
-      return parsed.data
+    // Parse and validate using Zod schema
+    const parsed = NotionMediaItemSchema.safeParse({
+      id: pageMetadata.data.id,
+      name: properties.Title,
+      appleId: properties['Apple ID'],
+      date: properties.Date,
     })
-    .filter((item): item is NotionMediaItem => item !== null)
+
+    if (!parsed.success) {
+      logValidationError(parsed.error, `${category} item`)
+      throw new Error(INVALID_MEDIA_ITEM_ERROR[category])
+    }
+
+    return parsed.data
+  })
 }
 
 const DATA_SOURCE_IDS: Record<MediaCategory, string> = {

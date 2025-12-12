@@ -1,29 +1,23 @@
-// Mock getPropertyValue before any imports
-const mockGetPropertyValue = vi.hoisted(() => vi.fn())
-
-vi.mock('./getPropertyValue', () => ({
-  default: mockGetPropertyValue,
-}))
-
-import { transformNotionPagesToMediaItems, type NotionMediaItem } from './getMediaItems'
+import {
+  transformNotionPagesToMediaItems,
+  INVALID_MEDIA_ITEM_ERROR,
+  INVALID_MEDIA_PROPERTIES_ERROR,
+  type NotionMediaItem,
+} from './getMediaItems'
+import { createTitleProperty, createNumberProperty, createDateProperty } from './testing/property-factories'
 
 describe('transformNotionPagesToMediaItems', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('transforms valid Notion pages to media items', () => {
     const pages = [
       {
         id: '123',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
+        properties: {
+          Title: createTitleProperty('The Great Gatsby'),
+          'Apple ID': createNumberProperty(12345),
+          Date: createDateProperty('2024-01-15'),
+        },
       },
     ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('The Great Gatsby')
-      .mockReturnValueOnce(12345)
-      .mockReturnValueOnce('2024-01-15')
 
     const result = transformNotionPagesToMediaItems(pages, 'books')
 
@@ -37,153 +31,96 @@ describe('transformNotionPagesToMediaItems', () => {
     ])
   })
 
-  it('filters out pages without properties', () => {
+  it('throws on pages without properties', () => {
     const pages = [
       { id: '123' }, // No properties
-      {
-        id: '456',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
-      },
     ]
 
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce(67890)
-      .mockReturnValueOnce('2024-02-20')
-
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toHaveLength(1)
-    expect(result[0].id).toBe('456')
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_PROPERTIES_ERROR.books)
   })
 
-  it('filters out items with missing name', () => {
+  it.each([
+    {
+      case: 'missing name',
+      properties: {
+        Title: createTitleProperty(null),
+        'Apple ID': createNumberProperty(12345),
+        Date: createDateProperty('2024-01-15'),
+      },
+    },
+    {
+      case: 'missing appleId',
+      properties: {
+        Title: createTitleProperty('Valid Book'),
+        'Apple ID': createNumberProperty(null),
+        Date: createDateProperty('2024-01-15'),
+      },
+    },
+    {
+      case: 'missing date',
+      properties: {
+        Title: createTitleProperty('Valid Book'),
+        'Apple ID': createNumberProperty(12345),
+        Date: createDateProperty(null),
+      },
+    },
+    {
+      case: 'invalid appleId (not a number)',
+      expectedError: INVALID_MEDIA_PROPERTIES_ERROR.books,
+      properties: {
+        Title: createTitleProperty('Valid Book'),
+        'Apple ID': { type: 'number' as const, number: 'not-a-number' as any }, // Invalid type
+        Date: createDateProperty('2024-01-15'),
+      },
+    },
+    {
+      case: 'invalid date format',
+      properties: {
+        Title: createTitleProperty('Valid Book'),
+        'Apple ID': createNumberProperty(12345),
+        Date: createDateProperty('01/15/2024'),
+      },
+    },
+    {
+      case: 'negative appleId',
+      properties: {
+        Title: createTitleProperty('Valid Book'),
+        'Apple ID': createNumberProperty(-12345),
+        Date: createDateProperty('2024-01-15'),
+      },
+    },
+  ])('throws on items with $case', ({ properties, expectedError }) => {
     const pages = [
       {
         id: '123',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
+        properties,
       },
     ]
 
-    mockGetPropertyValue
-      .mockReturnValueOnce(null) // Missing name
-      .mockReturnValueOnce(12345)
-      .mockReturnValueOnce('2024-01-15')
-
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
-  })
-
-  it('filters out items with missing appleId', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce(null) // Missing appleId
-      .mockReturnValueOnce('2024-01-15')
-
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
-  })
-
-  it('filters out items with missing date', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce(12345)
-      .mockReturnValueOnce(null) // Missing date
-
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
-  })
-
-  it('filters out items with invalid appleId (not a number)', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce('not-a-number') // Invalid appleId
-      .mockReturnValueOnce('2024-01-15')
-
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
-  })
-
-  it('filters out items with invalid date format', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce(12345)
-      .mockReturnValueOnce('01/15/2024') // Invalid date format
-
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
-  })
-
-  it('filters out items with negative appleId', () => {
-    const pages = [
-      {
-        id: '123',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
-      },
-    ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('Valid Book')
-      .mockReturnValueOnce(-12345) // Negative appleId
-      .mockReturnValueOnce('2024-01-15')
-
-    const result = transformNotionPagesToMediaItems(pages, 'books')
-
-    expect(result).toEqual([])
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(
+      expectedError || INVALID_MEDIA_ITEM_ERROR.books
+    )
   })
 
   it('processes multiple valid items', () => {
     const pages = [
       {
         id: '123',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
+        properties: {
+          Title: createTitleProperty('Book 1'),
+          'Apple ID': createNumberProperty(111),
+          Date: createDateProperty('2024-01-01'),
+        },
       },
       {
         id: '456',
-        properties: { Title: {}, 'Apple ID': {}, Date: {} },
+        properties: {
+          Title: createTitleProperty('Book 2'),
+          'Apple ID': createNumberProperty(222),
+          Date: createDateProperty('2024-02-02'),
+        },
       },
     ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('Book 1')
-      .mockReturnValueOnce(111)
-      .mockReturnValueOnce('2024-01-01')
-      .mockReturnValueOnce('Book 2')
-      .mockReturnValueOnce(222)
-      .mockReturnValueOnce('2024-02-02')
 
     const result = transformNotionPagesToMediaItems(pages, 'books')
 

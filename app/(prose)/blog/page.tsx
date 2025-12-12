@@ -1,7 +1,6 @@
 import { type ReactElement } from 'react'
 
 import getPosts from '@/lib/notion/getPosts'
-import getPropertyValue from '@/lib/notion/getPropertyValue'
 import Heading from '@/ui/heading'
 import { getHumanReadableDate, getMachineReadableDate } from '@/utils/dates'
 
@@ -21,20 +20,16 @@ export default async function Blog({ searchParams }: Props): Promise<ReactElemen
 
       <ul className="mt-8 grid gap-8">
         {posts.map(post => {
-          const slug = getPropertyValue(post.properties, 'Slug')
-          const title = getPropertyValue(post.properties, 'Title')
-          const date = getPropertyValue(post.properties, 'First published')
-
           return (
             <li key={post.id} className="grid">
               <article>
                 <header>
-                  <time dateTime={getMachineReadableDate(date)} className="timestamp block mb-0.5 md:min-w-28">
-                    {getHumanReadableDate(date)}
+                  <time dateTime={getMachineReadableDate(post.firstPublished)} className="timestamp block mb-0.5 md:min-w-28">
+                    {getHumanReadableDate(post.firstPublished)}
                   </time>
 
-                  <a href={`/${slug}/`} className="link-heading heading text-xl">
-                    {title || slug}
+                  <a href={`/${post.slug}/`} className="link-heading heading text-xl">
+                    {post.title || post.slug}
                   </a>
                 </header>
               </article>

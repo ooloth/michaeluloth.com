@@ -3,48 +3,44 @@
 
 import Link from '@/ui/link'
 import { Code } from '@/ui/code'
-import { type NotionAPIRichTextItem } from '@/lib/notion/types'
+import { type RichTextItem } from '@/lib/notion/schemas/block'
 
 type RichTextTag = 'code' | 'em' | 'span'
 
-function resolveTag(annotations: NotionAPIRichTextItem['annotations']): RichTextTag {
-  if (annotations.code) return 'code'
-  if (annotations.italic) return 'em'
+function resolveTag(item: RichTextItem): RichTextTag {
+  if (item.code) return 'code'
+  if (item.italic) return 'em'
   return 'span'
 }
 
-function resolveClasses(annotations: NotionAPIRichTextItem['annotations']): string {
+function resolveClasses(item: RichTextItem): string {
   const classes: string[] = []
 
-  if (annotations.bold) classes.push('font-semibold text-white')
-  if (annotations.italic) classes.push('italic')
-  if (annotations.strikethrough) classes.push('line-through')
-  if (annotations.underline) classes.push('underline')
+  if (item.bold) classes.push('font-semibold text-white')
+  if (item.italic) classes.push('italic')
+  if (item.strikethrough) classes.push('line-through')
+  if (item.underline) classes.push('underline')
 
   return classes.join(' ')
 }
 
 type Props = Readonly<{
-  richTextItems: NotionAPIRichTextItem[]
+  richTextItems: RichTextItem[]
 }>
 
 export default function RichText({ richTextItems: text }: Props) {
   if (!text) return null
 
-  return text.map(richTextItem => {
-    const annotations = richTextItem.annotations
-    const content = richTextItem.type === 'text' ? richTextItem.text.content : ''
-    const link = richTextItem.type === 'text' ? richTextItem.text.link : null
-
-    if (annotations.code) {
-      return <Code key={content} code={content} inline />
+  return text.map((richTextItem, index) => {
+    if (richTextItem.code) {
+      return <Code key={index} code={richTextItem.content} inline />
     }
 
-    const Tag = resolveTag(annotations)
+    const Tag = resolveTag(richTextItem)
 
     return (
-      <Tag key={link?.url ?? content} className={resolveClasses(annotations)}>
-        {link ? <Link href={link.url}>{content}</Link> : content}
+      <Tag key={index} className={resolveClasses(richTextItem)}>
+        {richTextItem.link ? <Link href={richTextItem.link}>{richTextItem.content}</Link> : richTextItem.content}
       </Tag>
     )
   })

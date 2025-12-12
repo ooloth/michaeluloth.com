@@ -1,10 +1,58 @@
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
+import { PostListItemSchema, PostPropertiesSchema, type PostListItem } from './schemas/post'
+import { PageMetadataSchema } from './schemas/page'
+import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
 type Options = {
   sortDirection?: 'ascending' | 'descending'
   skipCache?: boolean
+}
+
+export const INVALID_POST_ERROR = 'Invalid post data - build aborted'
+export const INVALID_POST_PROPERTIES_ERROR = 'Invalid post properties - build aborted'
+
+/**
+ * Pure function: transforms Notion API pages to validated post list items.
+ * Validates data at the API boundary using Zod schema.
+ * Can be tested without mocking I/O.
+ */
+export function transformNotionPagesToPostListItems(pages: unknown[]): PostListItem[] {
+  return pages.map(page => {
+    // Validate page metadata structure
+    const pageMetadata = PageMetadataSchema.safeParse(page)
+    if (!pageMetadata.success) {
+      logValidationError(pageMetadata.error, 'page metadata')
+      throw new Error(INVALID_POST_ERROR)
+    }
+
+    // Validate and extract property values at I/O boundary
+    const propertiesParsed = PostPropertiesSchema.safeParse(pageMetadata.data.properties)
+    if (!propertiesParsed.success) {
+      logValidationError(propertiesParsed.error, 'post properties')
+      throw new Error(INVALID_POST_PROPERTIES_ERROR)
+    }
+
+    const properties = propertiesParsed.data
+
+    // Parse and validate the final post object
+    const parsed = PostListItemSchema.safeParse({
+      id: pageMetadata.data.id,
+      slug: properties.Slug,
+      title: properties.Title,
+      description: properties.Description,
+      firstPublished: properties['First published'],
+      featuredImage: properties['Featured image'],
+    })
+
+    if (!parsed.success) {
+      logValidationError(parsed.error, 'post')
+      throw new Error(INVALID_POST_ERROR)
+    }
+
+    return parsed.data
+  })
 }
 
 /**
@@ -16,13 +64,13 @@ type Options = {
  * @see https://developers.notion.com/reference/query-a-data-source
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
-export default async function getPosts(options: Options = {}): Promise<any[]> {
+export default async function getPosts(options: Options = {}): Promise<PostListItem[]> {
   const { sortDirection = 'ascending', skipCache = false } = options
 
   // Check cache first (cache utility handles dev mode check)
   const cacheKey = `posts-list-${sortDirection}`
   if (!skipCache) {
-    const cached = await getCached<any[]>(cacheKey, 'notion')
+    const cached = await getCached<PostListItem[]>(cacheKey, 'notion')
     if (cached) {
       return cached
     }
@@ -30,7 +78,7 @@ export default async function getPosts(options: Options = {}): Promise<any[]> {
 
   console.log(`📥 Fetching posts from Notion API`)
 
-  const posts = await collectPaginatedAPI(notion.dataSources.query, {
+  const pages = await collectPaginatedAPI(notion.dataSources.query, {
     data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
     filter: {
       and: [
@@ -47,7 +95,8 @@ export default async function getPosts(options: Options = {}): Promise<any[]> {
     sorts: [{ property: 'First published', direction: sortDirection }],
   })
 
-  // TODO: parse with zod
+  // Transform and validate external data at boundary
+  const posts = transformNotionPagesToPostListItems(pages)
 
   // Cache the result (always caches, even when skipCache=true)
   // This ensures ?nocache=true refreshes the cache with latest data

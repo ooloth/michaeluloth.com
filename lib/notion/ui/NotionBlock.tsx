@@ -1,18 +1,7 @@
 import { type ReactElement } from 'react'
 
-import {
-  type NotionAPIBlock,
-  type NotionAPICodeBlock,
-  type NotionAPIHeading1Block,
-  type NotionAPIHeading2Block,
-  type NotionAPIHeading3Block,
-  type NotionAPIImageBlock,
-  type NotionAPIParagraphBlock,
-  type NotionAPIQuoteBlock,
-  type NotionAPIVideoBlock,
-  type NotionBulletedListBlock,
-  type NotionNumberedListBlock,
-} from '@/lib/notion/types'
+import { type GroupedBlock, type RichTextItem } from '@/lib/notion/schemas/block'
+import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
 import NotionRichText from '@/lib/notion/ui/NotionRichText'
 
 import { Code } from '@/ui/code'
@@ -21,11 +10,8 @@ import Image from '@/ui/image'
 import Paragraph from '@/ui/paragraph'
 import Video from '@/ui/video'
 
-// TODO: add type definitions for raw Notion blocks + my parsed blocks
-// see: https://github.com/9gustin/react-notion-render/blob/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/types/NotionBlock.ts
 type Props = {
-  // TODO: receive a confirmed type safe block instead of assuming the types?
-  block: NotionAPIBlock | NotionBulletedListBlock | NotionNumberedListBlock
+  block: GroupedBlock
 }
 
 export default function NotionBlock({ block }: Props): ReactElement {
@@ -33,130 +19,103 @@ export default function NotionBlock({ block }: Props): ReactElement {
   // see: https://github.com/9gustin/react-notion-render/tree/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/components/common
   switch (block.type) {
     case 'paragraph':
-      const paragraph = block['paragraph'] satisfies NotionAPIParagraphBlock['paragraph']
-
       return (
         <Paragraph>
-          <NotionRichText richTextItems={paragraph.rich_text} />
+          <NotionRichText richTextItems={block.richText} />
         </Paragraph>
       )
 
     case 'heading_1':
-      const heading1 = block['heading_1'] satisfies NotionAPIHeading1Block['heading_1']
-
       return (
         <Heading level={1}>
-          <NotionRichText richTextItems={heading1.rich_text} />
+          <NotionRichText richTextItems={block.richText} />
         </Heading>
       )
 
     case 'heading_2':
-      const heading2 = block['heading_2'] satisfies NotionAPIHeading2Block['heading_2']
-
       return (
         <Heading level={2}>
-          <NotionRichText richTextItems={heading2.rich_text} />
+          <NotionRichText richTextItems={block.richText} />
         </Heading>
       )
 
     case 'heading_3':
-      const heading3 = block['heading_3'] satisfies NotionAPIHeading3Block['heading_3']
-
       return (
         <Heading level={3}>
-          <NotionRichText richTextItems={heading3.rich_text} />
+          <NotionRichText richTextItems={block.richText} />
         </Heading>
       )
 
-    case 'bulleted_list':
-      // NOTE: I create this new type in NotionBlocks.tsx to group bulleted list items together
+    case 'bulleted_list': {
       // TODO: extract into a List component that handles ul, ol, todos and toggles
       // see: https://github.com/9gustin/react-notion-render/blob/main/src/components/common/List/index.tsx
+      if (block.type !== 'bulleted_list') throw new Error('Unexpected block type')
       return (
         <ul className="list-disc marker:text-accent flex flex-col gap-1 mt-2 pl-5 leading-snug">
-          {block['bulleted_list'].children.map(item => {
-            return (
-              <li key={item.id}>
-                <NotionRichText richTextItems={item['bulleted_list_item'].rich_text} />
-              </li>
-            )
-          })}
+          {block.items.map((item: { richText: RichTextItem[] }, index: number) => (
+            <li key={index}>
+              <NotionRichText richTextItems={item.richText} />
+            </li>
+          ))}
         </ul>
       )
+    }
 
-    case 'numbered_list':
-      // NOTE: I create this type in NotionBlocks.tsx to group numbeed list items together
+    case 'numbered_list': {
+      if (block.type !== 'numbered_list') throw new Error('Unexpected block type')
       return (
         <ol className="list-decimal marker:text-accent flex flex-col gap-1 mt-2 pl-5 leading-snug">
-          {block['numbered_list'].children.map(item => {
-            return (
-              <li key={item.id}>
-                <NotionRichText richTextItems={item['numbered_list_item'].rich_text} />
-              </li>
-            )
-          })}
+          {block.items.map((item: { richText: RichTextItem[] }, index: number) => (
+            <li key={index}>
+              <NotionRichText richTextItems={item.richText} />
+            </li>
+          ))}
         </ol>
       )
+    }
 
-    case 'code':
-      const code = block['code'] satisfies NotionAPICodeBlock['code']
-
+    case 'code': {
       // Hijack the caption to use as meta string for rehype-pretty-code if I want to highlight specific lines, etc
       // See: https://rehype-pretty.pages.dev/#meta-strings
-      const rehypePrettyCodeMetaString = code.caption?.[0]?.plain_text
-      // const rehypePrettyCodeMetaString = code.caption?.[0]?.plain_text || code.language
+      if (block.type !== 'code') throw new Error('Unexpected block type')
+      const codeText = block.richText.map((item: RichTextItem) => item.content).join('\n')
 
-      const codeText = code.rich_text.map(textItem => textItem.plain_text).join('\n')
-
-      return <Code code={codeText} lang={code.language} meta={rehypePrettyCodeMetaString} />
+      return <Code code={codeText} lang={block.language} meta={block.caption} />
+    }
 
     case 'quote':
-      const quote = block['quote'] satisfies NotionAPIQuoteBlock['quote']
-
       return (
         <blockquote>
-          <NotionRichText richTextItems={quote.rich_text} />
+          <NotionRichText richTextItems={block.richText} />
         </blockquote>
       )
 
     case 'image':
-      const image = block['image'] satisfies NotionAPIImageBlock['image']
-
-      const url = image.type === 'external' ? image.external.url : image.file.url
-
-      return <Image url={url} />
+      return <Image url={block.url} />
 
     case 'video':
-      const video = block['video'] satisfies NotionAPIVideoBlock['video']
-
-      const videoUrl = video.type === 'external' ? video.external.url : video.file.url
-      const videoCaption = video.caption?.[0]?.plain_text
-
-      return <Video url={videoUrl} caption={videoCaption} showCaption={!!videoCaption} />
+      return <Video url={block.url} caption={block.caption} showCaption={!!block.caption} />
 
     case 'toggle':
-      throw new Error('Toggle blocks not supported yet.')
+      // Render as details/summary for native HTML collapse behavior
+      return (
+        <details className="my-4">
+          <summary className="cursor-pointer font-medium">
+            <NotionRichText richTextItems={block.richText} />
+          </summary>
+          <div className="ml-4 mt-2">
+            <NotionBlocks blocks={block.children} />
+          </div>
+        </details>
+      )
 
-    // TODO: is "children" something I've inserted?
-
-    // const toggle = block['toggle'] satisfies ToggleBlock['toggle']
-    //
-    // return (
-    //   <details>
-    //     <summary>
-    //       <NotionRichText text={toggle.rich_text} />
-    //     </summary>
-    //     {toggle.children?.map(block => (
-    //       <Fragment key={block.id}>{NotionBlock(block)}</Fragment>
-    //     ))}
-    //   </details>
-    // )
-
-    case 'embed':
-      console.error('Embed blocks not supported yet. Skipping.')
+    case 'child_page':
+      // Child pages are typically skipped in rendering
+      console.warn('Child page blocks are not rendered:', block.title)
       return <></>
 
     default:
-      throw new Error(`Encountered unsupported Notion block type: "${block.type}"`)
+      // TypeScript exhaustiveness check
+      throw new Error(`Encountered unsupported Notion block type: "${(block as any).type}"`)
   }
 }

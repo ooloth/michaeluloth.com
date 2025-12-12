@@ -2,7 +2,9 @@ import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
-import getPropertyValue from '@/lib/notion/getPropertyValue'
+import { PostListItemSchema, PostPropertiesSchema, type Post, type PostListItem } from './schemas/post'
+import { PageMetadataSchema } from './schemas/page'
+import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
 type Options = {
@@ -12,22 +14,65 @@ type Options = {
   skipCache?: boolean
 }
 
-type PostProperties = {}
+export const INVALID_POST_DETAILS_ERROR = 'Invalid post details data - build aborted'
+export const INVALID_POST_PROPERTIES_ERROR = 'Invalid post properties - build aborted'
 
-type PostBlocks = {}
+/**
+ * Pure function: transforms a Notion API page to a validated Post.
+ * Validates data at the API boundary using Zod schema.
+ * Can be tested without mocking I/O.
+ */
+export function transformNotionPageToPost(page: unknown): Post {
+  // Validate page metadata structure
+  const pageMetadata = PageMetadataSchema.safeParse(page)
+  if (!pageMetadata.success) {
+    logValidationError(pageMetadata.error, 'page metadata')
+    throw new Error(INVALID_POST_DETAILS_ERROR)
+  }
 
-type WithBlocks<T> = T & {
-  blocks: PostBlocks
-}
+  // Validate last_edited_time exists (required for posts)
+  if (!pageMetadata.data.last_edited_time) {
+    throw new Error(INVALID_POST_DETAILS_ERROR)
+  }
 
-type WithPrevAndNext<T> = T & {
-  prevSlug: PostProperties | null
-  nextSlug: PostProperties | null
+  // Validate and extract property values at I/O boundary
+  const propertiesParsed = PostPropertiesSchema.safeParse(pageMetadata.data.properties)
+  if (!propertiesParsed.success) {
+    logValidationError(propertiesParsed.error, 'post properties')
+    throw new Error(INVALID_POST_PROPERTIES_ERROR)
+  }
+
+  const properties = propertiesParsed.data
+
+  // Parse and validate post list item fields using Zod schema
+  const parsed = PostListItemSchema.safeParse({
+    id: pageMetadata.data.id,
+    slug: properties.Slug,
+    title: properties.Title,
+    description: properties.Description,
+    firstPublished: properties['First published'],
+    featuredImage: properties['Featured image'],
+  })
+
+  if (!parsed.success) {
+    logValidationError(parsed.error, 'post details')
+    throw new Error(INVALID_POST_DETAILS_ERROR)
+  }
+
+  // Return full Post with additional fields
+  // Blocks are validated separately in getBlockChildren
+  return {
+    ...parsed.data,
+    lastEditedTime: pageMetadata.data.last_edited_time,
+    blocks: [],
+    prevPost: null,
+    nextPost: null,
+  }
 }
 
 /**
  * Fetches a specific blog post from a Notion data source by its "Slug" property.
- * Optionally includes the post's block children.
+ * Optionally includes the post's block children and prev/next navigation.
  *
  * @see https://github.com/makenotion/notion-sdk-js?tab=readme-ov-file#collectpaginatedapilistfn-firstpageargs
  * @see https://developers.notion.com/reference/query-a-data-source
@@ -38,7 +83,7 @@ export default async function getPost({
   includeBlocks = false,
   includePrevAndNext = false,
   skipCache = false,
-}: Options): Promise<any> {
+}: Options): Promise<Post | null> {
   if (!slug) {
     return null
   }
@@ -46,7 +91,7 @@ export default async function getPost({
   // Check cache first (cache utility handles dev mode check)
   const cacheKey = `post-${slug}-blocks-${includeBlocks}-nav-${includePrevAndNext}`
   if (!skipCache) {
-    const cached = await getCached<any>(cacheKey, 'notion')
+    const cached = await getCached<Post>(cacheKey, 'notion')
     if (cached) {
       return cached
     }
@@ -70,14 +115,13 @@ export default async function getPost({
     throw Error(`Multiple posts found for slug: ${slug}\n${JSON.stringify(response.results)}`)
   }
 
-  let post: WithPrevAndNext<any> = response.results[0]
-  // TODO: parse with zod
+  // Transform and validate external data at boundary
+  let post = transformNotionPageToPost(response.results[0])
 
   if (includePrevAndNext) {
     const posts = await getPosts({ sortDirection: 'ascending', skipCache })
-    // TODO: parse with zod
 
-    const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))
+    const postSlugs = posts.map(post => post.slug)
     const index = postSlugs.indexOf(slug)
 
     post = {
@@ -89,7 +133,6 @@ export default async function getPost({
 
   if (includeBlocks) {
     const blocks = await getBlockChildren(post.id)
-    // TODO: parse with zod
 
     post = { ...post, blocks }
   }
