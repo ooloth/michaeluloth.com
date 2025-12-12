@@ -1,6 +1,7 @@
 import { type ReactElement } from 'react'
 
 import { type GroupedBlock, type RichTextItem } from '@/lib/notion/schemas/block'
+import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
 import NotionRichText from '@/lib/notion/ui/NotionRichText'
 
 import { Code } from '@/ui/code'
@@ -96,8 +97,17 @@ export default function NotionBlock({ block }: Props): ReactElement {
       return <Video url={block.url} caption={block.caption} showCaption={!!block.caption} />
 
     case 'toggle':
-      // TODO: implement toggle rendering with recursive children
-      throw new Error('Toggle blocks not supported yet.')
+      // Render as details/summary for native HTML collapse behavior
+      return (
+        <details className="my-4">
+          <summary className="cursor-pointer font-medium">
+            <NotionRichText richTextItems={block.richText} />
+          </summary>
+          <div className="ml-4 mt-2">
+            <NotionBlocks blocks={block.children} />
+          </div>
+        </details>
+      )
 
     case 'child_page':
       // Child pages are typically skipped in rendering
