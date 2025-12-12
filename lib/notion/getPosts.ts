@@ -1,10 +1,51 @@
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
+import getPropertyValue from './getPropertyValue'
+import { PostListItemSchema, type PostListItem } from './schemas/post'
 import { env } from '@/lib/env'
 
 type Options = {
   sortDirection?: 'ascending' | 'descending'
   skipCache?: boolean
+}
+
+/**
+ * Pure function: transforms Notion API pages to validated post list items.
+ * Validates data at the API boundary using Zod schema.
+ * Can be tested without mocking I/O.
+ */
+export function transformNotionPagesToPostListItems(pages: unknown[]): PostListItem[] {
+  return pages
+    .map(page => {
+      // Type guard for pages with properties
+      if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
+        return null
+      }
+
+      const slug = getPropertyValue(page.properties as any, 'Slug')
+      const title = getPropertyValue(page.properties as any, 'Title')
+      const description = getPropertyValue(page.properties as any, 'Description')
+      const firstPublished = getPropertyValue(page.properties as any, 'First published')
+      const featuredImage = getPropertyValue(page.properties as any, 'Featured image')
+
+      // Parse and validate using Zod schema
+      const parsed = PostListItemSchema.safeParse({
+        id: page.id,
+        slug,
+        title,
+        description,
+        firstPublished,
+        featuredImage,
+      })
+
+      if (!parsed.success) {
+        console.log(`Skipping invalid post:`, parsed.error.format())
+        return null
+      }
+
+      return parsed.data
+    })
+    .filter((item): item is PostListItem => item !== null)
 }
 
 /**
@@ -16,13 +57,13 @@ type Options = {
  * @see https://developers.notion.com/reference/query-a-data-source
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
-export default async function getPosts(options: Options = {}): Promise<any[]> {
+export default async function getPosts(options: Options = {}): Promise<PostListItem[]> {
   const { sortDirection = 'ascending', skipCache = false } = options
 
   // Check cache first (cache utility handles dev mode check)
   const cacheKey = `posts-list-${sortDirection}`
   if (!skipCache) {
-    const cached = await getCached<any[]>(cacheKey, 'notion')
+    const cached = await getCached<PostListItem[]>(cacheKey, 'notion')
     if (cached) {
       return cached
     }
@@ -30,7 +71,7 @@ export default async function getPosts(options: Options = {}): Promise<any[]> {
 
   console.log(`📥 Fetching posts from Notion API`)
 
-  const posts = await collectPaginatedAPI(notion.dataSources.query, {
+  const pages = await collectPaginatedAPI(notion.dataSources.query, {
     data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
     filter: {
       and: [
@@ -47,7 +88,8 @@ export default async function getPosts(options: Options = {}): Promise<any[]> {
     sorts: [{ property: 'First published', direction: sortDirection }],
   })
 
-  // TODO: parse with zod
+  // Transform and validate external data at boundary
+  const posts = transformNotionPagesToPostListItems(pages)
 
   // Cache the result (always caches, even when skipCache=true)
   // This ensures ?nocache=true refreshes the cache with latest data
