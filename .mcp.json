@@ -3,12 +3,6 @@
     "next-devtools": {
       "command": "npx",
       "args": ["-y", "next-devtools-mcp@latest"]
-    },
-    "notion": {
-      "url": "https://mcp.notion.com/mcp"
-    },
-    "vercel": {
-      "url": "https://mcp.vercel.com"
     }
   }
 }
