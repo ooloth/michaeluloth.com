@@ -2,6 +2,7 @@ import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
 import getPropertyValue from './getPropertyValue'
 import { PostListItemSchema, type PostListItem } from './schemas/post'
+import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
 type Options = {
@@ -39,7 +40,7 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
       })
 
       if (!parsed.success) {
-        console.log(`Skipping invalid post:`, parsed.error.format())
+        logValidationError(parsed.error, 'post')
         return null
       }
 

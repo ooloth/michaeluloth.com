@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
 import getPropertyValue from './getPropertyValue'
+import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'
@@ -51,7 +52,7 @@ export function transformNotionPagesToMediaItems(
       })
 
       if (!parsed.success) {
-        console.log(`Skipping invalid ${category} item:`, parsed.error.format())
+        logValidationError(parsed.error, `${category} item`)
         return null
       }
 
