@@ -20,19 +20,16 @@ export default function PaginationLinks({ prevPost, nextPost }: Props) {
 }
 
 type PaginationLinkProps = Readonly<{
-  post: any
+  post: { title: string; slug: string }
   direction: 'Previous' | 'Next'
 }>
 
 function PaginationLink({ post, direction }: PaginationLinkProps) {
-  const title = getPropertyValue(post.properties, 'Title')
-  const slug = getPropertyValue(post.properties, 'Slug')
-
-  if (!title) {
+  if (!post.title) {
     throw new Error(`Post is missing a title: ${JSON.stringify(post)}`)
   }
 
-  const href = `/${slug}/`
+  const href = `/${post.slug}/`
   const emoji = direction === 'Previous' ? '👈' : '👉'
   const directionText = direction === 'Previous' ? 'Older' : 'Newer'
 
@@ -43,7 +40,7 @@ function PaginationLink({ post, direction }: PaginationLinkProps) {
           <Emoji symbol={emoji} className="text-2xl" />
           <span className={`${direction === 'Next' ? 'text-right' : null}`}>
             <span className="block capitalize text-[0.95em]">{directionText}</span>
-            <span className="block leading-snug font-light text-lg text-bright">{title}</span>
+            <span className="block leading-snug font-light text-lg text-bright">{post.title}</span>
           </span>
         </span>
       </div>

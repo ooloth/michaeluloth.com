@@ -97,7 +97,6 @@ export default async function DynamicRoute({ params, searchParams }: Props) {
  */
 export async function generateStaticParams(): Promise<Params[]> {
   const posts = await getPosts({ sortDirection: 'ascending' })
-  const postSlugs: string[] = posts.map(post => getPropertyValue(post.properties, 'Slug'))
 
-  return postSlugs.map(slug => ({ slug }))
+  return posts.map(post => ({ slug: post.slug }))
 }
