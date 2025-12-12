@@ -16,37 +16,35 @@ type Options = {
  * Can be tested without mocking I/O.
  */
 export function transformNotionPagesToPostListItems(pages: unknown[]): PostListItem[] {
-  return pages
-    .map(page => {
-      // Type guard for pages with properties
-      if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
-        return null
-      }
+  return pages.map(page => {
+    // Type guard for pages with properties
+    if (!page || typeof page !== 'object' || !('properties' in page) || !('id' in page)) {
+      throw new Error('Invalid post data - build aborted')
+    }
 
-      const slug = getPropertyValue(page.properties as any, 'Slug')
-      const title = getPropertyValue(page.properties as any, 'Title')
-      const description = getPropertyValue(page.properties as any, 'Description')
-      const firstPublished = getPropertyValue(page.properties as any, 'First published')
-      const featuredImage = getPropertyValue(page.properties as any, 'Featured image')
+    const slug = getPropertyValue(page.properties as any, 'Slug')
+    const title = getPropertyValue(page.properties as any, 'Title')
+    const description = getPropertyValue(page.properties as any, 'Description')
+    const firstPublished = getPropertyValue(page.properties as any, 'First published')
+    const featuredImage = getPropertyValue(page.properties as any, 'Featured image')
 
-      // Parse and validate using Zod schema
-      const parsed = PostListItemSchema.safeParse({
-        id: page.id,
-        slug,
-        title,
-        description,
-        firstPublished,
-        featuredImage,
-      })
-
-      if (!parsed.success) {
-        logValidationError(parsed.error, 'post')
-        return null
-      }
-
-      return parsed.data
+    // Parse and validate using Zod schema
+    const parsed = PostListItemSchema.safeParse({
+      id: page.id,
+      slug,
+      title,
+      description,
+      firstPublished,
+      featuredImage,
     })
-    .filter((item): item is PostListItem => item !== null)
+
+    if (!parsed.success) {
+      logValidationError(parsed.error, 'post')
+      throw new Error(`Invalid post data - build aborted`)
+    }
+
+    return parsed.data
+  })
 }
 
 /**
