@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 
 import getPost from '@/lib/notion/getPost'
 import getPosts from '@/lib/notion/getPosts'
-import getPropertyValue from '@/lib/notion/getPropertyValue'
 
 import Post from './ui/post'
 

@@ -1,7 +1,6 @@
 // TODO: use emoji component
 // TODO: I think we want to render this on [slug]/ui/post.tsx
 
-import getPropertyValue from '@/lib/notion/getPropertyValue'
 import Card from '@/ui/card'
 import Emoji from '@/ui/emoji'
 
