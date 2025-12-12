@@ -66,6 +66,17 @@ export const DatePropertySchema = z
   .transform(prop => prop.date?.start ?? null)
 
 /**
+ * URL property
+ * Transforms to: URL string or null
+ */
+export const UrlPropertySchema = z
+  .object({
+    type: z.literal('url'),
+    url: z.string().url().nullable(),
+  })
+  .transform(prop => prop.url)
+
+/**
  * Files property - array of file objects (external or uploaded)
  * Transforms to: array of URLs
  */
@@ -98,6 +109,34 @@ export const FilesPropertySchema = z
       }
     })
   )
+
+/**
+ * Featured image property - can be either URL or Files type
+ * Transforms to: single URL string or null
+ */
+export const FeaturedImagePropertySchema = z
+  .union([
+    // URL property type (some posts use this)
+    z
+      .object({
+        type: z.literal('url'),
+        url: z.string().url().nullable(),
+      })
+      .transform(prop => prop.url),
+    // Files property type (other posts use this)
+    z
+      .object({
+        type: z.literal('files'),
+        files: z.array(FileItemSchema),
+      })
+      .transform(prop => {
+        // Extract first file URL or null
+        const firstFile = prop.files[0]
+        if (!firstFile) return null
+        return firstFile.type === 'external' ? firstFile.external.url : firstFile.file.url
+      }),
+  ])
+  .nullable()
 
 /**
  * Helper to create a schema for a specific set of page properties.

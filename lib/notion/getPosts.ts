@@ -6,7 +6,7 @@ import {
   RichTextPropertySchema,
   TitlePropertySchema,
   DatePropertySchema,
-  FilesPropertySchema,
+  FeaturedImagePropertySchema,
 } from './schemas/properties'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
@@ -28,7 +28,7 @@ const PostPropertiesSchema = createPropertiesSchema({
   Title: TitlePropertySchema,
   Description: RichTextPropertySchema,
   'First published': DatePropertySchema,
-  'Featured image': FilesPropertySchema,
+  'Featured image': FeaturedImagePropertySchema,
 })
 
 /**
@@ -59,7 +59,7 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
       title: properties.Title,
       description: properties.Description,
       firstPublished: properties['First published'],
-      featuredImage: properties['Featured image'][0] ?? null,
+      featuredImage: properties['Featured image'],
     })
 
     if (!parsed.success) {

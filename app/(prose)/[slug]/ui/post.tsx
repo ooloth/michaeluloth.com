@@ -1,5 +1,5 @@
 import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
-import type { Post as PostType } from '@/lib/notion/schemas/post'
+import type { Post as PostType, PostListItem } from '@/lib/notion/schemas/post'
 // import { Code } from '@/ui/code'
 import PaginationLinks from '@/ui/nav/pagination'
 
@@ -9,8 +9,8 @@ import Subscribe from './subscribe'
 
 type Props = Readonly<{
   post: PostType
-  prevPost: PostType | null
-  nextPost: PostType | null
+  prevPost: PostListItem | null
+  nextPost: PostListItem | null
 }>
 
 export default function Post({ post, prevPost, nextPost }: Props) {
