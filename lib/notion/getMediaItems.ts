@@ -1,7 +1,12 @@
 import { z } from 'zod'
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
-import getPropertyValue from './getPropertyValue'
+import {
+  createPropertiesSchema,
+  TitlePropertySchema,
+  NumberPropertySchema,
+  DatePropertySchema,
+} from './schemas/properties'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
@@ -24,6 +29,22 @@ export const INVALID_MEDIA_ITEM_ERROR = {
   podcasts: 'Invalid podcast data - build aborted',
 } satisfies Record<MediaCategory, string>
 
+export const INVALID_MEDIA_PROPERTIES_ERROR = {
+  books: 'Invalid book properties - build aborted',
+  albums: 'Invalid album properties - build aborted',
+  podcasts: 'Invalid podcast properties - build aborted',
+} satisfies Record<MediaCategory, string>
+
+/**
+ * Schema for validating and transforming media item properties from Notion API.
+ * Validates structure and extracts values in one step.
+ */
+const MediaPropertiesSchema = createPropertiesSchema({
+  Title: TitlePropertySchema,
+  'Apple ID': NumberPropertySchema,
+  Date: DatePropertySchema,
+})
+
 type Options = {
   category: MediaCategory
   skipCache?: boolean
@@ -41,16 +62,21 @@ export function transformNotionPagesToMediaItems(pages: unknown[], category: Med
       throw new Error(INVALID_MEDIA_ITEM_ERROR[category])
     }
 
-    const name = getPropertyValue(page.properties as any, 'Title')
-    const appleId = getPropertyValue(page.properties as any, 'Apple ID')
-    const date = getPropertyValue(page.properties as any, 'Date')
+    // Validate and extract property values at I/O boundary
+    const propertiesParsed = MediaPropertiesSchema.safeParse(page.properties)
+    if (!propertiesParsed.success) {
+      logValidationError(propertiesParsed.error, `${category} item`)
+      throw new Error(INVALID_MEDIA_PROPERTIES_ERROR[category])
+    }
+
+    const properties = propertiesParsed.data
 
     // Parse and validate using Zod schema
     const parsed = NotionMediaItemSchema.safeParse({
       id: page.id,
-      name,
-      appleId,
-      date,
+      name: properties.Title,
+      appleId: properties['Apple ID'],
+      date: properties.Date,
     })
 
     if (!parsed.success) {

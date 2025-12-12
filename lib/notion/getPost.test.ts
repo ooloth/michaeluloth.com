@@ -1,36 +1,62 @@
-// Mock getPropertyValue before any imports
-const mockGetPropertyValue = vi.hoisted(() => vi.fn())
+import { transformNotionPageToPost, INVALID_POST_DETAILS_ERROR, INVALID_POST_PROPERTIES_ERROR } from './getPost'
 
-vi.mock('./getPropertyValue', () => ({
-  default: mockGetPropertyValue,
-}))
+// Helper functions to create valid Notion property structures
+function createRichTextProperty(text: string | null) {
+  if (text === null) {
+    return {
+      type: 'rich_text' as const,
+      rich_text: [],
+    }
+  }
+  return {
+    type: 'rich_text' as const,
+    rich_text: [{ plain_text: text }],
+  }
+}
 
-import { transformNotionPageToPost, INVALID_POST_DETAILS_ERROR } from './getPost'
+function createTitleProperty(text: string | null) {
+  if (text === null) {
+    return {
+      type: 'title' as const,
+      title: [],
+    }
+  }
+  return {
+    type: 'title' as const,
+    title: [{ plain_text: text }],
+  }
+}
+
+function createDateProperty(date: string | null) {
+  return {
+    type: 'date' as const,
+    date: date ? { start: date } : null,
+  }
+}
+
+function createFilesProperty(urls: string[]) {
+  return {
+    type: 'files' as const,
+    files: urls.map(url => ({
+      type: 'external' as const,
+      external: { url },
+    })),
+  }
+}
 
 describe('transformNotionPageToPost', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('transforms valid Notion page to post', () => {
     const page = {
       id: '123',
       last_edited_time: '2024-01-20T10:30:00.000Z',
       properties: {
-        Slug: {},
-        Title: {},
-        Description: {},
-        'First published': {},
-        'Featured image': {},
+        Slug: createRichTextProperty('hello-world'),
+        Title: createTitleProperty('Hello World'),
+        Description: createRichTextProperty('A great post'),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty(['https://example.com/image.jpg']),
       },
     }
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('hello-world')
-      .mockReturnValueOnce('Hello World')
-      .mockReturnValueOnce('A great post')
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce('https://example.com/image.jpg')
 
     const result = transformNotionPageToPost(page)
 
@@ -53,20 +79,13 @@ describe('transformNotionPageToPost', () => {
       id: '456',
       last_edited_time: '2024-02-25T15:45:30.000Z',
       properties: {
-        Slug: {},
-        Title: {},
-        Description: {},
-        'First published': {},
-        'Featured image': {},
+        Slug: createRichTextProperty('minimal-post'),
+        Title: createTitleProperty('Minimal Post'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-02-20'),
+        'Featured image': createFilesProperty([]),
       },
     }
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('minimal-post')
-      .mockReturnValueOnce('Minimal Post')
-      .mockReturnValueOnce(null) // No description
-      .mockReturnValueOnce('2024-02-20')
-      .mockReturnValueOnce(null) // No featured image
 
     const result = transformNotionPageToPost(page)
 
@@ -109,25 +128,64 @@ describe('transformNotionPageToPost', () => {
   })
 
   it.each([
-    { case: 'missing slug', mocks: [null, 'Valid Title', null, '2024-01-15', null] },
-    { case: 'missing title', mocks: ['valid-slug', null, null, '2024-01-15', null] },
-    { case: 'missing firstPublished', mocks: ['valid-slug', 'Valid Title', null, null, null] },
-    { case: 'invalid date format', mocks: ['valid-slug', 'Valid Title', null, '01/15/2024', null] },
-    { case: 'invalid featuredImage URL', mocks: ['valid-slug', 'Valid Title', null, '2024-01-15', 'not-a-url'] },
-  ])('throws on posts with $case', ({ mocks }) => {
+    {
+      case: 'missing slug',
+      properties: {
+        Slug: createRichTextProperty(null),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'missing title',
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty(null),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'missing firstPublished',
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty(null),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'invalid date format',
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('01/15/2024'),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'invalid featuredImage URL',
+      expectedError: INVALID_POST_PROPERTIES_ERROR,
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty(['not-a-url']),
+      },
+    },
+  ])('throws on posts with $case', ({ properties, expectedError }) => {
     const page = {
       id: '123',
       last_edited_time: '2024-01-01T00:00:00.000Z',
-      properties: {
-        Slug: {},
-        Title: {},
-        'First published': {},
-        'Featured image': {},
-      },
+      properties,
     }
 
-    mocks.forEach(val => mockGetPropertyValue.mockReturnValueOnce(val))
-
-    expect(() => transformNotionPageToPost(page)).toThrow(INVALID_POST_DETAILS_ERROR)
+    expect(() => transformNotionPageToPost(page)).toThrow(expectedError || INVALID_POST_DETAILS_ERROR)
   })
 })

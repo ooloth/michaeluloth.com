@@ -1,37 +1,63 @@
-// Mock getPropertyValue before any imports
-const mockGetPropertyValue = vi.hoisted(() => vi.fn())
+import { transformNotionPagesToPostListItems, INVALID_POST_ERROR, INVALID_POST_PROPERTIES_ERROR } from './getPosts'
 
-vi.mock('./getPropertyValue', () => ({
-  default: mockGetPropertyValue,
-}))
+// Helper functions to create valid Notion property structures
+function createRichTextProperty(text: string | null) {
+  if (text === null) {
+    return {
+      type: 'rich_text' as const,
+      rich_text: [],
+    }
+  }
+  return {
+    type: 'rich_text' as const,
+    rich_text: [{ plain_text: text }],
+  }
+}
 
-import { transformNotionPagesToPostListItems, INVALID_POST_ERROR } from './getPosts'
+function createTitleProperty(text: string | null) {
+  if (text === null) {
+    return {
+      type: 'title' as const,
+      title: [],
+    }
+  }
+  return {
+    type: 'title' as const,
+    title: [{ plain_text: text }],
+  }
+}
+
+function createDateProperty(date: string | null) {
+  return {
+    type: 'date' as const,
+    date: date ? { start: date } : null,
+  }
+}
+
+function createFilesProperty(urls: string[]) {
+  return {
+    type: 'files' as const,
+    files: urls.map(url => ({
+      type: 'external' as const,
+      external: { url },
+    })),
+  }
+}
 
 describe('transformNotionPagesToPostListItems', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('transforms valid Notion pages to post list items', () => {
     const pages = [
       {
         id: '123',
         properties: {
-          Slug: {},
-          Title: {},
-          Description: {},
-          'First published': {},
-          'Featured image': {},
+          Slug: createRichTextProperty('hello-world'),
+          Title: createTitleProperty('Hello World'),
+          Description: createRichTextProperty('A great post'),
+          'First published': createDateProperty('2024-01-15'),
+          'Featured image': createFilesProperty(['https://example.com/image.jpg']),
         },
       },
     ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('hello-world')
-      .mockReturnValueOnce('Hello World')
-      .mockReturnValueOnce('A great post')
-      .mockReturnValueOnce('2024-01-15')
-      .mockReturnValueOnce('https://example.com/image.jpg')
 
     const result = transformNotionPagesToPostListItems(pages)
 
@@ -52,21 +78,14 @@ describe('transformNotionPagesToPostListItems', () => {
       {
         id: '456',
         properties: {
-          Slug: {},
-          Title: {},
-          Description: {},
-          'First published': {},
-          'Featured image': {},
+          Slug: createRichTextProperty('minimal-post'),
+          Title: createTitleProperty('Minimal Post'),
+          Description: createRichTextProperty(null),
+          'First published': createDateProperty('2024-02-20'),
+          'Featured image': createFilesProperty([]),
         },
       },
     ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('minimal-post')
-      .mockReturnValueOnce('Minimal Post')
-      .mockReturnValueOnce(null) // No description
-      .mockReturnValueOnce('2024-02-20')
-      .mockReturnValueOnce(null) // No featured image
 
     const result = transformNotionPagesToPostListItems(pages)
 
@@ -91,28 +110,76 @@ describe('transformNotionPagesToPostListItems', () => {
   })
 
   it.each([
-    { case: 'missing slug', mocks: [null, 'Valid Title', null, '2024-01-15', null] },
-    { case: 'empty slug', mocks: ['', 'Valid Title', null, '2024-01-15', null] },
-    { case: 'missing title', mocks: ['valid-slug', null, null, '2024-01-15', null] },
-    { case: 'missing firstPublished', mocks: ['valid-slug', 'Valid Title', null, null, null] },
-    { case: 'invalid date format', mocks: ['valid-slug', 'Valid Title', null, '01/15/2024', null] },
-    { case: 'invalid featuredImage URL', mocks: ['valid-slug', 'Valid Title', null, '2024-01-15', 'not-a-url'] },
-  ])('throws on posts with $case', ({ mocks }) => {
+    {
+      case: 'missing slug',
+      properties: {
+        Slug: createRichTextProperty(null),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'empty slug',
+      properties: {
+        Slug: createRichTextProperty(''),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'missing title',
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty(null),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'missing firstPublished',
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty(null),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'invalid date format',
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('01/15/2024'),
+        'Featured image': createFilesProperty([]),
+      },
+    },
+    {
+      case: 'invalid featuredImage URL',
+      expectedError: INVALID_POST_PROPERTIES_ERROR,
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty(['not-a-url']),
+      },
+    },
+  ])('throws on posts with $case', ({ properties, expectedError }) => {
     const pages = [
       {
         id: '123',
-        properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
-          'Featured image': {},
-        },
+        properties,
       },
     ]
 
-    mocks.forEach(val => mockGetPropertyValue.mockReturnValueOnce(val))
-
-    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(expectedError || INVALID_POST_ERROR)
   })
 
   it('processes multiple valid posts', () => {
@@ -120,32 +187,24 @@ describe('transformNotionPagesToPostListItems', () => {
       {
         id: '123',
         properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
+          Slug: createRichTextProperty('post-1'),
+          Title: createTitleProperty('Post 1'),
+          Description: createRichTextProperty(null),
+          'First published': createDateProperty('2024-01-01'),
+          'Featured image': createFilesProperty([]),
         },
       },
       {
         id: '456',
         properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
+          Slug: createRichTextProperty('post-2'),
+          Title: createTitleProperty('Post 2'),
+          Description: createRichTextProperty(null),
+          'First published': createDateProperty('2024-02-02'),
+          'Featured image': createFilesProperty([]),
         },
       },
     ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('post-1')
-      .mockReturnValueOnce('Post 1')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-01')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('post-2')
-      .mockReturnValueOnce('Post 2')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-02-02')
-      .mockReturnValueOnce(null)
 
     const result = transformNotionPagesToPostListItems(pages)
 
@@ -159,32 +218,24 @@ describe('transformNotionPagesToPostListItems', () => {
       {
         id: '123',
         properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
+          Slug: createRichTextProperty('post-1'),
+          Title: createTitleProperty('Post 1'),
+          Description: createRichTextProperty(null),
+          'First published': createDateProperty('2024-01-01'),
+          'Featured image': createFilesProperty([]),
         },
       },
       {
         id: '456',
         properties: {
-          Slug: {},
-          Title: {},
-          'First published': {},
+          Slug: createRichTextProperty('post-2'),
+          Title: createTitleProperty(null), // Invalid - missing title
+          Description: createRichTextProperty(null),
+          'First published': createDateProperty('2024-02-02'),
+          'Featured image': createFilesProperty([]),
         },
       },
     ]
-
-    mockGetPropertyValue
-      .mockReturnValueOnce('post-1')
-      .mockReturnValueOnce('Post 1')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-01-01')
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('post-2')
-      .mockReturnValueOnce(null) // Invalid - missing title
-      .mockReturnValueOnce(null)
-      .mockReturnValueOnce('2024-02-02')
-      .mockReturnValueOnce(null)
 
     expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
   })

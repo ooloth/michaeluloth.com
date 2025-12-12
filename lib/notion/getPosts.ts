@@ -1,7 +1,13 @@
 import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion, { collectPaginatedAPI } from './client'
-import getPropertyValue from './getPropertyValue'
 import { PostListItemSchema, type PostListItem } from './schemas/post'
+import {
+  createPropertiesSchema,
+  RichTextPropertySchema,
+  TitlePropertySchema,
+  DatePropertySchema,
+  FilesPropertySchema,
+} from './schemas/properties'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
@@ -11,6 +17,19 @@ type Options = {
 }
 
 export const INVALID_POST_ERROR = 'Invalid post data - build aborted'
+export const INVALID_POST_PROPERTIES_ERROR = 'Invalid post properties - build aborted'
+
+/**
+ * Schema for validating and transforming post properties from Notion API.
+ * Validates structure and extracts values in one step.
+ */
+const PostPropertiesSchema = createPropertiesSchema({
+  Slug: RichTextPropertySchema,
+  Title: TitlePropertySchema,
+  Description: RichTextPropertySchema,
+  'First published': DatePropertySchema,
+  'Featured image': FilesPropertySchema,
+})
 
 /**
  * Pure function: transforms Notion API pages to validated post list items.
@@ -24,20 +43,23 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
       throw new Error(INVALID_POST_ERROR)
     }
 
-    const slug = getPropertyValue(page.properties as any, 'Slug')
-    const title = getPropertyValue(page.properties as any, 'Title')
-    const description = getPropertyValue(page.properties as any, 'Description')
-    const firstPublished = getPropertyValue(page.properties as any, 'First published')
-    const featuredImage = getPropertyValue(page.properties as any, 'Featured image')
+    // Validate and extract property values at I/O boundary
+    const propertiesParsed = PostPropertiesSchema.safeParse(page.properties)
+    if (!propertiesParsed.success) {
+      logValidationError(propertiesParsed.error, 'post properties')
+      throw new Error(INVALID_POST_PROPERTIES_ERROR)
+    }
 
-    // Parse and validate using Zod schema
+    const properties = propertiesParsed.data
+
+    // Parse and validate the final post object
     const parsed = PostListItemSchema.safeParse({
       id: page.id,
-      slug,
-      title,
-      description,
-      firstPublished,
-      featuredImage,
+      slug: properties.Slug,
+      title: properties.Title,
+      description: properties.Description,
+      firstPublished: properties['First published'],
+      featuredImage: properties['Featured image'][0] ?? null,
     })
 
     if (!parsed.success) {

@@ -2,8 +2,14 @@ import { getCached, setCached } from '@/lib/cache/filesystem'
 import notion from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
-import getPropertyValue from '@/lib/notion/getPropertyValue'
 import { PostListItemSchema, type Post, type PostListItem } from './schemas/post'
+import {
+  createPropertiesSchema,
+  RichTextPropertySchema,
+  TitlePropertySchema,
+  DatePropertySchema,
+  FilesPropertySchema,
+} from './schemas/properties'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 
@@ -15,6 +21,19 @@ type Options = {
 }
 
 export const INVALID_POST_DETAILS_ERROR = 'Invalid post details data - build aborted'
+export const INVALID_POST_PROPERTIES_ERROR = 'Invalid post properties - build aborted'
+
+/**
+ * Schema for validating and transforming post properties from Notion API.
+ * Validates structure and extracts values in one step.
+ */
+const PostPropertiesSchema = createPropertiesSchema({
+  Slug: RichTextPropertySchema,
+  Title: TitlePropertySchema,
+  Description: RichTextPropertySchema,
+  'First published': DatePropertySchema,
+  'Featured image': FilesPropertySchema,
+})
 
 /**
  * Pure function: transforms a Notion API page to a validated Post.
@@ -27,20 +46,23 @@ export function transformNotionPageToPost(page: unknown): Post {
     throw new Error(INVALID_POST_DETAILS_ERROR)
   }
 
-  const slug = getPropertyValue(page.properties as any, 'Slug')
-  const title = getPropertyValue(page.properties as any, 'Title')
-  const description = getPropertyValue(page.properties as any, 'Description')
-  const firstPublished = getPropertyValue(page.properties as any, 'First published')
-  const featuredImage = getPropertyValue(page.properties as any, 'Featured image')
+  // Validate and extract property values at I/O boundary
+  const propertiesParsed = PostPropertiesSchema.safeParse(page.properties)
+  if (!propertiesParsed.success) {
+    logValidationError(propertiesParsed.error, 'post properties')
+    throw new Error(INVALID_POST_PROPERTIES_ERROR)
+  }
+
+  const properties = propertiesParsed.data
 
   // Parse and validate post list item fields using Zod schema
   const parsed = PostListItemSchema.safeParse({
     id: page.id,
-    slug,
-    title,
-    description,
-    firstPublished,
-    featuredImage,
+    slug: properties.Slug,
+    title: properties.Title,
+    description: properties.Description,
+    firstPublished: properties['First published'],
+    featuredImage: properties['Featured image'][0] ?? null,
   })
 
   if (!parsed.success) {
