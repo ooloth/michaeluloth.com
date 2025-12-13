@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
+import { type Result, Ok, Err } from '@/utils/result'
 
 interface iTunesListItem {
   date: string
@@ -47,11 +48,8 @@ export default async function fetchItunesItems(
   items: iTunesListItem[],
   medium: iTunesMedium,
   entity: iTunesEntity,
-): Promise<iTunesItem[]> {
+): Promise<Result<iTunesItem[], Error>> {
   const stringOfItemIDs = items.map(item => item.id).join(',')
-
-  let formattedResults: iTunesItem[]
-  const includedIds = new Set()
 
   // See: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/#lookup
   try {
@@ -61,7 +59,7 @@ export default async function fetchItunesItems(
 
     const data = await response.json()
 
-    formattedResults = await Promise.all(
+    const formattedResults = await Promise.all(
       data.results.map(async (result: unknown) => {
         if (!result) {
           return null
@@ -82,11 +80,6 @@ export default async function fetchItunesItems(
 
         if (!matchingItem) {
           console.log('No matching item for iTunes result:', resultID)
-          return null
-        }
-
-        if (includedIds.has(resultID)) {
-          console.log('Duplicate iTunes result:', resultID)
           return null
         }
 
@@ -115,15 +108,26 @@ export default async function fetchItunesItems(
           return null
         }
 
-        includedIds.add(resultID)
-
         return parsedItem.data
       }),
     )
 
-    return formattedResults.filter(Boolean).sort((a, b) => b.date.localeCompare(a.date))
+    // Remove duplicates (keep first occurrence) and nulls
+    const seenIds = new Set<string>()
+    const uniqueResults = formattedResults.filter((item) => {
+      if (!item) return false
+      if (seenIds.has(item.id)) {
+        console.log('Duplicate iTunes result:', item.id)
+        return false
+      }
+      seenIds.add(item.id)
+      return true
+    })
+
+    const sortedResults = uniqueResults.sort((a, b) => b.date.localeCompare(a.date))
+    return Ok(sortedResults)
   } catch (error) {
-    console.log('fetchItunesItems error:', error)
-    return []
+    console.error('fetchItunesItems error:', error)
+    return Err(error instanceof Error ? error : new Error(String(error)))
   }
 }
