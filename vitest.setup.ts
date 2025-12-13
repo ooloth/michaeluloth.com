@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
 
 // Make vi globally available
-;(global as any).vi = vi
+;(global as unknown as { vi: typeof vi }).vi = vi
 
 // Mock environment variables globally for all tests
 vi.mock('@/lib/env', () => ({

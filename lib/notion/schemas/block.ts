@@ -200,6 +200,7 @@ export const NumberedListItemBlockSchema = z
 /**
  * Toggle block schema (recursive - contains children blocks)
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const ToggleBlockSchema: z.ZodType<any> = z
   .object({
     type: z.literal('toggle'),

@@ -25,7 +25,7 @@ export default async function Image({ loading = 'eager', url, showCaption, image
     throw new Error(`🚨 Image URL is not a Cloudinary URL: "${url}"`)
   }
 
-  const { alt, caption, height, sizes, src, srcSet, width } = (await fetchCloudinaryImageMetadata(url)).unwrap()
+  const { alt, caption, height, sizes, src, srcSet, width } = (await fetchCloudinaryImageMetadata({ url })).unwrap()
 
   const imageClasses = imageStyles ? `${imageStylesDefault} ${imageStyles}` : imageStylesDefault
   const outerClasses = outerStyles ? `${outerStylesDefault} ${outerStyles}` : outerStylesDefault

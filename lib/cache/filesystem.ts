@@ -33,7 +33,7 @@ export async function getCached<T>(key: string, dir: string = 'default'): Promis
 
     console.log(`💾 Cache hit: ${key}`)
     return parsed.data as T
-  } catch (error) {
+  } catch {
     // Cache miss or read error - not a problem, just return null
     return null
   }

@@ -30,7 +30,7 @@ describe('fetchItunesItems', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const inputItems = [{ id: 123, name: 'Test Album', date: '2024-01-15' }]
 
@@ -75,7 +75,7 @@ describe('fetchItunesItems', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const inputItems = [
         { id: 1, name: 'Album 1', date: '2024-01-15' },
@@ -108,7 +108,7 @@ describe('fetchItunesItems', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const inputItems = [{ id: 456, name: 'Test Book', date: '2024-01-15' }]
 
@@ -146,7 +146,7 @@ describe('fetchItunesItems', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const inputItems = [
         { id: 1, name: 'Album 1', date: '2024-01-15' },
@@ -185,7 +185,7 @@ describe('fetchItunesItems', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
@@ -218,7 +218,7 @@ describe('fetchItunesItems', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
@@ -237,7 +237,7 @@ describe('fetchItunesItems', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
@@ -255,7 +255,7 @@ describe('fetchItunesItems', () => {
       const networkError = new Error('Network error')
       global.fetch = vi.fn(async () => {
         throw networkError
-      }) as any
+      }) as unknown as typeof global.fetch
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
@@ -272,7 +272,7 @@ describe('fetchItunesItems', () => {
         json: async () => {
           throw new Error('Invalid JSON')
         },
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
@@ -287,7 +287,7 @@ describe('fetchItunesItems', () => {
     it('wraps non-Error exceptions as Error', async () => {
       global.fetch = vi.fn(async () => {
         throw 'string error'
-      }) as any
+      }) as unknown as typeof global.fetch
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import getBlockChildren, { validateBlocks, INVALID_BLOCK_ERROR } from './getBlockChildren'
 import { collectPaginatedAPI, type Client } from './client'
-import type { GroupedBlock } from './schemas/block'
+import type { GroupedBlock, BulletedListBlock } from './schemas/block'
 import { isOk, isErr } from '@/utils/result'
 
 // Test helper: creates a mock Notion client
@@ -12,7 +12,7 @@ function createMockNotionClient(): Client {
         list: vi.fn(),
       },
     },
-  } as Client
+  } as unknown as Client
 }
 
 vi.mock('./client', () => ({
@@ -715,10 +715,10 @@ describe('validateBlocks', () => {
 
       expect(result).toHaveLength(3)
       expect(result[0].type).toBe('bulleted_list')
-      expect((result[0] as any).items).toHaveLength(1)
+      expect((result[0] as BulletedListBlock).items).toHaveLength(1)
       expect(result[1].type).toBe('paragraph')
       expect(result[2].type).toBe('bulleted_list')
-      expect((result[2] as any).items).toHaveLength(1)
+      expect((result[2] as BulletedListBlock).items).toHaveLength(1)
     })
   })
 
@@ -864,9 +864,11 @@ describe('validateBlocks', () => {
       const result = validateBlocks(blocks) as GroupedBlock[]
 
       expect(result[0].type).toBe('toggle')
-      expect((result[0] as any).children).toHaveLength(1)
-      expect((result[0] as any).children[0].type).toBe('bulleted_list')
-      expect((result[0] as any).children[0].items).toHaveLength(2)
+      if (result[0].type === 'toggle') {
+        expect(result[0].children).toHaveLength(1)
+        expect(result[0].children[0].type).toBe('bulleted_list')
+        expect((result[0].children[0] as BulletedListBlock).items).toHaveLength(2)
+      }
     })
 
     it('handles toggle blocks with no children', () => {

@@ -198,7 +198,7 @@ describe('Result type', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toBe('divide by zero')
+        expect((result.error as Error).message).toBe('divide by zero')
       }
     })
 

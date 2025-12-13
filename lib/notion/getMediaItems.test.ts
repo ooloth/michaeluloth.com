@@ -101,7 +101,7 @@ describe('transformNotionPagesToMediaItems', () => {
       expectedError: INVALID_MEDIA_PROPERTIES_ERROR.books,
       properties: {
         Title: createTitleProperty('Valid Book'),
-        'Apple ID': { type: 'number' as const, number: 'not-a-number' as any }, // Invalid type
+        'Apple ID': { type: 'number' as const, number: 'not-a-number' as unknown as number }, // Invalid type
         Date: createDateProperty('2024-01-15'),
       },
     },
