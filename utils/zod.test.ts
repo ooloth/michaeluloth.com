@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import { z, type ZodError } from 'zod'
+import { z } from 'zod'
 import { formatValidationError, logValidationError } from './zod'
 
 describe('formatValidationError', () => {

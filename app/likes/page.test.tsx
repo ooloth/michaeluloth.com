@@ -1,8 +1,9 @@
+import type { ReactElement } from 'react'
 import { fetchItunesMedia } from './page'
 import Likes from './page'
 import getMediaItems, { type NotionMediaItem } from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
-import fetchTmdbList from '@/lib/tmdb/fetchTmdbList'
+import fetchTmdbList, { type TmdbItem } from '@/lib/tmdb/fetchTmdbList'
 import { Ok, Err, isOk, isErr } from '@/utils/result'
 
 // Mock dependencies
@@ -243,27 +244,29 @@ describe('Likes page', () => {
       ]
 
       // Mock TMDB
-      vi.mocked(fetchTmdbList).mockImplementation(async (listId, mediaType) => {
+      vi.mocked(fetchTmdbList).mockImplementation(async (_listId: string, mediaType: 'tv' | 'movie') => {
         if (mediaType === 'tv') return Ok(mockTvShows)
         if (mediaType === 'movie') return Ok(mockMovies)
         return Ok([])
       })
 
       // Mock Notion + iTunes (via fetchItunesMedia helper)
-      vi.mocked(getMediaItems).mockImplementation(async ({ category }) => {
+      vi.mocked(getMediaItems).mockImplementation(async () => {
         const mockMediaItem = { appleId: 999, name: 'Test', date: '2024-01-01' }
         return Ok([mockMediaItem] as unknown as NotionMediaItem[])
       })
 
-      vi.mocked(fetchItunesItems).mockImplementation(async (items, medium) => {
-        if (medium === 'ebook') return Ok(mockBooks as iTunesItem[])
-        if (medium === 'music') return Ok(mockAlbums as iTunesItem[])
-        if (medium === 'podcast') return Ok(mockPodcasts as iTunesItem[])
-        return Ok([])
-      })
+      vi.mocked(fetchItunesItems).mockImplementation(
+        async (_items: Array<{ id: number; name: string; date: string }>, medium: string) => {
+          if (medium === 'ebook') return Ok(mockBooks as iTunesItem[])
+          if (medium === 'music') return Ok(mockAlbums as iTunesItem[])
+          if (medium === 'podcast') return Ok(mockPodcasts as iTunesItem[])
+          return Ok([])
+        },
+      )
 
       const searchParams = Promise.resolve({})
-      const result = await Likes({ searchParams })
+      const result = (await Likes({ searchParams })) as ReactElement
 
       // Verify all fetchers were called
       expect(fetchTmdbList).toHaveBeenCalledWith(expect.any(String), 'tv')
@@ -273,7 +276,7 @@ describe('Likes page', () => {
 
       // Verify component structure
       expect(result.type).toBe('main')
-      expect(result.props.className).toBe('flex-auto')
+      expect((result.props as { className: string }).className).toBe('flex-auto')
     })
 
     it('passes skipCache=true to iTunes fetchers when nocache param is present', async () => {
@@ -310,17 +313,17 @@ describe('Likes page', () => {
       vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
 
       const searchParams = Promise.resolve({})
-      const result = await Likes({ searchParams })
+      const result = (await Likes({ searchParams })) as ReactElement
 
       expect(result.type).toBe('main')
-      expect(result.props.children).toBeDefined()
+      expect((result.props as { children: unknown }).children).toBeDefined()
     })
   })
 
   describe('error cases', () => {
     it('throws when TMDB TV fetch fails', async () => {
       const error = new Error('TMDB TV API error')
-      vi.mocked(fetchTmdbList).mockImplementation(async (listId, mediaType) => {
+      vi.mocked(fetchTmdbList).mockImplementation(async (_listId: string, mediaType: 'tv' | 'movie') => {
         if (mediaType === 'tv') return Err(error)
         return Ok([])
       })
@@ -335,7 +338,7 @@ describe('Likes page', () => {
 
     it('throws when TMDB movies fetch fails', async () => {
       const error = new Error('TMDB movies API error')
-      vi.mocked(fetchTmdbList).mockImplementation(async (listId, mediaType) => {
+      vi.mocked(fetchTmdbList).mockImplementation(async (_listId: string, mediaType: 'tv' | 'movie') => {
         if (mediaType === 'tv') return Ok([])
         if (mediaType === 'movie') return Err(error)
         return Ok([])
@@ -351,7 +354,7 @@ describe('Likes page', () => {
     it('throws when books fetch fails', async () => {
       const error = new Error('Books fetch failed')
       vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
-      vi.mocked(getMediaItems).mockImplementation(async ({ category }) => {
+      vi.mocked(getMediaItems).mockImplementation(async ({ category }: { category: string }) => {
         if (category === 'books') return Err(error)
         return Ok([])
       })
@@ -365,7 +368,7 @@ describe('Likes page', () => {
     it('throws when albums fetch fails', async () => {
       const error = new Error('Albums fetch failed')
       vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
-      vi.mocked(getMediaItems).mockImplementation(async ({ category }) => {
+      vi.mocked(getMediaItems).mockImplementation(async ({ category }: { category: string }) => {
         if (category === 'albums') return Err(error)
         return Ok([])
       })
@@ -379,7 +382,7 @@ describe('Likes page', () => {
     it('throws when podcasts fetch fails', async () => {
       const error = new Error('Podcasts fetch failed')
       vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
-      vi.mocked(getMediaItems).mockImplementation(async ({ category }) => {
+      vi.mocked(getMediaItems).mockImplementation(async ({ category }: { category: string }) => {
         if (category === 'podcasts') return Err(error)
         return Ok([])
       })
@@ -393,7 +396,9 @@ describe('Likes page', () => {
     it('throws when iTunes API fails for any category', async () => {
       const error = new Error('iTunes API error')
       vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
-      vi.mocked(getMediaItems).mockResolvedValue(Ok([{ appleId: 1, name: 'Test', date: '2024-01-01' }] as unknown as NotionMediaItem[]))
+      vi.mocked(getMediaItems).mockResolvedValue(
+        Ok([{ appleId: 1, name: 'Test', date: '2024-01-01' }] as unknown as NotionMediaItem[]),
+      )
       vi.mocked(fetchItunesItems).mockResolvedValue(Err(error))
 
       const searchParams = Promise.resolve({})

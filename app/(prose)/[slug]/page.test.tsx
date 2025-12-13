@@ -254,8 +254,8 @@ describe('DynamicRoute page', () => {
       expect(notFound).toHaveBeenCalled()
     })
 
-    it('calls notFound() when post is undefined', async () => {
-      vi.mocked(getPost).mockResolvedValue(Ok(undefined as any))
+    it('calls notFound() when post does not exist', async () => {
+      vi.mocked(getPost).mockResolvedValue(Ok(null))
       vi.mocked(notFound).mockImplementation(() => {
         throw new Error('NEXT_NOT_FOUND')
       })

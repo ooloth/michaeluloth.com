@@ -64,9 +64,7 @@ describe('getImagePlaceholderForEnv', () => {
       const networkError = new Error('Network request failed')
       global.fetch = vi.fn().mockRejectedValue(networkError)
 
-      await expect(getImagePlaceholderForEnv('https://example.com/image.jpg')).rejects.toThrow(
-        'Network request failed',
-      )
+      await expect(getImagePlaceholderForEnv('https://example.com/image.jpg')).rejects.toThrow('Network request failed')
     })
 
     it('throws when fetch returns 404', async () => {
@@ -145,7 +143,9 @@ describe('getImagePlaceholderForEnv', () => {
       const mockArrayBuffer = vi.fn(async () => imageData.buffer)
       global.fetch = vi.fn(async () => ({ arrayBuffer: mockArrayBuffer }))
 
-      vi.mocked(getPlaiceholder).mockResolvedValue({ base64: 'data:image/png;base64,test' } as any)
+      vi.mocked(getPlaiceholder).mockResolvedValue({
+        base64: 'data:image/png;base64,test',
+      } as Awaited<ReturnType<typeof getPlaiceholder>>)
 
       await getImagePlaceholderForEnv('https://example.com/image.jpg', 8)
 

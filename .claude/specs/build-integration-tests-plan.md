@@ -29,6 +29,7 @@ This plan adds **build integration tests** that verify the actual Next.js build 
 **File**: `tests/build/setup.ts`
 
 Create a test harness that:
+
 - Runs `next build` in a child process
 - Captures stdout/stderr
 - Parses build output for errors/warnings
@@ -36,6 +37,7 @@ Create a test harness that:
 - Cleans up after tests
 
 **Dependencies needed**:
+
 ```json
 {
   "execa": "^8.0.0" // For running shell commands with proper stdio handling
@@ -195,16 +197,19 @@ jobs:
 Build tests call real APIs (Notion, TMDB, iTunes). Options:
 
 **Option A: Use Real APIs (Recommended for first iteration)**
+
 - Pros: Tests real integration, catches API changes
 - Cons: Slower, requires API credentials in CI, subject to rate limits
 - Mitigation: Run less frequently (only on PR/main), use caching where possible
 
 **Option B: Mock at Network Level**
+
 - Use MSW (Mock Service Worker) or nock to intercept HTTP requests
 - Pros: Fast, deterministic, no API credentials needed
 - Cons: Doesn't catch API changes, more setup overhead
 
 **Option C: Hybrid Approach**
+
 - Unit tests: Mock everything (fast feedback)
 - Build tests: Real APIs (comprehensive validation)
 - Best of both worlds

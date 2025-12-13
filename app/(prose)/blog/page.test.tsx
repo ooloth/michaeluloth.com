@@ -1,6 +1,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
+import type { ReactElement } from 'react'
 import Blog from './page'
 import getPosts from '@/lib/notion/getPosts'
+import type { PostListItem } from '@/lib/notion/schemas/post'
 import { Ok, Err } from '@/utils/result'
 
 // Mock dependencies
@@ -13,7 +15,7 @@ describe('Blog page', () => {
 
   describe('success cases', () => {
     it('fetches and renders posts with descending sort', async () => {
-      const mockPosts = [
+      const mockPosts: PostListItem[] = [
         {
           id: '1',
           slug: 'newest-post',
@@ -35,11 +37,11 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const searchParams = Promise.resolve({})
-      const result = await Blog({ searchParams })
+      const result = (await Blog({ searchParams })) as ReactElement
 
       expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending', skipCache: false })
       expect(result.type).toBe('main')
-      expect(result.props.children).toBeDefined()
+      expect((result.props as { children: unknown }).children).toBeDefined()
     })
 
     it('passes skipCache=true when nocache query param is present', async () => {
@@ -63,7 +65,7 @@ describe('Blog page', () => {
     })
 
     it('passes skipCache=false when nocache is not "true"', async () => {
-      const mockPosts = []
+      const mockPosts: PostListItem[] = []
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
@@ -77,10 +79,10 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok([]))
 
       const searchParams = Promise.resolve({})
-      const result = await Blog({ searchParams })
+      const result = (await Blog({ searchParams })) as ReactElement
 
       expect(result.type).toBe('main')
-      expect(result.props.children).toBeDefined()
+      expect((result.props as { children: unknown }).children).toBeDefined()
     })
 
     it('renders posts with correct structure', async () => {
@@ -98,24 +100,24 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const searchParams = Promise.resolve({})
-      const result = await Blog({ searchParams })
+      const result = (await Blog({ searchParams })) as ReactElement
 
       // Verify the component structure
       expect(result.type).toBe('main')
-      expect(result.props.className).toBe('flex-auto')
+      expect((result.props as { className: string }).className).toBe('flex-auto')
 
       // Find the posts list in the rendered output
-      const mainChildren = result.props.children
+      const mainChildren = (result.props as { children: ReactElement[] }).children
       expect(Array.isArray(mainChildren)).toBe(true)
 
       // Verify heading exists
       const heading = mainChildren[0]
-      expect(heading.props.level).toBe(1)
+      expect((heading.props as { level: number }).level).toBe(1)
 
       // Verify posts list exists
       const postsList = mainChildren[1]
       expect(postsList.type).toBe('ul')
-      expect(postsList.props.className).toBe('mt-8 grid gap-8')
+      expect((postsList.props as { className: string }).className).toBe('mt-8 grid gap-8')
     })
 
     it('uses slug as fallback when title is missing', async () => {

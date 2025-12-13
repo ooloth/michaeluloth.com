@@ -14,6 +14,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Location**: `app/(prose)/[slug]/page.tsx:97-101`
 
 **What it does**:
+
 - Queries Notion API to fetch all posts
 - Maps them to slug params for static page generation
 - Critical build-time function that determines which pages Next.js pre-renders
@@ -21,11 +22,13 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Current test coverage**: None
 
 **Risks**:
+
 - If `getPosts` returns an error, the build will crash with no test coverage
 - No validation that slugs are properly formatted
 - No test ensuring the function returns the correct shape for Next.js
 
 **What should be tested**:
+
 - Returns array of `{ slug: string }` objects
 - Handles `getPosts` error gracefully (or crashes intentionally)
 - Handles empty posts list (returns `[]`)
@@ -35,11 +38,13 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 ### 2. Build-time rendering logic in page components is untested ❌ HIGH
 
 **Locations**:
+
 - `app/(prose)/[slug]/page.tsx` (blog post pages)
 - `app/(prose)/blog/page.tsx` (blog index)
 - `app/likes/page.tsx` (likes page with multiple API calls)
 
 **What they do**:
+
 - Fetch data during build via Server Components
 - Call external APIs (Notion, TMDB, iTunes)
 - Handle errors and transform data for rendering
@@ -47,6 +52,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Current test coverage**: Only `app/likes/page.test.tsx` which tests the `fetchItunesMedia` helper, but not the actual page component
 
 **What should be tested**:
+
 - Blog index page fetches and displays posts correctly
 - Dynamic blog post page fetches post with blocks and navigation
 - Dynamic blog post page returns `notFound()` when slug doesn't exist
@@ -59,11 +65,13 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Location**: `utils/getImagePlaceholderForEnv.test.ts`
 
 **What's tested**:
+
 - ✅ Development mode (returns gray pixel)
 - ✅ Production mode (mocked plaiceholder)
 - ✅ Parameter validation
 
 **What's NOT tested**:
+
 - Actual image fetching and buffer conversion (tests mock `fetch` but don't verify the real flow)
 - Real plaiceholder integration (the library is mocked, so you don't know if it actually works with real images)
 - Error handling when image URL is invalid (404, network error, etc.)
@@ -76,6 +84,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Location**: `lib/notion/getBlockChildren.ts`
 
 **What it does**:
+
 - Fetches child blocks for blog post content
 - Recursively fetches nested blocks
 - Transforms and validates block data
@@ -84,6 +93,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Current test coverage**: None (only integration test that mocks it)
 
 **What should be tested**:
+
 - Fetches blocks for a valid page ID
 - Handles pagination for pages with many blocks
 - Recursively fetches child blocks
@@ -97,6 +107,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **What's tested**: Most API fetchers test that validation errors throw/return `Err`
 
 **What's NOT tested**:
+
 - Build-time behavior when validation fails - you test that functions return `Err`, but not what happens during actual Next.js build
 - Logging of validation errors - `logValidationError` utility is called everywhere but never tested
 - Whether builds abort or continue when validation fails - critical for catching data issues
@@ -106,11 +117,13 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Location**: `lib/cache/filesystem.test.ts`
 
 **What's tested**:
+
 - ✅ Cache is disabled in production
 - ✅ Cache read/write in development
 - ✅ Schema validation
 
 **What's NOT tested**:
+
 - Behavior during Next.js production build - does the cache get used? Ignored? Cleared?
 - Cache key collisions - what happens if two different requests use the same sanitized key?
 - Cache directory initialization - what if `.local-cache` doesn't exist yet?
@@ -125,6 +138,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **What it does**: Transforms Cloudinary URLs during build for TMDB/iTunes images
 
 **What should be tested**:
+
 - Transforms image URL with correct parameters
 - Handles URLs that are already transformed
 - Handles invalid Cloudinary URLs
@@ -137,6 +151,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Current test coverage**: None (only used in tests via mocks)
 
 **What it does**:
+
 - Fetches books, albums, podcasts from Notion
 - Filters and transforms media data
 - Used by likes page during build
@@ -150,10 +165,12 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **What's tested**: None
 
 **What it does**:
+
 - Validates all required env vars with Zod
 - Used throughout build-time logic
 
 **What should be tested**:
+
 - All required env vars are present
 - Validation fails with helpful errors for missing vars
 - Validation fails for invalid formats (e.g., non-numeric IDs)
@@ -164,30 +181,32 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 **Locations**: Throughout the codebase
 
 **Patterns used**:
+
 - `Result<T, Error>` for explicit error handling
 - `.unwrap()` calls that throw on error
 - Try-catch blocks
 
 **What's NOT tested**:
+
 - What happens when `.unwrap()` is called during build? - Does Next.js show the error? Crash gracefully? Continue?
 - Error message quality - Are build errors actionable for developers?
 - Partial build success - If TMDB succeeds but iTunes fails, what happens?
 
 ## Test Coverage Summary
 
-| Build-Time Component | Unit Tests | Integration Tests | E2E/Build Tests |
-|---------------------|------------|-------------------|-----------------|
-| `generateStaticParams` | ✅ **Complete** (6 tests) | ❌ None | ❌ None |
-| Page components (Server Components) | ✅ **Excellent** (32 tests - all major pages) | ❌ None | ❌ None |
-| Notion API fetching | ✅ Excellent (26 tests) | ⚠️ Mocked | ❌ None |
-| TMDB API fetching | ✅ Good (13 tests) | ❌ None | ❌ None |
-| iTunes API fetching | ✅ Good (10 tests) | ❌ None | ❌ None |
-| Cloudinary metadata | ✅ Good (15 tests) | ❌ None | ❌ None |
-| Image placeholders | ⚠️ Mocked (5 tests) | ❌ None | ❌ None |
-| Caching | ✅ Good (12 tests) | ❌ None | ❌ None |
-| Environment validation | ✅ **Complete** (28 tests) | ❌ None | ❌ None |
-| Block fetching | ✅ Excellent (26 tests) | ❌ None | ❌ None |
-| Error handling/recovery | ⚠️ Partial | ❌ None | ❌ None |
+| Build-Time Component                | Unit Tests                                    | Integration Tests | E2E/Build Tests |
+| ----------------------------------- | --------------------------------------------- | ----------------- | --------------- |
+| `generateStaticParams`              | ✅ **Complete** (6 tests)                     | ❌ None           | ❌ None         |
+| Page components (Server Components) | ✅ **Excellent** (32 tests - all major pages) | ❌ None           | ❌ None         |
+| Notion API fetching                 | ✅ Excellent (26 tests)                       | ⚠️ Mocked         | ❌ None         |
+| TMDB API fetching                   | ✅ Good (13 tests)                            | ❌ None           | ❌ None         |
+| iTunes API fetching                 | ✅ Good (10 tests)                            | ❌ None           | ❌ None         |
+| Cloudinary metadata                 | ✅ Good (15 tests)                            | ❌ None           | ❌ None         |
+| Image placeholders                  | ⚠️ Mocked (5 tests)                           | ❌ None           | ❌ None         |
+| Caching                             | ✅ Good (12 tests)                            | ❌ None           | ❌ None         |
+| Environment validation              | ✅ **Complete** (28 tests)                    | ❌ None           | ❌ None         |
+| Block fetching                      | ✅ Excellent (26 tests)                       | ❌ None           | ❌ None         |
+| Error handling/recovery             | ⚠️ Partial                                    | ❌ None           | ❌ None         |
 
 ## Priority Order
 
@@ -206,6 +225,7 @@ Based on criticality and impact on build reliability:
 ## Implementation Plan
 
 Work through the priority list one test at a time:
+
 - Create comprehensive unit tests for each component
 - Mock external dependencies appropriately
 - Test both success and error paths
@@ -217,6 +237,7 @@ Work through the priority list one test at a time:
 ### 2025-12-13 - Session 1
 
 **Completed:**
+
 1. ✅ **`generateStaticParams`** - Created `app/(prose)/[slug]/page.test.tsx`
    - 6 comprehensive tests covering success and error cases
    - Tests verify correct params structure for Next.js
@@ -235,70 +256,72 @@ Work through the priority list one test at a time:
 **Updated Test Count:** 246 tests total (was 218)
 
 **Next Priorities:**
+
 1. Page component integration tests (Server Components)
 2. Image placeholder error handling improvements
 3. Build-time error reporting enhancements
 
 ### 2025-12-13 - Session 2
 
-**Completed:**
-3. ✅ **Blog page component** - Created `app/(prose)/blog/page.test.tsx`
-   - 8 comprehensive tests for Server Component build-time behavior
-   - Tests successful data fetching with descending sort
-   - Tests skipCache query param handling (`nocache=true`)
-   - Tests empty posts array handling
-   - Tests component structure and rendering
-   - Tests error propagation (build failures when data fetch fails)
-   - All tests passing
+**Completed:** 3. ✅ **Blog page component** - Created `app/(prose)/blog/page.test.tsx`
+
+- 8 comprehensive tests for Server Component build-time behavior
+- Tests successful data fetching with descending sort
+- Tests skipCache query param handling (`nocache=true`)
+- Tests empty posts array handling
+- Tests component structure and rendering
+- Tests error propagation (build failures when data fetch fails)
+- All tests passing
 
 **Updated Test Count:** 254 tests total (was 246)
 
 ### 2025-12-13 - Session 3
 
-**Completed:**
-4. ✅ **Dynamic route page component** - Extended `app/(prose)/[slug]/page.test.tsx`
-   - 8 additional tests for the page component's default export
-   - Tests successful post fetching with blocks and navigation
-   - Tests skipCache query param handling
-   - Tests `notFound()` behavior when post doesn't exist
-   - Tests error propagation (build failures when getPost fails)
-   - Total tests in file: 14 (6 generateStaticParams + 8 page component)
-   - All tests passing
+**Completed:** 4. ✅ **Dynamic route page component** - Extended `app/(prose)/[slug]/page.test.tsx`
+
+- 8 additional tests for the page component's default export
+- Tests successful post fetching with blocks and navigation
+- Tests skipCache query param handling
+- Tests `notFound()` behavior when post doesn't exist
+- Tests error propagation (build failures when getPost fails)
+- Total tests in file: 14 (6 generateStaticParams + 8 page component)
+- All tests passing
 
 **Updated Test Count:** 262 tests total (was 254)
 
 ### 2025-12-13 - Session 4
 
-**Completed:**
-5. ✅ **Likes page component** - Extended `app/likes/page.test.tsx`
-   - 10 additional tests for the page component's default export
-   - Tests parallel fetching of all 5 media types (TV, movies, books, albums, podcasts)
-   - Tests skipCache query param handling for iTunes media
-   - Tests empty responses from all APIs
-   - Tests error propagation when any of the 5 API calls fail during build
-   - Tests that build fails fast when Promise.all encounters error
-   - Total tests in file: 16 (6 helper + 10 page component)
-   - All tests passing
+**Completed:** 5. ✅ **Likes page component** - Extended `app/likes/page.test.tsx`
+
+- 10 additional tests for the page component's default export
+- Tests parallel fetching of all 5 media types (TV, movies, books, albums, podcasts)
+- Tests skipCache query param handling for iTunes media
+- Tests empty responses from all APIs
+- Tests error propagation when any of the 5 API calls fail during build
+- Tests that build fails fast when Promise.all encounters error
+- Total tests in file: 16 (6 helper + 10 page component)
+- All tests passing
 
 **Updated Test Count:** 272 tests total (was 262)
 
 ### 2025-12-13 - Session 5
 
-**Completed:**
-6. ✅ **Zod validation error utilities** - Created `utils/zod.test.ts`
-   - 21 comprehensive tests for `formatValidationError` and `logValidationError`
-   - Tests single field errors (required, type mismatch, email, min length, regex)
-   - Tests nested field errors with dot notation (objects, arrays, deep nesting)
-   - Tests multiple field errors with comma separation and order preservation
-   - Tests empty path errors (root-level validation)
-   - Tests real-world scenarios (Notion posts, media items)
-   - Tests logging functionality (console.warn usage, message format, context handling)
-   - Tests build-time debugging helpfulness (concise messages, no throw behavior)
-   - All tests passing
+**Completed:** 6. ✅ **Zod validation error utilities** - Created `utils/zod.test.ts`
+
+- 21 comprehensive tests for `formatValidationError` and `logValidationError`
+- Tests single field errors (required, type mismatch, email, min length, regex)
+- Tests nested field errors with dot notation (objects, arrays, deep nesting)
+- Tests multiple field errors with comma separation and order preservation
+- Tests empty path errors (root-level validation)
+- Tests real-world scenarios (Notion posts, media items)
+- Tests logging functionality (console.warn usage, message format, context handling)
+- Tests build-time debugging helpfulness (concise messages, no throw behavior)
+- All tests passing
 
 **Updated Test Count:** 303 tests total (was 272)
 
 **Build-Time Testing Status:**
+
 - ✅ All critical and high-priority gaps filled
 - ✅ Most medium-priority gaps filled (image placeholder error handling, validation utilities)
 - ⚠️ Remaining gaps: Cloudinary transformation tests (5 basic tests exist)

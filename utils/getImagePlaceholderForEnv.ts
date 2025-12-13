@@ -1,4 +1,4 @@
-import { getPlaiceholder, type GetPlaiceholderSrc } from 'plaiceholder'
+import { getPlaiceholder } from 'plaiceholder'
 
 export const ERRORS = {
   INVALID_SIZE: '[getImagePlaceholderForEnv]: size argument must be an integer between 4 and 64',
