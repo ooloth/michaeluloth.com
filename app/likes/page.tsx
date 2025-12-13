@@ -76,8 +76,8 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
 
   // Fetch all categories in parallel
   const [tv, movies, books, albums, podcasts] = await Promise.all([
-    fetchTmdbList(TMDB_TV_LIST_ID, 'tv'),
-    fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie'),
+    fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then(unwrap),
+    fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then(unwrap),
     getMediaItems({ category: 'books', skipCache }).then(async items =>
       unwrap(
         await fetchItunesItems(
