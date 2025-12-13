@@ -1,4 +1,4 @@
-import { getCached, setCached } from '@/lib/cache/filesystem'
+import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
 import notion from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
@@ -13,6 +13,7 @@ type Options = {
   includeBlocks?: boolean
   includePrevAndNext?: boolean
   skipCache?: boolean
+  cache?: CacheAdapter
 }
 
 export const INVALID_POST_DETAILS_ERROR = 'Invalid post details data - build aborted'
@@ -84,6 +85,7 @@ export default async function getPost({
   includeBlocks = false,
   includePrevAndNext = false,
   skipCache = false,
+  cache = filesystemCache,
 }: Options): Promise<Result<Post | null, Error>> {
   try {
     if (!slug) {
@@ -93,7 +95,7 @@ export default async function getPost({
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `post-${slug}-blocks-${includeBlocks}-nav-${includePrevAndNext}`
     if (!skipCache) {
-      const cached = await getCached<Post>(cacheKey, 'notion')
+      const cached = await cache.get<Post>(cacheKey, 'notion')
       if (cached) {
         return Ok(cached)
       }
@@ -121,7 +123,7 @@ export default async function getPost({
     let post = transformNotionPageToPost(response.results[0])
 
     if (includePrevAndNext) {
-      const postsResult = await getPosts({ sortDirection: 'ascending', skipCache })
+      const postsResult = await getPosts({ sortDirection: 'ascending', skipCache, cache })
       if (!postsResult.ok) {
         return Err(postsResult.error)
       }
@@ -148,7 +150,7 @@ export default async function getPost({
 
     // Cache the result (always caches, even when skipCache=true)
     // This ensures ?nocache=true refreshes the cache with latest data
-    await setCached(cacheKey, post, 'notion')
+    await cache.set(cacheKey, post, 'notion')
 
     return Ok(post)
   } catch (error) {

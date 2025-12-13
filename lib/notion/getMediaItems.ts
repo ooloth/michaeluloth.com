@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { getCached, setCached } from '@/lib/cache/filesystem'
+import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
 import notion, { collectPaginatedAPI } from './client'
 import {
   createPropertiesSchema,
@@ -50,6 +50,7 @@ const MediaPropertiesSchema = createPropertiesSchema({
 type Options = {
   category: MediaCategory
   skipCache?: boolean
+  cache?: CacheAdapter
 }
 
 /**
@@ -109,13 +110,13 @@ const DATA_SOURCE_IDS: Record<MediaCategory, string> = {
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
 export default async function getMediaItems(options: Options): Promise<Result<NotionMediaItem[], Error>> {
-  const { category, skipCache = false } = options
+  const { category, skipCache = false, cache = filesystemCache } = options
 
   try {
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `media-${category}`
     if (!skipCache) {
-      const cached = await getCached<NotionMediaItem[]>(cacheKey, 'notion')
+      const cached = await cache.get<NotionMediaItem[]>(cacheKey, 'notion')
       if (cached) {
         return Ok(cached)
       }
@@ -140,7 +141,7 @@ export default async function getMediaItems(options: Options): Promise<Result<No
 
     // Cache the result (always caches, even when skipCache=true)
     // This ensures ?nocache=true refreshes the cache with latest data
-    await setCached(cacheKey, items, 'notion')
+    await cache.set(cacheKey, items, 'notion')
 
     return Ok(items)
   } catch (error) {

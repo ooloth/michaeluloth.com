@@ -1,4 +1,4 @@
-import { getCached, setCached } from '@/lib/cache/filesystem'
+import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
 import cloudinary from '@/lib/cloudinary/client'
 import { type CloudinaryResource } from '@/lib/cloudinary/types'
 import { getErrorDetails } from '@/utils/logging'
@@ -15,13 +15,19 @@ export type CloudinaryImageMetadata = {
   width: number
 }
 
+type Options = {
+  url: string
+  cache?: CacheAdapter
+}
+
 /**
  * Fetches Cloudinary image metadata including alt text, caption, dimensions, and responsive image attributes.
  *
  */
-export default async function fetchCloudinaryImageMetadata(
-  url: string,
-): Promise<Result<CloudinaryImageMetadata, Error>> {
+export default async function fetchCloudinaryImageMetadata({
+  url,
+  cache = filesystemCache,
+}: Options): Promise<Result<CloudinaryImageMetadata, Error>> {
   try {
     const publicId = parsePublicIdFromCloudinaryUrl(url)
     if (!publicId) {
@@ -29,7 +35,7 @@ export default async function fetchCloudinaryImageMetadata(
     }
 
     // Check cache first (dev mode only)
-    const cached = await getCached<CloudinaryImageMetadata>(publicId, 'cloudinary')
+    const cached = await cache.get<CloudinaryImageMetadata>(publicId, 'cloudinary')
     if (cached) {
       return Ok(cached)
     }
@@ -125,7 +131,7 @@ export default async function fetchCloudinaryImageMetadata(
     }
 
     // Cache the result (dev mode only)
-    await setCached(publicId, metadata, 'cloudinary')
+    await cache.set(publicId, metadata, 'cloudinary')
 
     return Ok(metadata)
   } catch (error) {
