@@ -56,8 +56,50 @@ const CloudinaryResourceSchema = z.object({
 })
 
 /**
+ * Generates responsive image URLs for Cloudinary images.
+ * Pure function - testable without I/O.
+ *
+ * @param publicId - Cloudinary public ID
+ * @param cloudinaryClient - Cloudinary client instance
+ * @returns Object with src, srcSet, and sizes strings for responsive images
+ */
+export function generateResponsiveImageUrls(
+  publicId: string,
+  cloudinaryClient: CloudinaryClient,
+): { src: string; srcSet: string; sizes: string } {
+  const widths = [
+    350, // image layout width on phone at 1x DPR
+    700, // image layout width on phone at 2x DPR
+    850,
+    1020,
+    1200, // image layout width on phone at 3x DPR
+    1440, // max image layout width at 2x DPR (skipped 1x since 700px is already included above)
+    1680,
+    1920,
+    2160, // max image layout width at 3x DPR
+  ]
+
+  const baseOptions = {
+    crop: 'scale',
+    fetch_format: 'auto',
+    quality: 'auto',
+  } as const
+
+  const src = cloudinaryClient.url(publicId, { ...baseOptions, width: 1440 })
+
+  const srcSet = widths
+    .map(width => `${cloudinaryClient.url(publicId, { ...baseOptions, width })} ${width}w`)
+    .join(', ')
+
+  const sizes = '(min-width: 768px) 768px, 100vw'
+
+  return { src, srcSet, sizes }
+}
+
+/**
  * Fetches Cloudinary image metadata including alt text, caption, dimensions, and responsive image attributes.
  *
+ * @see https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
  */
 export default async function fetchCloudinaryImageMetadata({
   url,
@@ -76,14 +118,11 @@ export default async function fetchCloudinaryImageMetadata({
       'cloudinary',
       CloudinaryImageMetadataSchema,
     )
-    if (cached) {
-      return Ok(cached)
-    }
+    if (cached) return Ok(cached)
 
     console.log(`📥 Fetching Cloudinary image metadata from API for "${publicId}"`)
 
     // Fetch image details from Cloudinary Admin API
-    // See: https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
     const cloudinaryResponse = await cloudinaryClient.api
       .resource(publicId, {
         context: true, // include contextual metadata (alt, caption, plus any custom fields)
@@ -101,69 +140,25 @@ export default async function fetchCloudinaryImageMetadata({
       )
     }
 
-    const cloudinaryImage = parseResult.data
+    const { public_id, width, height, context } = parseResult.data
 
-    const alt = cloudinaryImage.context?.custom?.alt
-
+    // Warn about missing alt text (soft failure)
+    const alt = context?.custom?.alt
     if (!alt) {
       // TODO: restore strictness? I disabled it after a couple "/fetch/" gifs were missing all contextual metadata
       console.error(`🚨 Cloudinary image "${publicId}" is missing alt text in contextual metadata.`)
-      // throw new Error(`🚨 Cloudinary image "${publicId}" is missing alt text in contextual metadata.`)
     }
 
-    const caption = cloudinaryImage.context?.custom?.caption // comes from "Title" field in contextual metadata
-
-    const { width, height } = cloudinaryImage
-
-    // console.log(`✅ Fetched Cloudinary image metadata for "${url}"`)
-
-    // TODO: separate into multiple functions: (1) fetch cloudinary image metadata from (2) update image metadata logic
-    const widths = [
-      350, // image layout width on phone at 1x DPR
-      700, // image layout width on phone at 2x DPR
-      850,
-      1020,
-      1200, // image layout width on phone at 3x DPR
-      1440, // max image layout width at 2x DPR (skipped 1x since 700px is already included above)
-      1680,
-      1920,
-      2160, // max image layout width at 3x DPR
-    ]
-
-    // Generate URL with desired transformations
-    const src = cloudinaryClient.url(cloudinaryImage.public_id, {
-      crop: 'scale',
-      fetch_format: 'auto',
-      quality: 'auto',
-      width: 1440,
-    })
-
-    // Generate srcset attribute
-    const srcSet = widths
-      .map(
-        width =>
-          `${cloudinaryClient.url(cloudinaryImage.public_id, {
-            crop: 'scale',
-            fetch_format: 'auto',
-            quality: 'auto',
-            width,
-          })} ${width}w`,
-      )
-      .join(', ')
-
-    const sizes = '(min-width: 768px) 768px, 100vw'
-
+    // Build metadata
     const metadata: CloudinaryImageMetadata = {
       alt: alt ?? '',
-      caption: caption ?? '',
-      height,
-      sizes,
-      src,
-      srcSet,
+      caption: context?.custom?.caption ?? '',
       width,
+      height,
+      ...generateResponsiveImageUrls(public_id, cloudinaryClient),
     }
 
-    // Cache the result (dev mode only)
+    // Cache result (dev mode only)
     await cache.set(publicId, metadata, 'cloudinary')
 
     return Ok(metadata)

@@ -1,4 +1,4 @@
-import fetchCloudinaryImageMetadata from './fetchCloudinaryImageMetadata'
+import fetchCloudinaryImageMetadata, { generateResponsiveImageUrls } from './fetchCloudinaryImageMetadata'
 import { isOk, isErr } from '@/utils/result'
 import type { CloudinaryResource } from './types'
 import { type CacheAdapter } from '@/lib/cache/adapter'
@@ -261,7 +261,7 @@ describe('fetchCloudinaryImageMetadata', () => {
       }
     })
 
-    it('returns Err when image is missing width', async () => {
+    it('returns Err when Cloudinary response has invalid structure', async () => {
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
@@ -269,17 +269,17 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
-      const mockCloudinaryResource = {
+      // Missing required fields (width, height) - should fail Zod validation
+      const invalidResponse = {
         public_id: 'sample/image',
-        height: 800,
         context: {
           custom: {
             alt: 'Test',
           },
         },
-      } as CloudinaryResource
+      }
 
-      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
+      vi.mocked(mockClient.api.resource).mockResolvedValue(invalidResponse)
 
       const result = await fetchCloudinaryImageMetadata({
         url: 'https://res.cloudinary.com/test/image.jpg',
@@ -289,11 +289,11 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toContain('missing width metadata')
+        expect(result.error.message).toContain('Invalid Cloudinary API response')
       }
     })
 
-    it('returns Err when image is missing height', async () => {
+    it('returns Err when public_id is not a string', async () => {
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
@@ -301,17 +301,13 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
-      const mockCloudinaryResource = {
-        public_id: 'sample/image',
+      const invalidResponse = {
+        public_id: 123, // Should be string
         width: 1200,
-        context: {
-          custom: {
-            alt: 'Test',
-          },
-        },
-      } as CloudinaryResource
+        height: 800,
+      }
 
-      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
+      vi.mocked(mockClient.api.resource).mockResolvedValue(invalidResponse)
 
       const result = await fetchCloudinaryImageMetadata({
         url: 'https://res.cloudinary.com/test/image.jpg',
@@ -321,7 +317,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toContain('missing height metadata')
+        expect(result.error.message).toContain('Invalid Cloudinary API response')
       }
     })
 
@@ -369,6 +365,46 @@ describe('fetchCloudinaryImageMetadata', () => {
         expect(result.error).toBeInstanceOf(Error)
         expect(result.error.message).toContain('string error')
       }
+    })
+  })
+})
+
+describe('generateResponsiveImageUrls', () => {
+  it('generates src URL with width 1440', () => {
+    const mockClient = createMockCloudinaryClient()
+    const result = generateResponsiveImageUrls('sample/image', mockClient)
+
+    expect(result.src).toContain('w_1440')
+    expect(result.src).toBe('https://res.cloudinary.com/test/image/upload/w_1440/sample/image')
+  })
+
+  it('generates srcSet with all required widths', () => {
+    const mockClient = createMockCloudinaryClient()
+    const result = generateResponsiveImageUrls('sample/image', mockClient)
+
+    const expectedWidths = [350, 700, 850, 1020, 1200, 1440, 1680, 1920, 2160]
+
+    expectedWidths.forEach(width => {
+      expect(result.srcSet).toContain(`w_${width}`)
+      expect(result.srcSet).toContain(`${width}w`)
+    })
+  })
+
+  it('returns correct sizes string', () => {
+    const mockClient = createMockCloudinaryClient()
+    const result = generateResponsiveImageUrls('sample/image', mockClient)
+
+    expect(result.sizes).toBe('(min-width: 768px) 768px, 100vw')
+  })
+
+  it('formats srcSet as comma-separated list', () => {
+    const mockClient = createMockCloudinaryClient()
+    const result = generateResponsiveImageUrls('sample/image', mockClient)
+
+    const parts = result.srcSet.split(', ')
+    expect(parts).toHaveLength(9) // 9 different widths
+    parts.forEach(part => {
+      expect(part).toMatch(/^https:\/\/.*\/w_\d+\/.*\s\d+w$/)
     })
   })
 })
