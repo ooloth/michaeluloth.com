@@ -178,7 +178,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 | Build-Time Component | Unit Tests | Integration Tests | E2E/Build Tests |
 |---------------------|------------|-------------------|-----------------|
 | `generateStaticParams` | ✅ **Complete** (6 tests) | ❌ None | ❌ None |
-| Page components (Server Components) | ⚠️ Partial (1/4) | ❌ None | ❌ None |
+| Page components (Server Components) | ⚠️ Partial (14/20+ tests) | ❌ None | ❌ None |
 | Notion API fetching | ✅ Excellent (26 tests) | ⚠️ Mocked | ❌ None |
 | TMDB API fetching | ✅ Good (13 tests) | ❌ None | ❌ None |
 | iTunes API fetching | ✅ Good (10 tests) | ❌ None | ❌ None |
@@ -238,3 +238,17 @@ Work through the priority list one test at a time:
 1. Page component integration tests (Server Components)
 2. Image placeholder error handling improvements
 3. Build-time error reporting enhancements
+
+### 2025-12-13 - Session 2
+
+**Completed:**
+3. ✅ **Blog page component** - Created `app/(prose)/blog/page.test.tsx`
+   - 8 comprehensive tests for Server Component build-time behavior
+   - Tests successful data fetching with descending sort
+   - Tests skipCache query param handling (`nocache=true`)
+   - Tests empty posts array handling
+   - Tests component structure and rendering
+   - Tests error propagation (build failures when data fetch fails)
+   - All tests passing
+
+**Updated Test Count:** 254 tests total (was 246)
