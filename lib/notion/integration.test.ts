@@ -16,6 +16,23 @@ import { isOk, isErr } from '@/utils/result'
  * but we don't mock our own Result-returning functions.
  */
 
+// Test helpers for creating properly typed mock data
+type MockNotionPage = {
+  id: string
+  last_edited_time?: string
+  properties: Record<string, unknown>
+}
+
+type MockNotionBlock = {
+  id: string
+  type: string
+  [key: string]: unknown
+}
+
+type MockQueryResponse = {
+  results: MockNotionPage[]
+}
+
 // Mock only the Notion client, not our functions
 vi.mock('./client', () => ({
   default: {
@@ -119,15 +136,14 @@ describe('Notion API Integration Tests', () => {
       ]
 
       // Mock notion.dataSources.query for getPost's direct query
-      vi.mocked(notion.dataSources.query).mockResolvedValueOnce({
-        results: [mockCurrentPost],
-      } as any)
+      const queryResponse: MockQueryResponse = { results: [mockCurrentPost] }
+      vi.mocked(notion.dataSources.query).mockResolvedValueOnce(queryResponse)
 
       // Mock collectPaginatedAPI for getPosts (navigation)
-      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce(mockPostsPages as any)
+      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce(mockPostsPages)
 
       // Mock collectPaginatedAPI for getBlockChildren
-      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce(mockBlocks as any)
+      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce(mockBlocks)
 
       // Call getPost with both navigation and blocks
       const result = await getPost({
@@ -178,9 +194,8 @@ describe('Notion API Integration Tests', () => {
       }
 
       // Mock successful getPost direct query
-      vi.mocked(notion.dataSources.query).mockResolvedValueOnce({
-        results: [mockPost],
-      } as any)
+      const queryResponse: MockQueryResponse = { results: [mockPost] }
+      vi.mocked(notion.dataSources.query).mockResolvedValueOnce(queryResponse)
 
       // Mock getPosts failure (via collectPaginatedAPI)
       vi.mocked(collectPaginatedAPI).mockRejectedValueOnce(new Error('Failed to fetch posts for navigation'))
@@ -215,9 +230,8 @@ describe('Notion API Integration Tests', () => {
         },
       }
 
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
-        results: [mockPost],
-      } as any)
+      const queryResponse: MockQueryResponse = { results: [mockPost] }
+      vi.mocked(notion.dataSources.query).mockResolvedValue(queryResponse)
 
       vi.mocked(collectPaginatedAPI).mockRejectedValue(new Error('Failed to fetch blocks'))
 
@@ -265,7 +279,7 @@ describe('Notion API Integration Tests', () => {
         },
       ]
 
-      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce(mockPages as any)
+      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce(mockPages)
 
       // Default sort is ascending, but mock data is in descending order (as returned by API)
       const result = await getPosts({ sortDirection: 'descending', skipCache: true })
@@ -303,7 +317,7 @@ describe('Notion API Integration Tests', () => {
         },
       ]
 
-      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce(mockPages as any)
+      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce(mockPages)
 
       const result = await getMediaItems({ category: 'books', skipCache: true })
 
@@ -341,7 +355,8 @@ describe('Notion API Integration Tests', () => {
         },
       }
 
-      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce([invalidPage] as any)
+      // Intentionally invalid for validation test
+      vi.mocked(collectPaginatedAPI).mockResolvedValueOnce([invalidPage] as MockNotionPage[])
 
       const result = await getPosts({ skipCache: true })
 
@@ -365,7 +380,8 @@ describe('Notion API Integration Tests', () => {
         },
       ]
 
-      vi.mocked(collectPaginatedAPI).mockResolvedValue(invalidBlocks as any)
+      // Intentionally invalid for validation test
+      vi.mocked(collectPaginatedAPI).mockResolvedValue(invalidBlocks as MockNotionBlock[])
 
       const result = await getBlockChildren('test-block-id')
 
