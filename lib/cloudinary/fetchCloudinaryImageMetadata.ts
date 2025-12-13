@@ -1,9 +1,9 @@
 import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
 import cloudinary, { type CloudinaryClient } from '@/lib/cloudinary/client'
-import { type CloudinaryResource } from '@/lib/cloudinary/types'
 import { getErrorDetails } from '@/utils/logging'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/result'
+import { z } from 'zod'
 
 export type CloudinaryImageMetadata = {
   alt: string
@@ -15,11 +15,45 @@ export type CloudinaryImageMetadata = {
   width: number
 }
 
+/**
+ * Schema for CloudinaryImageMetadata
+ * Validates the cached metadata structure
+ */
+const CloudinaryImageMetadataSchema = z.object({
+  alt: z.string(),
+  caption: z.string(),
+  height: z.number(),
+  sizes: z.string(),
+  src: z.string(),
+  srcSet: z.string(),
+  width: z.number(),
+}) satisfies z.ZodType<CloudinaryImageMetadata>
+
 type Options = {
   url: string
   cache?: CacheAdapter
   cloudinaryClient?: CloudinaryClient
 }
+
+/**
+ * Schema for Cloudinary API resource response
+ * Validates the parts of CloudinaryResource that we actually use
+ */
+const CloudinaryResourceSchema = z.object({
+  public_id: z.string(),
+  width: z.number(),
+  height: z.number(),
+  context: z
+    .object({
+      custom: z
+        .object({
+          alt: z.string().optional(),
+          caption: z.string().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+})
 
 /**
  * Fetches Cloudinary image metadata including alt text, caption, dimensions, and responsive image attributes.
@@ -37,7 +71,11 @@ export default async function fetchCloudinaryImageMetadata({
     }
 
     // Check cache first (dev mode only)
-    const cached = await cache.get<CloudinaryImageMetadata>(publicId, 'cloudinary')
+    const cached = await cache.get<CloudinaryImageMetadata>(
+      publicId,
+      'cloudinary',
+      CloudinaryImageMetadataSchema,
+    )
     if (cached) {
       return Ok(cached)
     }
@@ -46,7 +84,7 @@ export default async function fetchCloudinaryImageMetadata({
 
     // Fetch image details from Cloudinary Admin API
     // See: https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
-    const cloudinaryImage: CloudinaryResource = await cloudinaryClient.api
+    const cloudinaryResponse = await cloudinaryClient.api
       .resource(publicId, {
         context: true, // include contextual metadata (alt, caption, plus any custom fields)
         type: publicId.startsWith('http') ? 'fetch' : 'upload',
@@ -55,16 +93,17 @@ export default async function fetchCloudinaryImageMetadata({
         throw Error(`🚨 Error fetching Cloudinary image: "${publicId}":\n\n${getErrorDetails(error)}\n`)
       })
 
-    // TODO: parse image with zod (api uses type "object" for context and metadata)
-
-    type CloudinaryImageContext = {
-      custom: {
-        alt?: string
-        caption?: string
-      }
+    // Validate response with Zod
+    const parseResult = CloudinaryResourceSchema.safeParse(cloudinaryResponse)
+    if (!parseResult.success) {
+      throw new Error(
+        `🚨 Invalid Cloudinary API response for "${publicId}":\n${parseResult.error.message}`,
+      )
     }
 
-    const alt = (cloudinaryImage.context as CloudinaryImageContext)?.custom.alt // "custom" property currently defined as type "object" by sdk
+    const cloudinaryImage = parseResult.data
+
+    const alt = cloudinaryImage.context?.custom?.alt
 
     if (!alt) {
       // TODO: restore strictness? I disabled it after a couple "/fetch/" gifs were missing all contextual metadata
@@ -72,17 +111,9 @@ export default async function fetchCloudinaryImageMetadata({
       // throw new Error(`🚨 Cloudinary image "${publicId}" is missing alt text in contextual metadata.`)
     }
 
-    const caption = (cloudinaryImage.context as CloudinaryImageContext)?.custom.caption // comes from "Title" field in contextual metadata
+    const caption = cloudinaryImage.context?.custom?.caption // comes from "Title" field in contextual metadata
 
-    const width = cloudinaryImage.width
-    if (typeof width !== 'number') {
-      throw new Error(`🚨 Cloudinary image "${publicId}" is missing width metadata.`)
-    }
-
-    const height = cloudinaryImage.height
-    if (typeof height !== 'number') {
-      throw new Error(`🚨 Cloudinary image "${publicId}" is missing height metadata.`)
-    }
+    const { width, height } = cloudinaryImage
 
     // console.log(`✅ Fetched Cloudinary image metadata for "${url}"`)
 
