@@ -2,6 +2,7 @@ import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
 import { env } from '@/lib/env'
+import { type Result, Ok, Err, toErr } from '@/utils/result'
 
 // Schema for raw TMDB API response item
 const TmdbApiResultSchema = z.object({
@@ -25,10 +26,14 @@ const TmdbItemSchema = z.object({
 
 export type TmdbItem = z.infer<typeof TmdbItemSchema>
 
-export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie'): Promise<TmdbItem[]> {
+export default async function fetchTmdbList(
+  listId: string,
+  api: 'tv' | 'movie',
+): Promise<Result<TmdbItem[], Error>> {
   if (!listId) {
-    console.log('fetchTmdbList error: listId is undefined')
-    return []
+    const error = new Error('fetchTmdbList: listId is required')
+    console.error(error.message)
+    return Err(error)
   }
 
   const items = []
@@ -109,11 +114,11 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
         }
       }
     } catch (error) {
-      console.log('fetchTmdbList error:', error)
+      return toErr(error, 'fetchTmdbList')
     }
 
     page++
   } while (page <= totalPages)
 
-  return await Promise.all(items)
+  return Ok(items)
 }

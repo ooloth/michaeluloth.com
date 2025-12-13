@@ -12,7 +12,7 @@ export default async function Blog({ searchParams }: Props): Promise<ReactElemen
   const params = await searchParams
   const skipCache = params.nocache === 'true'
 
-  const posts = await getPosts({ sortDirection: 'descending', skipCache })
+  const posts = (await getPosts({ sortDirection: 'descending', skipCache })).unwrap()
 
   return (
     <main className="flex-auto">
