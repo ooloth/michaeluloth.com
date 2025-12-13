@@ -16,6 +16,7 @@ This document describes the established pattern for validating external inputs u
 ### Schema Organization
 
 **Use inline schemas when:**
+
 - Schema is used in only one file
 - Type is not exported for use elsewhere
 - Simple, single-purpose validation
@@ -30,6 +31,7 @@ const TmdbApiResultSchema = z.object({
 ```
 
 **Use dedicated schema files when:**
+
 - Schema/type is shared across multiple files
 - Part of a domain with multiple related schemas
 - Types need to be exported for UI components
@@ -83,7 +85,7 @@ const item = ProcessedItemSchema.safeParse({
 const cached = await cache.get<Post>(
   'post-123',
   'notion',
-  PostSchema  // ← Schema ensures data integrity
+  PostSchema, // ← Schema ensures data integrity
 )
 
 // ⚠️ Avoid - no validation, unsafe
@@ -91,6 +93,7 @@ const cached = await cache.get<Post>('post-123', 'notion')
 ```
 
 **Benefits:**
+
 - Detects corrupted cache files → cache miss → re-fetch
 - Handles schema evolution gracefully
 - Prevents runtime errors from malformed data
@@ -104,10 +107,10 @@ const result = MySchema.safeParse(data)
 if (!result.success) {
   // Log helpful context
   console.warn(`Invalid data for ${key}:`, result.error.message)
-  return null  // or throw, depending on criticality
+  return null // or throw, depending on criticality
 }
 
-const validData = result.data  // TypeScript knows this is valid
+const validData = result.data // TypeScript knows this is valid
 ```
 
 ### 4. Optional vs Required Fields
@@ -116,10 +119,10 @@ Be explicit about optionality:
 
 ```typescript
 const Schema = z.object({
-  required: z.string(),           // Must exist
+  required: z.string(), // Must exist
   optional: z.string().optional(), // May be undefined
   nullable: z.string().nullable(), // May be null
-  nullish: z.string().nullish(),   // May be null or undefined
+  nullish: z.string().nullish(), // May be null or undefined
 })
 ```
 
@@ -134,7 +137,7 @@ const data = apiResponse as MyType
 // ✅ Good - runtime validation with safeParse
 const result = MySchema.safeParse(apiResponse)
 if (result.success) {
-  const data = result.data  // Validated
+  const data = result.data // Validated
 }
 ```
 

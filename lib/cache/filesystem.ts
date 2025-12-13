@@ -27,11 +27,7 @@ const CacheFileSchema = z.object({
  * @param schema - Optional Zod schema to validate the cached data
  * @returns The cached data if found and valid, null otherwise
  */
-export async function getCached<T>(
-  key: string,
-  dir: string = 'default',
-  schema?: z.ZodSchema<T>,
-): Promise<T | null> {
+export async function getCached<T>(key: string, dir: string = 'default', schema?: z.ZodSchema<T>): Promise<T | null> {
   // Only cache in development mode
   if (process.env.NODE_ENV !== 'development') {
     return null

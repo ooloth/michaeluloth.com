@@ -121,10 +121,7 @@ describe('filesystem cache', () => {
 
       await getCached('test/key:with*special?chars', 'namespace')
 
-      expect(readFile).toHaveBeenCalledWith(
-        expect.stringContaining('test-key-with-special-chars.json'),
-        'utf-8',
-      )
+      expect(readFile).toHaveBeenCalledWith(expect.stringContaining('test-key-with-special-chars.json'), 'utf-8')
     })
   })
 

@@ -113,11 +113,7 @@ export default async function fetchCloudinaryImageMetadata({
     }
 
     // Check cache first (dev mode only)
-    const cached = await cache.get<CloudinaryImageMetadata>(
-      publicId,
-      'cloudinary',
-      CloudinaryImageMetadataSchema,
-    )
+    const cached = await cache.get<CloudinaryImageMetadata>(publicId, 'cloudinary', CloudinaryImageMetadataSchema)
     if (cached) return Ok(cached)
 
     console.log(`📥 Fetching Cloudinary image metadata from API for "${publicId}"`)
@@ -135,9 +131,7 @@ export default async function fetchCloudinaryImageMetadata({
     // Validate response with Zod
     const parseResult = CloudinaryResourceSchema.safeParse(cloudinaryResponse)
     if (!parseResult.success) {
-      throw new Error(
-        `🚨 Invalid Cloudinary API response for "${publicId}":\n${parseResult.error.message}`,
-      )
+      throw new Error(`🚨 Invalid Cloudinary API response for "${publicId}":\n${parseResult.error.message}`)
     }
 
     const { public_id, width, height, context } = parseResult.data
