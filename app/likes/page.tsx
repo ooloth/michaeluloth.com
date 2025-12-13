@@ -78,33 +78,33 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
   const [tv, movies, books, albums, podcasts] = await Promise.all([
     fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then(unwrap),
     fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then(unwrap),
-    getMediaItems({ category: 'books', skipCache }).then(async items =>
-      unwrap(
-        await fetchItunesItems(
-          items.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+    getMediaItems({ category: 'books', skipCache })
+      .then((items) =>
+        fetchItunesItems(
+          items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
           'ebook',
           'ebook',
         ),
-      ),
-    ),
-    getMediaItems({ category: 'albums', skipCache }).then(async items =>
-      unwrap(
-        await fetchItunesItems(
-          items.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+      )
+      .then(unwrap),
+    getMediaItems({ category: 'albums', skipCache })
+      .then((items) =>
+        fetchItunesItems(
+          items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
           'music',
           'album',
         ),
-      ),
-    ),
-    getMediaItems({ category: 'podcasts', skipCache }).then(async items =>
-      unwrap(
-        await fetchItunesItems(
-          items.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+      )
+      .then(unwrap),
+    getMediaItems({ category: 'podcasts', skipCache })
+      .then((items) =>
+        fetchItunesItems(
+          items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
           'podcast',
           'podcast',
         ),
-      ),
-    ),
+      )
+      .then(unwrap),
   ])
 
   return (
