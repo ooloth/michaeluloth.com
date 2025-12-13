@@ -1,0 +1,2 @@
+# Ignore Claude Code Review workflow to prevent breaking security validation
+.github/workflows/claude-code-review.yml
