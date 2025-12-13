@@ -66,7 +66,7 @@ const ProcessedItemSchema = z.object({
 // Validate raw response
 const apiResult = ApiResponseSchema.safeParse(rawResponse)
 if (!apiResult.success) {
-  throw new Error(`Invalid API response: ${apiResult.error.message}`)
+  throw new Error(`Invalid API response: ${formatValidationError(apiResult.error)}`)
 }
 
 // Transform and validate again
@@ -111,6 +111,28 @@ if (!result.success) {
 }
 
 const validData = result.data // TypeScript knows this is valid
+```
+
+**Validation Error Helpers (`utils/zod.ts`):**
+
+Use these helpers for cleaner, more consistent error messages:
+
+```typescript
+import { formatValidationError, logValidationError } from '@/utils/zod'
+
+// For throwing errors - extracts field names and messages
+const result = MySchema.safeParse(data)
+if (!result.success) {
+  throw new Error(`Invalid data: ${formatValidationError(result.error)}`)
+  // Output: "Invalid data: title: Required, date: Invalid format"
+}
+
+// For logging warnings - includes context
+const result = MySchema.safeParse(data)
+if (!result.success) {
+  logValidationError(result.error, 'post metadata')
+  // Output: "Skipping invalid post metadata (title: Required, date: Invalid format)"
+}
 ```
 
 ### 4. Optional vs Required Fields

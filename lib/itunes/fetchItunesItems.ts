@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
+import { formatValidationError } from '@/utils/zod'
 import { type Result, Ok, toErr } from '@/utils/result'
 
 interface iTunesListItem {
@@ -68,7 +69,7 @@ export default async function fetchItunesItems(
         // Validate raw iTunes API data at boundary
         const parsedResult = iTunesApiResultSchema.safeParse(result)
         if (!parsedResult.success) {
-          console.log('Skipping invalid iTunes result:', parsedResult.error.format())
+          console.log('Skipping invalid iTunes result:', formatValidationError(parsedResult.error))
           return null
         }
 

@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { z } from 'zod'
+import { formatValidationError } from '@/utils/zod'
 
 /**
  * Sanitizes a cache key to be safe for use as a filename.
@@ -44,7 +45,7 @@ export async function getCached<T>(key: string, dir: string = 'default', schema?
     // Validate cache file structure
     const cacheFileResult = CacheFileSchema.safeParse(parsed)
     if (!cacheFileResult.success) {
-      console.warn(`⚠️  Invalid cache file structure for ${key}, ignoring cache`)
+      console.warn(`⚠️  Invalid cache file structure for ${key}: ${formatValidationError(cacheFileResult.error)}`)
       return null
     }
 
@@ -54,7 +55,7 @@ export async function getCached<T>(key: string, dir: string = 'default', schema?
     if (schema) {
       const dataResult = schema.safeParse(data)
       if (!dataResult.success) {
-        console.warn(`⚠️  Invalid cached data for ${key}, ignoring cache`)
+        console.warn(`⚠️  Invalid cached data for ${key}: ${formatValidationError(dataResult.error)}`)
         return null
       }
       console.log(`💾 Cache hit: ${key}`)

@@ -1,6 +1,7 @@
 import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
 import cloudinary, { type CloudinaryClient } from '@/lib/cloudinary/client'
 import { getErrorDetails } from '@/utils/logging'
+import { formatValidationError } from '@/utils/zod'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/result'
 import { z } from 'zod'
@@ -131,7 +132,8 @@ export default async function fetchCloudinaryImageMetadata({
     // Validate response with Zod
     const parseResult = CloudinaryResourceSchema.safeParse(cloudinaryResponse)
     if (!parseResult.success) {
-      throw new Error(`🚨 Invalid Cloudinary API response for "${publicId}":\n${parseResult.error.message}`)
+      const errors = formatValidationError(parseResult.error)
+      throw new Error(`🚨 Invalid Cloudinary API response for "${publicId}": ${errors}`)
     }
 
     const { public_id, width, height, context } = parseResult.data
