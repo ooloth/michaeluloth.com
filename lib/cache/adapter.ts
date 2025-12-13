@@ -1,3 +1,4 @@
+import { type z } from 'zod'
 import { getCached, setCached } from './filesystem'
 
 /**
@@ -8,9 +9,12 @@ import { getCached, setCached } from './filesystem'
 export interface CacheAdapter {
   /**
    * Get a value from the cache.
-   * @returns The cached value or null if not found/expired
+   * @param key - The cache key
+   * @param namespace - Optional namespace/directory for the cache
+   * @param schema - Optional Zod schema to validate cached data
+   * @returns The cached value or null if not found/expired/invalid
    */
-  get<T>(key: string, namespace?: string): Promise<T | null>
+  get<T>(key: string, namespace?: string, schema?: z.ZodSchema<T>): Promise<T | null>
 
   /**
    * Set a value in the cache.
