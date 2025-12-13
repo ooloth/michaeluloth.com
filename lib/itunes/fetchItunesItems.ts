@@ -114,15 +114,16 @@ export default async function fetchItunesItems(
 
     // Remove duplicates (keep first occurrence) and nulls
     const seenIds = new Set<string>()
-    const uniqueResults = formattedResults.filter((item) => {
-      if (!item) return false
+    const uniqueResults: iTunesItem[] = []
+    for (const item of formattedResults) {
+      if (!item) continue
       if (seenIds.has(item.id)) {
         console.log('Duplicate iTunes result:', item.id)
-        return false
+        continue
       }
       seenIds.add(item.id)
-      return true
-    })
+      uniqueResults.push(item)
+    }
 
     const sortedResults = uniqueResults.sort((a, b) => b.date.localeCompare(a.date))
     return Ok(sortedResults)
