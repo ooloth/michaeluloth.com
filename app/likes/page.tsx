@@ -79,6 +79,7 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
     fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then(unwrap),
     fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then(unwrap),
     getMediaItems({ category: 'books', skipCache })
+      .then(unwrap)
       .then((items) =>
         fetchItunesItems(
           items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
@@ -88,6 +89,7 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
       )
       .then(unwrap),
     getMediaItems({ category: 'albums', skipCache })
+      .then(unwrap)
       .then((items) =>
         fetchItunesItems(
           items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
@@ -97,6 +99,7 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
       )
       .then(unwrap),
     getMediaItems({ category: 'podcasts', skipCache })
+      .then(unwrap)
       .then((items) =>
         fetchItunesItems(
           items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
