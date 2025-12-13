@@ -20,7 +20,7 @@ export default async function DynamicRoute({ params, searchParams }: Props) {
   const skipCache = search.nocache === 'true'
 
   // TODO: use fetch instead? https://nextjs.org/docs/app/api-reference/functions/fetch
-  const post = await getPost({ slug, includeBlocks: true, includePrevAndNext: true, skipCache })
+  const post = (await getPost({ slug, includeBlocks: true, includePrevAndNext: true, skipCache })).unwrap()
   if (!post) {
     notFound()
   }

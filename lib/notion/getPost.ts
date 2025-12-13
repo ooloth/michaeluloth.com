@@ -6,6 +6,7 @@ import { PostListItemSchema, PostPropertiesSchema, type Post, type PostListItem 
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
+import { Ok, Err, type Result } from '@/utils/result'
 
 type Options = {
   slug: string | null
@@ -83,63 +84,68 @@ export default async function getPost({
   includeBlocks = false,
   includePrevAndNext = false,
   skipCache = false,
-}: Options): Promise<Post | null> {
-  if (!slug) {
-    return null
-  }
-
-  // Check cache first (cache utility handles dev mode check)
-  const cacheKey = `post-${slug}-blocks-${includeBlocks}-nav-${includePrevAndNext}`
-  if (!skipCache) {
-    const cached = await getCached<Post>(cacheKey, 'notion')
-    if (cached) {
-      return cached
+}: Options): Promise<Result<Post | null, Error>> {
+  try {
+    if (!slug) {
+      return Ok(null)
     }
-  }
 
-  console.info(`📥 Fetching post from Notion API: ${slug}`)
-
-  const response = await notion.dataSources.query({
-    data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
-    filter: {
-      and: [{ property: 'Slug', rich_text: { equals: slug } }],
-    },
-  })
-
-  if (response.results.length === 0) {
-    console.error(`No post found for slug: ${slug}`)
-    return null
-  }
-
-  if (response.results.length > 1) {
-    throw Error(`Multiple posts found for slug: ${slug}\n${JSON.stringify(response.results)}`)
-  }
-
-  // Transform and validate external data at boundary
-  let post = transformNotionPageToPost(response.results[0])
-
-  if (includePrevAndNext) {
-    const posts = (await getPosts({ sortDirection: 'ascending', skipCache })).unwrap()
-
-    const postSlugs = posts.map(post => post.slug)
-    const index = postSlugs.indexOf(slug)
-
-    post = {
-      ...post,
-      prevPost: index > 0 ? posts[index - 1] : null,
-      nextPost: index < postSlugs.length - 1 ? posts[index + 1] : null,
+    // Check cache first (cache utility handles dev mode check)
+    const cacheKey = `post-${slug}-blocks-${includeBlocks}-nav-${includePrevAndNext}`
+    if (!skipCache) {
+      const cached = await getCached<Post>(cacheKey, 'notion')
+      if (cached) {
+        return Ok(cached)
+      }
     }
+
+    console.info(`📥 Fetching post from Notion API: ${slug}`)
+
+    const response = await notion.dataSources.query({
+      data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
+      filter: {
+        and: [{ property: 'Slug', rich_text: { equals: slug } }],
+      },
+    })
+
+    if (response.results.length === 0) {
+      console.error(`No post found for slug: ${slug}`)
+      return Ok(null)
+    }
+
+    if (response.results.length > 1) {
+      throw Error(`Multiple posts found for slug: ${slug}\n${JSON.stringify(response.results)}`)
+    }
+
+    // Transform and validate external data at boundary
+    let post = transformNotionPageToPost(response.results[0])
+
+    if (includePrevAndNext) {
+      const posts = (await getPosts({ sortDirection: 'ascending', skipCache })).unwrap()
+
+      const postSlugs = posts.map(post => post.slug)
+      const index = postSlugs.indexOf(slug)
+
+      post = {
+        ...post,
+        prevPost: index > 0 ? posts[index - 1] : null,
+        nextPost: index < postSlugs.length - 1 ? posts[index + 1] : null,
+      }
+    }
+
+    if (includeBlocks) {
+      const blocks = await getBlockChildren(post.id)
+
+      post = { ...post, blocks }
+    }
+
+    // Cache the result (always caches, even when skipCache=true)
+    // This ensures ?nocache=true refreshes the cache with latest data
+    await setCached(cacheKey, post, 'notion')
+
+    return Ok(post)
+  } catch (error) {
+    console.error('getPost error:', error)
+    return Err(error instanceof Error ? error : new Error(String(error)))
   }
-
-  if (includeBlocks) {
-    const blocks = await getBlockChildren(post.id)
-
-    post = { ...post, blocks }
-  }
-
-  // Cache the result (always caches, even when skipCache=true)
-  // This ensures ?nocache=true refreshes the cache with latest data
-  await setCached(cacheKey, post, 'notion')
-
-  return post
 }
