@@ -11,6 +11,15 @@ import {
   createFilesProperty,
 } from './testing/property-factories'
 import { isOk, isErr } from '@/utils/result'
+import { type CacheAdapter } from '@/lib/cache/adapter'
+
+// Test helper: creates a mock cache adapter
+function createMockCache(cachedValue: unknown = null): CacheAdapter {
+  return {
+    get: vi.fn().mockResolvedValue(cachedValue),
+    set: vi.fn(),
+  }
+}
 
 // Mock dependencies
 vi.mock('./client', () => ({
@@ -20,11 +29,6 @@ vi.mock('./client', () => ({
     },
   },
   collectPaginatedAPI: vi.fn(),
-}))
-
-vi.mock('@/lib/cache/filesystem', () => ({
-  getCached: vi.fn(),
-  setCached: vi.fn(),
 }))
 
 vi.mock('@/lib/env', () => ({
@@ -238,9 +242,9 @@ describe('getPosts', () => {
   describe('success cases', () => {
     it('returns Ok with valid posts from Notion API', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached, setCached } = await import('@/lib/cache/filesystem')
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
+
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
         {
           id: '123',
@@ -254,7 +258,7 @@ describe('getPosts', () => {
         },
       ])
 
-      const result = await getPosts()
+      const result = await getPosts({ cache: mockCache })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -268,12 +272,11 @@ describe('getPosts', () => {
         })
       }
 
-      expect(setCached).toHaveBeenCalledWith('posts-list-ascending', expect.any(Array), 'notion')
+      expect(mockCache.set).toHaveBeenCalledWith('posts-list-ascending', expect.any(Array), 'notion')
     })
 
     it('returns Ok with cached data when available', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached } = await import('@/lib/cache/filesystem')
 
       const cachedData: PostListItem[] = [
         {
@@ -285,9 +288,10 @@ describe('getPosts', () => {
           featuredImage: null,
         },
       ]
-      vi.mocked(getCached).mockResolvedValue(cachedData)
 
-      const result = await getPosts()
+      const mockCache = createMockCache(cachedData)
+
+      const result = await getPosts({ cache: mockCache })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -300,11 +304,11 @@ describe('getPosts', () => {
 
     it('skips cache when skipCache is true', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached, setCached } = await import('@/lib/cache/filesystem')
 
-      vi.mocked(getCached).mockResolvedValue([
+      const mockCache = createMockCache([
         { id: 'old', slug: 'old', title: 'Old', description: null, firstPublished: '2020-01-01', featuredImage: null },
       ])
+
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
         {
           id: '789',
@@ -318,26 +322,27 @@ describe('getPosts', () => {
         },
       ])
 
-      const result = await getPosts({ skipCache: true })
+      const result = await getPosts({ skipCache: true, cache: mockCache })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
         expect(result.value[0].slug).toBe('fresh-post')
       }
 
+      // Should not call cache.get when skipCache is true
+      expect(mockCache.get).not.toHaveBeenCalled()
       // Should call API and update cache even with skipCache
       expect(collectPaginatedAPI).toHaveBeenCalled()
-      expect(setCached).toHaveBeenCalled()
+      expect(mockCache.set).toHaveBeenCalled()
     })
 
     it('respects sortDirection parameter', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached } = await import('@/lib/cache/filesystem')
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockResolvedValue([])
 
-      await getPosts({ sortDirection: 'descending' })
+      await getPosts({ sortDirection: 'descending', cache: mockCache })
 
       expect(collectPaginatedAPI).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({
         sorts: [{ property: 'First published', direction: 'descending' }],
@@ -346,25 +351,23 @@ describe('getPosts', () => {
 
     it('uses correct cache key for different sort directions', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached, setCached } = await import('@/lib/cache/filesystem')
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockResolvedValue([])
 
-      await getPosts({ sortDirection: 'descending' })
+      await getPosts({ sortDirection: 'descending', cache: mockCache })
 
-      expect(getCached).toHaveBeenCalledWith('posts-list-descending', 'notion')
-      expect(setCached).toHaveBeenCalledWith('posts-list-descending', expect.any(Array), 'notion')
+      expect(mockCache.get).toHaveBeenCalledWith('posts-list-descending', 'notion')
+      expect(mockCache.set).toHaveBeenCalledWith('posts-list-descending', expect.any(Array), 'notion')
     })
 
     it('returns Ok with empty array when no posts', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached } = await import('@/lib/cache/filesystem')
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockResolvedValue([])
 
-      const result = await getPosts()
+      const result = await getPosts({ cache: mockCache })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -376,13 +379,12 @@ describe('getPosts', () => {
   describe('error cases', () => {
     it('returns Err when Notion API call fails', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached } = await import('@/lib/cache/filesystem')
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
       const apiError = new Error('Notion API error')
       vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-      const result = await getPosts()
+      const result = await getPosts({ cache: mockCache })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -392,9 +394,8 @@ describe('getPosts', () => {
 
     it('returns Err when validation fails', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached } = await import('@/lib/cache/filesystem')
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
         {
           id: '123',
@@ -408,7 +409,7 @@ describe('getPosts', () => {
         },
       ])
 
-      const result = await getPosts()
+      const result = await getPosts({ cache: mockCache })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -417,12 +418,13 @@ describe('getPosts', () => {
     })
 
     it('returns Err when cache read fails', async () => {
-      const { getCached } = await import('@/lib/cache/filesystem')
-
       const cacheError = new Error('Cache read error')
-      vi.mocked(getCached).mockRejectedValue(cacheError)
+      const mockCache: CacheAdapter = {
+        get: vi.fn().mockRejectedValue(cacheError),
+        set: vi.fn(),
+      }
 
-      const result = await getPosts()
+      const result = await getPosts({ cache: mockCache })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -432,12 +434,11 @@ describe('getPosts', () => {
 
     it('wraps non-Error exceptions as Error', async () => {
       const { collectPaginatedAPI } = await import('./client')
-      const { getCached } = await import('@/lib/cache/filesystem')
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
 
-      const result = await getPosts()
+      const result = await getPosts({ cache: mockCache })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
