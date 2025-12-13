@@ -1,9 +1,9 @@
-import type { ReactElement } from 'react'
+import { render, screen } from '@testing-library/react'
 import { fetchItunesMedia } from './page'
 import Likes from './page'
 import getMediaItems, { type NotionMediaItem } from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
-import fetchTmdbList, { type TmdbItem } from '@/lib/tmdb/fetchTmdbList'
+import fetchTmdbList from '@/lib/tmdb/fetchTmdbList'
 import { Ok, Err, isOk, isErr } from '@/utils/result'
 
 // Mock dependencies
@@ -266,7 +266,8 @@ describe('Likes page', () => {
       )
 
       const searchParams = Promise.resolve({})
-      const result = (await Likes({ searchParams })) as ReactElement
+      const jsx = await Likes({ searchParams })
+      render(jsx)
 
       // Verify all fetchers were called
       expect(fetchTmdbList).toHaveBeenCalledWith(expect.any(String), 'tv')
@@ -274,9 +275,19 @@ describe('Likes page', () => {
       expect(getMediaItems).toHaveBeenCalledTimes(3) // books, albums, podcasts
       expect(fetchItunesItems).toHaveBeenCalledTimes(3)
 
-      // Verify component structure
-      expect(result.type).toBe('main')
-      expect((result.props as { className: string }).className).toBe('flex-auto')
+      // Verify page structure
+      expect(screen.getByRole('main')).toBeInTheDocument()
+      expect(screen.getByRole('main')).toHaveClass('flex-auto')
+
+      // Verify heading
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Likes')
+
+      // Verify section headings exist
+      expect(screen.getByRole('heading', { level: 2, name: /tv/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: /movies/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: /books/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: /albums/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: /podcasts/i })).toBeInTheDocument()
     })
 
     it('passes skipCache=true to iTunes fetchers when nocache param is present', async () => {
@@ -286,7 +297,8 @@ describe('Likes page', () => {
       vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
 
       const searchParams = Promise.resolve({ nocache: 'true' })
-      await Likes({ searchParams })
+      const jsx = await Likes({ searchParams })
+      render(jsx)
 
       // Verify skipCache was passed to getMediaItems (called by fetchItunesMedia)
       expect(getMediaItems).toHaveBeenCalledWith({ category: 'books', skipCache: true })
@@ -300,7 +312,8 @@ describe('Likes page', () => {
       vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
 
       const searchParams = Promise.resolve({ nocache: 'false' })
-      await Likes({ searchParams })
+      const jsx = await Likes({ searchParams })
+      render(jsx)
 
       expect(getMediaItems).toHaveBeenCalledWith({ category: 'books', skipCache: false })
       expect(getMediaItems).toHaveBeenCalledWith({ category: 'albums', skipCache: false })
@@ -313,10 +326,11 @@ describe('Likes page', () => {
       vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
 
       const searchParams = Promise.resolve({})
-      const result = (await Likes({ searchParams })) as ReactElement
+      const jsx = await Likes({ searchParams })
+      render(jsx)
 
-      expect(result.type).toBe('main')
-      expect((result.props as { children: unknown }).children).toBeDefined()
+      expect(screen.getByRole('main')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Likes')
     })
   })
 

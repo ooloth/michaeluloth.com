@@ -1,3 +1,4 @@
+import { render, screen } from '@testing-library/react'
 import { generateStaticParams } from './page'
 import DynamicRoute from './page'
 import getPosts from '@/lib/notion/getPosts'
@@ -124,11 +125,23 @@ describe('DynamicRoute page', () => {
         title: 'Test Post',
         description: 'Test description',
         firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
         featuredImage: null,
         blocks: [
           {
-            type: 'paragraph',
-            richText: [{ type: 'text', text: 'Test content' }],
+            type: 'paragraph' as const,
+            richText: [
+              {
+                type: 'text' as const,
+                content: 'Test content',
+                link: null,
+                bold: false,
+                italic: false,
+                strikethrough: false,
+                underline: false,
+                code: false,
+              },
+            ],
           },
         ],
         prevPost: {
@@ -145,7 +158,8 @@ describe('DynamicRoute page', () => {
 
       const params = Promise.resolve({ slug: 'test-post' })
       const searchParams = Promise.resolve({})
-      const result = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params, searchParams })
+      render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
         slug: 'test-post',
@@ -154,8 +168,13 @@ describe('DynamicRoute page', () => {
         skipCache: false,
       })
 
-      expect(result.type).toBeDefined()
-      expect(result.props).toBeDefined()
+      // Verify post content is rendered
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Test Post')
+      expect(screen.getByText('Test content')).toBeInTheDocument()
+
+      // Verify navigation links (the link text is the post title, not the direction)
+      expect(screen.getByRole('link', { name: /previous post/i })).toHaveAttribute('href', '/previous-post/')
+      expect(screen.getByRole('link', { name: /next post/i })).toHaveAttribute('href', '/next-post/')
     })
 
     it('passes skipCache=true when nocache query param is present', async () => {
@@ -165,6 +184,7 @@ describe('DynamicRoute page', () => {
         title: 'Test Post',
         description: null,
         firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
         featuredImage: null,
         blocks: [],
         prevPost: null,
@@ -175,7 +195,8 @@ describe('DynamicRoute page', () => {
 
       const params = Promise.resolve({ slug: 'test-post' })
       const searchParams = Promise.resolve({ nocache: 'true' })
-      await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params, searchParams })
+      render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
         slug: 'test-post',
@@ -192,6 +213,7 @@ describe('DynamicRoute page', () => {
         title: 'Test Post',
         description: null,
         firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
         featuredImage: null,
         blocks: [],
         prevPost: null,
@@ -202,7 +224,8 @@ describe('DynamicRoute page', () => {
 
       const params = Promise.resolve({ slug: 'test-post' })
       const searchParams = Promise.resolve({ nocache: 'false' })
-      await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params, searchParams })
+      render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
         slug: 'test-post',
@@ -219,6 +242,7 @@ describe('DynamicRoute page', () => {
         title: 'My Post',
         description: null,
         firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
         featuredImage: null,
         blocks: [],
         prevPost: null,
@@ -229,7 +253,8 @@ describe('DynamicRoute page', () => {
 
       const params = Promise.resolve({ slug: 'my-post' })
       const searchParams = Promise.resolve({})
-      await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params, searchParams })
+      render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
         slug: 'my-post',
@@ -237,6 +262,40 @@ describe('DynamicRoute page', () => {
         includePrevAndNext: true,
         skipCache: false,
       })
+
+      // Verify post title is rendered
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('My Post')
+    })
+
+    it('renders post without navigation when prevPost and nextPost are null', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'standalone-post',
+        title: 'Standalone Post',
+        description: null,
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'standalone-post' })
+      const searchParams = Promise.resolve({})
+      const jsx = await DynamicRoute({ params, searchParams })
+      render(jsx)
+
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Standalone Post')
+
+      // No navigation links should be present
+      const links = screen.queryAllByRole('link')
+      const navLinks = links.filter(
+        link => link.textContent?.includes('Previous') || link.textContent?.includes('Next'),
+      )
+      expect(navLinks.length).toBe(0)
     })
   })
 

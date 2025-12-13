@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import type { ReactElement } from 'react'
+import { render, screen } from '@testing-library/react'
 import Blog from './page'
 import getPosts from '@/lib/notion/getPosts'
 import type { PostListItem } from '@/lib/notion/schemas/post'
@@ -37,11 +37,18 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const searchParams = Promise.resolve({})
-      const result = (await Blog({ searchParams })) as ReactElement
+      const jsx = await Blog({ searchParams })
+      render(jsx)
 
       expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending', skipCache: false })
-      expect(result.type).toBe('main')
-      expect((result.props as { children: unknown }).children).toBeDefined()
+
+      // Verify page structure
+      expect(screen.getByRole('main')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Blog')
+
+      // Verify posts are rendered
+      expect(screen.getByRole('link', { name: /newest post/i })).toHaveAttribute('href', '/newest-post/')
+      expect(screen.getByRole('link', { name: /older post/i })).toHaveAttribute('href', '/older-post/')
     })
 
     it('passes skipCache=true when nocache query param is present', async () => {
@@ -59,7 +66,8 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const searchParams = Promise.resolve({ nocache: 'true' })
-      await Blog({ searchParams })
+      const jsx = await Blog({ searchParams })
+      render(jsx)
 
       expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending', skipCache: true })
     })
@@ -70,7 +78,8 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const searchParams = Promise.resolve({ nocache: 'false' })
-      await Blog({ searchParams })
+      const jsx = await Blog({ searchParams })
+      render(jsx)
 
       expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending', skipCache: false })
     })
@@ -79,10 +88,14 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok([]))
 
       const searchParams = Promise.resolve({})
-      const result = (await Blog({ searchParams })) as ReactElement
+      const jsx = await Blog({ searchParams })
+      render(jsx)
 
-      expect(result.type).toBe('main')
-      expect((result.props as { children: unknown }).children).toBeDefined()
+      expect(screen.getByRole('main')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Blog')
+
+      // No posts should be rendered
+      expect(screen.queryByRole('link')).not.toBeInTheDocument()
     })
 
     it('renders posts with correct structure', async () => {
@@ -100,24 +113,18 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const searchParams = Promise.resolve({})
-      const result = (await Blog({ searchParams })) as ReactElement
+      const jsx = await Blog({ searchParams })
+      render(jsx)
 
-      // Verify the component structure
-      expect(result.type).toBe('main')
-      expect((result.props as { className: string }).className).toBe('flex-auto')
-
-      // Find the posts list in the rendered output
-      const mainChildren = (result.props as { children: ReactElement[] }).children
-      expect(Array.isArray(mainChildren)).toBe(true)
+      // Verify main element exists
+      const main = screen.getByRole('main')
+      expect(main).toHaveClass('flex-auto')
 
       // Verify heading exists
-      const heading = mainChildren[0]
-      expect((heading.props as { level: number }).level).toBe(1)
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Blog')
 
-      // Verify posts list exists
-      const postsList = mainChildren[1]
-      expect(postsList.type).toBe('ul')
-      expect((postsList.props as { className: string }).className).toBe('mt-8 grid gap-8')
+      // Verify post link exists with correct href
+      expect(screen.getByRole('link', { name: /test post title/i })).toHaveAttribute('href', '/test-post/')
     })
 
     it('uses slug as fallback when title is missing', async () => {
@@ -135,10 +142,14 @@ describe('Blog page', () => {
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const searchParams = Promise.resolve({})
-      const result = await Blog({ searchParams })
+      const jsx = await Blog({ searchParams })
+      render(jsx)
 
       // The component should still render without error
-      expect(result.type).toBe('main')
+      expect(screen.getByRole('main')).toBeInTheDocument()
+
+      // Link should still exist (using slug as fallback)
+      expect(screen.getByRole('link')).toHaveAttribute('href', '/fallback-slug/')
     })
   })
 
