@@ -1,11 +1,14 @@
 import { fetchItunesMedia } from './page'
+import Likes from './page'
 import getMediaItems, { type NotionMediaItem } from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
+import fetchTmdbList from '@/lib/tmdb/fetchTmdbList'
 import { Ok, Err, isOk, isErr } from '@/utils/result'
 
 // Mock dependencies
 vi.mock('@/lib/notion/getMediaItems')
 vi.mock('@/lib/itunes/fetchItunesItems')
+vi.mock('@/lib/tmdb/fetchTmdbList')
 
 describe('fetchItunesMedia', () => {
   beforeEach(() => {
@@ -171,6 +174,231 @@ describe('fetchItunesMedia', () => {
         'ebook',
         'ebook',
       )
+    })
+  })
+})
+
+describe('Likes page', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('success cases', () => {
+    it('fetches all media types in parallel during build', async () => {
+      // Mock all API responses
+      const mockTvShows = [
+        {
+          id: 1,
+          title: 'TV Show 1',
+          date: '2024-01-01',
+          imageUrl: 'https://image.tmdb.org/tv1.jpg',
+          imagePlaceholder: 'base64-tv',
+          link: 'https://tmdb.org/tv/1',
+        },
+      ]
+
+      const mockMovies = [
+        {
+          id: 2,
+          title: 'Movie 1',
+          date: '2024-02-01',
+          imageUrl: 'https://image.tmdb.org/movie1.jpg',
+          imagePlaceholder: 'base64-movie',
+          link: 'https://tmdb.org/movie/2',
+        },
+      ]
+
+      const mockBooks = [
+        {
+          id: '3',
+          title: 'Book 1',
+          date: '2024-03-01',
+          imageUrl: 'https://itunes.apple.com/book1.jpg',
+          imagePlaceholder: 'base64-book',
+          link: 'https://books.apple.com/3',
+        },
+      ]
+
+      const mockAlbums = [
+        {
+          id: '4',
+          title: 'Album 1',
+          artist: 'Artist 1',
+          date: '2024-04-01',
+          imageUrl: 'https://itunes.apple.com/album1.jpg',
+          imagePlaceholder: 'base64-album',
+          link: 'https://music.apple.com/4',
+        },
+      ]
+
+      const mockPodcasts = [
+        {
+          id: '5',
+          title: 'Podcast 1',
+          date: '2024-05-01',
+          imageUrl: 'https://itunes.apple.com/podcast1.jpg',
+          imagePlaceholder: 'base64-podcast',
+          link: 'https://podcasts.apple.com/5',
+        },
+      ]
+
+      // Mock TMDB
+      vi.mocked(fetchTmdbList).mockImplementation(async (listId, mediaType) => {
+        if (mediaType === 'tv') return Ok(mockTvShows)
+        if (mediaType === 'movie') return Ok(mockMovies)
+        return Ok([])
+      })
+
+      // Mock Notion + iTunes (via fetchItunesMedia helper)
+      vi.mocked(getMediaItems).mockImplementation(async ({ category }) => {
+        const mockMediaItem = { appleId: 999, name: 'Test', date: '2024-01-01' }
+        return Ok([mockMediaItem] as unknown as NotionMediaItem[])
+      })
+
+      vi.mocked(fetchItunesItems).mockImplementation(async (items, medium) => {
+        if (medium === 'ebook') return Ok(mockBooks as iTunesItem[])
+        if (medium === 'music') return Ok(mockAlbums as iTunesItem[])
+        if (medium === 'podcast') return Ok(mockPodcasts as iTunesItem[])
+        return Ok([])
+      })
+
+      const searchParams = Promise.resolve({})
+      const result = await Likes({ searchParams })
+
+      // Verify all fetchers were called
+      expect(fetchTmdbList).toHaveBeenCalledWith(expect.any(String), 'tv')
+      expect(fetchTmdbList).toHaveBeenCalledWith(expect.any(String), 'movie')
+      expect(getMediaItems).toHaveBeenCalledTimes(3) // books, albums, podcasts
+      expect(fetchItunesItems).toHaveBeenCalledTimes(3)
+
+      // Verify component structure
+      expect(result.type).toBe('main')
+      expect(result.props.className).toBe('flex-auto')
+    })
+
+    it('passes skipCache=true to iTunes fetchers when nocache param is present', async () => {
+      // Mock responses
+      vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
+      vi.mocked(getMediaItems).mockResolvedValue(Ok([]))
+      vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
+
+      const searchParams = Promise.resolve({ nocache: 'true' })
+      await Likes({ searchParams })
+
+      // Verify skipCache was passed to getMediaItems (called by fetchItunesMedia)
+      expect(getMediaItems).toHaveBeenCalledWith({ category: 'books', skipCache: true })
+      expect(getMediaItems).toHaveBeenCalledWith({ category: 'albums', skipCache: true })
+      expect(getMediaItems).toHaveBeenCalledWith({ category: 'podcasts', skipCache: true })
+    })
+
+    it('passes skipCache=false when nocache is not "true"', async () => {
+      vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
+      vi.mocked(getMediaItems).mockResolvedValue(Ok([]))
+      vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
+
+      const searchParams = Promise.resolve({ nocache: 'false' })
+      await Likes({ searchParams })
+
+      expect(getMediaItems).toHaveBeenCalledWith({ category: 'books', skipCache: false })
+      expect(getMediaItems).toHaveBeenCalledWith({ category: 'albums', skipCache: false })
+      expect(getMediaItems).toHaveBeenCalledWith({ category: 'podcasts', skipCache: false })
+    })
+
+    it('handles empty responses from all APIs', async () => {
+      vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
+      vi.mocked(getMediaItems).mockResolvedValue(Ok([]))
+      vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
+
+      const searchParams = Promise.resolve({})
+      const result = await Likes({ searchParams })
+
+      expect(result.type).toBe('main')
+      expect(result.props.children).toBeDefined()
+    })
+  })
+
+  describe('error cases', () => {
+    it('throws when TMDB TV fetch fails', async () => {
+      const error = new Error('TMDB TV API error')
+      vi.mocked(fetchTmdbList).mockImplementation(async (listId, mediaType) => {
+        if (mediaType === 'tv') return Err(error)
+        return Ok([])
+      })
+      vi.mocked(getMediaItems).mockResolvedValue(Ok([]))
+      vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
+
+      const searchParams = Promise.resolve({})
+
+      // Promise.all with .unwrap() should throw on first failure
+      await expect(Likes({ searchParams })).rejects.toThrow('TMDB TV API error')
+    })
+
+    it('throws when TMDB movies fetch fails', async () => {
+      const error = new Error('TMDB movies API error')
+      vi.mocked(fetchTmdbList).mockImplementation(async (listId, mediaType) => {
+        if (mediaType === 'tv') return Ok([])
+        if (mediaType === 'movie') return Err(error)
+        return Ok([])
+      })
+      vi.mocked(getMediaItems).mockResolvedValue(Ok([]))
+      vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
+
+      const searchParams = Promise.resolve({})
+
+      await expect(Likes({ searchParams })).rejects.toThrow('TMDB movies API error')
+    })
+
+    it('throws when books fetch fails', async () => {
+      const error = new Error('Books fetch failed')
+      vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
+      vi.mocked(getMediaItems).mockImplementation(async ({ category }) => {
+        if (category === 'books') return Err(error)
+        return Ok([])
+      })
+      vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
+
+      const searchParams = Promise.resolve({})
+
+      await expect(Likes({ searchParams })).rejects.toThrow('Books fetch failed')
+    })
+
+    it('throws when albums fetch fails', async () => {
+      const error = new Error('Albums fetch failed')
+      vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
+      vi.mocked(getMediaItems).mockImplementation(async ({ category }) => {
+        if (category === 'albums') return Err(error)
+        return Ok([])
+      })
+      vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
+
+      const searchParams = Promise.resolve({})
+
+      await expect(Likes({ searchParams })).rejects.toThrow('Albums fetch failed')
+    })
+
+    it('throws when podcasts fetch fails', async () => {
+      const error = new Error('Podcasts fetch failed')
+      vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
+      vi.mocked(getMediaItems).mockImplementation(async ({ category }) => {
+        if (category === 'podcasts') return Err(error)
+        return Ok([])
+      })
+      vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
+
+      const searchParams = Promise.resolve({})
+
+      await expect(Likes({ searchParams })).rejects.toThrow('Podcasts fetch failed')
+    })
+
+    it('throws when iTunes API fails for any category', async () => {
+      const error = new Error('iTunes API error')
+      vi.mocked(fetchTmdbList).mockResolvedValue(Ok([]))
+      vi.mocked(getMediaItems).mockResolvedValue(Ok([{ appleId: 1, name: 'Test', date: '2024-01-01' }] as unknown as NotionMediaItem[]))
+      vi.mocked(fetchItunesItems).mockResolvedValue(Err(error))
+
+      const searchParams = Promise.resolve({})
+
+      await expect(Likes({ searchParams })).rejects.toThrow('iTunes API error')
     })
   })
 })
