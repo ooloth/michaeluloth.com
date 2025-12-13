@@ -7,6 +7,7 @@ import getMediaItems, {
 import { createTitleProperty, createNumberProperty, createDateProperty } from './testing/property-factories'
 import { isOk, isErr } from '@/utils/result'
 import { type CacheAdapter } from '@/lib/cache/adapter'
+import { type Client, collectPaginatedAPI } from './client'
 
 // Test helper: creates a mock cache adapter
 function createMockCache(cachedValue: unknown = null): CacheAdapter {
@@ -16,13 +17,16 @@ function createMockCache(cachedValue: unknown = null): CacheAdapter {
   }
 }
 
-// Mock dependencies
-vi.mock('./client', () => ({
-  default: {
+// Test helper: creates a mock Notion client
+function createMockNotionClient(): Client {
+  return {
     dataSources: {
       query: vi.fn(),
     },
-  },
+  } as Client
+}
+
+vi.mock('./client', () => ({
   collectPaginatedAPI: vi.fn(),
 }))
 
@@ -165,9 +169,8 @@ describe('getMediaItems', () => {
 
   describe('success cases', () => {
     it('returns Ok with valid media items from Notion API', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
 
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
         {
@@ -180,7 +183,7 @@ describe('getMediaItems', () => {
         },
       ])
 
-      const result = await getMediaItems({ category: 'books', cache: mockCache })
+      const result = await getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -197,15 +200,14 @@ describe('getMediaItems', () => {
     })
 
     it('returns Ok with cached data when available', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const cachedData: NotionMediaItem[] = [
         { id: '456', name: 'Cached Book', appleId: 99999, date: '2024-01-01' },
       ]
 
       const mockCache = createMockCache(cachedData)
+      const mockClient = createMockNotionClient()
 
-      const result = await getMediaItems({ category: 'books', cache: mockCache })
+      const result = await getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -217,9 +219,8 @@ describe('getMediaItems', () => {
     })
 
     it('skips cache when skipCache is true', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const mockCache = createMockCache([{ id: 'old', name: 'Old', appleId: 1, date: '2020-01-01' }])
+      const mockClient = createMockNotionClient()
 
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
         {
@@ -232,7 +233,7 @@ describe('getMediaItems', () => {
         },
       ])
 
-      const result = await getMediaItems({ category: 'books', skipCache: true, cache: mockCache })
+      const result = await getMediaItems({ category: 'books', skipCache: true, cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -247,9 +248,8 @@ describe('getMediaItems', () => {
     })
 
     it('handles different media categories', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
 
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
         {
@@ -262,7 +262,7 @@ describe('getMediaItems', () => {
         },
       ])
 
-      const result = await getMediaItems({ category: 'albums', cache: mockCache })
+      const result = await getMediaItems({ category: 'albums', cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -272,13 +272,12 @@ describe('getMediaItems', () => {
     })
 
     it('returns Ok with empty array when no items', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
 
       vi.mocked(collectPaginatedAPI).mockResolvedValue([])
 
-      const result = await getMediaItems({ category: 'podcasts', cache: mockCache })
+      const result = await getMediaItems({ category: 'podcasts', cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -289,13 +288,12 @@ describe('getMediaItems', () => {
 
   describe('error cases', () => {
     it('returns Err when Notion API call fails', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
       const apiError = new Error('Notion API error')
       vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-      const result = await getMediaItems({ category: 'books', cache: mockCache })
+      const result = await getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -304,9 +302,8 @@ describe('getMediaItems', () => {
     })
 
     it('returns Err when validation fails', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
 
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
         {
@@ -319,7 +316,7 @@ describe('getMediaItems', () => {
         },
       ])
 
-      const result = await getMediaItems({ category: 'books', cache: mockCache })
+      const result = await getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -333,8 +330,9 @@ describe('getMediaItems', () => {
         get: vi.fn().mockRejectedValue(cacheError),
         set: vi.fn(),
       }
+      const mockClient = createMockNotionClient()
 
-      const result = await getMediaItems({ category: 'books', cache: mockCache })
+      const result = await getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -343,13 +341,12 @@ describe('getMediaItems', () => {
     })
 
     it('wraps non-Error exceptions as Error', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
 
       vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
 
-      const result = await getMediaItems({ category: 'books', cache: mockCache })
+      const result = await getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {

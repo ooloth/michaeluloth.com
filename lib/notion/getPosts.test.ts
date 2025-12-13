@@ -12,6 +12,7 @@ import {
 } from './testing/property-factories'
 import { isOk, isErr } from '@/utils/result'
 import { type CacheAdapter } from '@/lib/cache/adapter'
+import { type Client, collectPaginatedAPI } from './client'
 
 // Test helper: creates a mock cache adapter
 function createMockCache(cachedValue: unknown = null): CacheAdapter {
@@ -21,13 +22,16 @@ function createMockCache(cachedValue: unknown = null): CacheAdapter {
   }
 }
 
-// Mock dependencies
-vi.mock('./client', () => ({
-  default: {
+// Test helper: creates a mock Notion client
+function createMockNotionClient(): Client {
+  return {
     dataSources: {
       query: vi.fn(),
     },
-  },
+  } as Client
+}
+
+vi.mock('./client', () => ({
   collectPaginatedAPI: vi.fn(),
 }))
 
@@ -241,9 +245,8 @@ describe('getPosts', () => {
 
   describe('success cases', () => {
     it('returns Ok with valid posts from Notion API', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
 
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
         {
@@ -258,7 +261,7 @@ describe('getPosts', () => {
         },
       ])
 
-      const result = await getPosts({ cache: mockCache })
+      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -276,8 +279,6 @@ describe('getPosts', () => {
     })
 
     it('returns Ok with cached data when available', async () => {
-      const { collectPaginatedAPI } = await import('./client')
-
       const cachedData: PostListItem[] = [
         {
           id: '456',
@@ -290,8 +291,9 @@ describe('getPosts', () => {
       ]
 
       const mockCache = createMockCache(cachedData)
+      const mockClient = createMockNotionClient()
 
-      const result = await getPosts({ cache: mockCache })
+      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -303,7 +305,7 @@ describe('getPosts', () => {
     })
 
     it('skips cache when skipCache is true', async () => {
-      const { collectPaginatedAPI } = await import('./client')
+      const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache([
         { id: 'old', slug: 'old', title: 'Old', description: null, firstPublished: '2020-01-01', featuredImage: null },
@@ -322,7 +324,7 @@ describe('getPosts', () => {
         },
       ])
 
-      const result = await getPosts({ skipCache: true, cache: mockCache })
+      const result = await getPosts({ skipCache: true, cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -337,12 +339,12 @@ describe('getPosts', () => {
     })
 
     it('respects sortDirection parameter', async () => {
-      const { collectPaginatedAPI } = await import('./client')
+      const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockResolvedValue([])
 
-      await getPosts({ sortDirection: 'descending', cache: mockCache })
+      await getPosts({ sortDirection: 'descending', cache: mockCache, notionClient: mockClient })
 
       expect(collectPaginatedAPI).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({
         sorts: [{ property: 'First published', direction: 'descending' }],
@@ -350,24 +352,24 @@ describe('getPosts', () => {
     })
 
     it('uses correct cache key for different sort directions', async () => {
-      const { collectPaginatedAPI } = await import('./client')
+      const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockResolvedValue([])
 
-      await getPosts({ sortDirection: 'descending', cache: mockCache })
+      await getPosts({ sortDirection: 'descending', cache: mockCache, notionClient: mockClient })
 
       expect(mockCache.get).toHaveBeenCalledWith('posts-list-descending', 'notion')
       expect(mockCache.set).toHaveBeenCalledWith('posts-list-descending', expect.any(Array), 'notion')
     })
 
     it('returns Ok with empty array when no posts', async () => {
-      const { collectPaginatedAPI } = await import('./client')
+      const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockResolvedValue([])
 
-      const result = await getPosts({ cache: mockCache })
+      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -378,13 +380,13 @@ describe('getPosts', () => {
 
   describe('error cases', () => {
     it('returns Err when Notion API call fails', async () => {
-      const { collectPaginatedAPI } = await import('./client')
+      const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache()
       const apiError = new Error('Notion API error')
       vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-      const result = await getPosts({ cache: mockCache })
+      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -393,7 +395,7 @@ describe('getPosts', () => {
     })
 
     it('returns Err when validation fails', async () => {
-      const { collectPaginatedAPI } = await import('./client')
+      const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
@@ -409,7 +411,7 @@ describe('getPosts', () => {
         },
       ])
 
-      const result = await getPosts({ cache: mockCache })
+      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -423,8 +425,9 @@ describe('getPosts', () => {
         get: vi.fn().mockRejectedValue(cacheError),
         set: vi.fn(),
       }
+      const mockClient = createMockNotionClient()
 
-      const result = await getPosts({ cache: mockCache })
+      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -433,12 +436,12 @@ describe('getPosts', () => {
     })
 
     it('wraps non-Error exceptions as Error', async () => {
-      const { collectPaginatedAPI } = await import('./client')
+      const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
 
-      const result = await getPosts({ cache: mockCache })
+      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {

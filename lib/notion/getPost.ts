@@ -1,5 +1,5 @@
 import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
-import notion from './client'
+import notion, { type Client } from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
 import { PostListItemSchema, PostPropertiesSchema, type Post, type PostListItem } from './schemas/post'
@@ -14,6 +14,7 @@ type Options = {
   includePrevAndNext?: boolean
   skipCache?: boolean
   cache?: CacheAdapter
+  notionClient?: Client
 }
 
 export const INVALID_POST_DETAILS_ERROR = 'Invalid post details data - build aborted'
@@ -86,6 +87,7 @@ export default async function getPost({
   includePrevAndNext = false,
   skipCache = false,
   cache = filesystemCache,
+  notionClient = notion,
 }: Options): Promise<Result<Post | null, Error>> {
   try {
     if (!slug) {
@@ -103,7 +105,7 @@ export default async function getPost({
 
     console.info(`📥 Fetching post from Notion API: ${slug}`)
 
-    const response = await notion.dataSources.query({
+    const response = await notionClient.dataSources.query({
       data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
       filter: {
         and: [{ property: 'Slug', rich_text: { equals: slug } }],
@@ -123,7 +125,7 @@ export default async function getPost({
     let post = transformNotionPageToPost(response.results[0])
 
     if (includePrevAndNext) {
-      const postsResult = await getPosts({ sortDirection: 'ascending', skipCache, cache })
+      const postsResult = await getPosts({ sortDirection: 'ascending', skipCache, cache, notionClient })
       if (!postsResult.ok) {
         return Err(postsResult.error)
       }

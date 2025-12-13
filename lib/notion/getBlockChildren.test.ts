@@ -1,18 +1,21 @@
 import { describe, it, expect, vi } from 'vitest'
 import getBlockChildren, { validateBlocks, INVALID_BLOCK_ERROR } from './getBlockChildren'
-import * as client from './client'
+import { collectPaginatedAPI, type Client } from './client'
 import type { GroupedBlock } from './schemas/block'
 import { isOk, isErr } from '@/utils/result'
 
-// Mock the client
-vi.mock('./client', () => ({
-  default: {
+// Test helper: creates a mock Notion client
+function createMockNotionClient(): Client {
+  return {
     blocks: {
       children: {
         list: vi.fn(),
       },
     },
-  },
+  } as Client
+}
+
+vi.mock('./client', () => ({
   collectPaginatedAPI: vi.fn(),
 }))
 
@@ -977,6 +980,7 @@ describe('validateBlocks', () => {
 
 describe('getBlockChildren', () => {
   it('fetches and validates blocks from Notion API', async () => {
+    const mockClient = createMockNotionClient()
     const mockBlocks = [
       {
         type: 'paragraph',
@@ -998,11 +1002,11 @@ describe('getBlockChildren', () => {
       },
     ]
 
-    vi.mocked(client.collectPaginatedAPI).mockResolvedValue(mockBlocks)
+    vi.mocked(collectPaginatedAPI).mockResolvedValue(mockBlocks)
 
-    const result = await getBlockChildren('test-block-id')
+    const result = await getBlockChildren('test-block-id', mockClient)
 
-    expect(client.collectPaginatedAPI).toHaveBeenCalledWith(client.default.blocks.children.list, {
+    expect(collectPaginatedAPI).toHaveBeenCalledWith(mockClient.blocks.children.list, {
       block_id: 'test-block-id',
     })
 
@@ -1028,6 +1032,7 @@ describe('getBlockChildren', () => {
   })
 
   it('returns Err on invalid data from API', async () => {
+    const mockClient = createMockNotionClient()
     const invalidBlocks = [
       {
         type: 'paragraph',
@@ -1035,9 +1040,9 @@ describe('getBlockChildren', () => {
       },
     ]
 
-    vi.mocked(client.collectPaginatedAPI).mockResolvedValue(invalidBlocks)
+    vi.mocked(collectPaginatedAPI).mockResolvedValue(invalidBlocks)
 
-    const result = await getBlockChildren('test-block-id')
+    const result = await getBlockChildren('test-block-id', mockClient)
 
     expect(isErr(result)).toBe(true)
     if (isErr(result)) {
@@ -1046,10 +1051,11 @@ describe('getBlockChildren', () => {
   })
 
   it('returns Err when Notion API call fails', async () => {
+    const mockClient = createMockNotionClient()
     const apiError = new Error('Notion API error')
-    vi.mocked(client.collectPaginatedAPI).mockRejectedValue(apiError)
+    vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-    const result = await getBlockChildren('test-block-id')
+    const result = await getBlockChildren('test-block-id', mockClient)
 
     expect(isErr(result)).toBe(true)
     if (isErr(result)) {
@@ -1058,9 +1064,10 @@ describe('getBlockChildren', () => {
   })
 
   it('wraps non-Error exceptions as Error', async () => {
-    vi.mocked(client.collectPaginatedAPI).mockRejectedValue('string error')
+    const mockClient = createMockNotionClient()
+    vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
 
-    const result = await getBlockChildren('test-block-id')
+    const result = await getBlockChildren('test-block-id', mockClient)
 
     expect(isErr(result)).toBe(true)
     if (isErr(result)) {

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
-import notion, { collectPaginatedAPI } from './client'
+import notion, { collectPaginatedAPI, type Client } from './client'
 import {
   createPropertiesSchema,
   TitlePropertySchema,
@@ -51,6 +51,7 @@ type Options = {
   category: MediaCategory
   skipCache?: boolean
   cache?: CacheAdapter
+  notionClient?: Client
 }
 
 /**
@@ -110,7 +111,7 @@ const DATA_SOURCE_IDS: Record<MediaCategory, string> = {
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
 export default async function getMediaItems(options: Options): Promise<Result<NotionMediaItem[], Error>> {
-  const { category, skipCache = false, cache = filesystemCache } = options
+  const { category, skipCache = false, cache = filesystemCache, notionClient = notion } = options
 
   try {
     // Check cache first (cache utility handles dev mode check)
@@ -124,7 +125,7 @@ export default async function getMediaItems(options: Options): Promise<Result<No
 
     console.log(`📥 Fetching ${category} from Notion API`)
 
-    const pages = await collectPaginatedAPI(notion.dataSources.query, {
+    const pages = await collectPaginatedAPI(notionClient.dataSources.query, {
       data_source_id: DATA_SOURCE_IDS[category],
       filter: {
         and: [

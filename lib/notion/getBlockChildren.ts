@@ -1,4 +1,4 @@
-import notion, { collectPaginatedAPI } from './client'
+import notion, { collectPaginatedAPI, type Client } from './client'
 import { BlockSchema, type Block, type GroupedBlock, type BulletedListBlock, type NumberedListBlock } from './schemas/block'
 import { logValidationError } from '@/utils/zod'
 import { Ok, toErr, type Result } from '@/utils/result'
@@ -90,9 +90,12 @@ export function validateBlocks(blocks: unknown[]): GroupedBlock[] {
  *
  * @see https://developers.notion.com/reference/get-block-children
  */
-export default async function getBlockChildren(blockId: string): Promise<Result<GroupedBlock[], Error>> {
+export default async function getBlockChildren(
+  blockId: string,
+  notionClient: Client = notion
+): Promise<Result<GroupedBlock[], Error>> {
   try {
-    const children = await collectPaginatedAPI(notion.blocks.children.list, {
+    const children = await collectPaginatedAPI(notionClient.blocks.children.list, {
       block_id: blockId,
     })
 
