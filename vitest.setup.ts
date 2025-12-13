@@ -1,4 +1,5 @@
 import { vi } from 'vitest'
+import '@testing-library/jest-dom/vitest'
 
 // Make vi globally available
 ;(global as unknown as { vi: typeof vi }).vi = vi
