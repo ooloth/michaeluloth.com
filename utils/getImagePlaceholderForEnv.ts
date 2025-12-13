@@ -1,5 +1,9 @@
 import { getPlaiceholder, type GetPlaiceholderSrc } from 'plaiceholder'
 
+export const ERRORS = {
+  INVALID_SIZE: '[getImagePlaceholderForEnv]: size argument must be an integer between 4 and 64',
+} as const
+
 /**
  * Generates image placeholders with environment-aware behavior.
  * Production: generates actual base64 placeholders from image URLs using plaiceholder.
@@ -11,7 +15,7 @@ import { getPlaiceholder, type GetPlaiceholderSrc } from 'plaiceholder'
 export default async function getImagePlaceholderForEnv(imageUrl: string, size: number = 4): Promise<string> {
   // Validate size argument
   if ((size && size < 4) || (size && size > 64)) {
-    throw Error('[getImagePlaceholderForEnv]: size argument must be an integer between 4 and 64')
+    throw Error(ERRORS.INVALID_SIZE)
   }
 
   if (process.env.NODE_ENV === 'production') {

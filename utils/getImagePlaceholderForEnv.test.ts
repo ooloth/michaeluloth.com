@@ -1,4 +1,4 @@
-import getImagePlaceholderForEnv from './getImagePlaceholderForEnv'
+import getImagePlaceholderForEnv, { ERRORS } from './getImagePlaceholderForEnv'
 
 // Mock plaiceholder (vi is globally available)
 vi.mock('plaiceholder', () => ({
@@ -48,15 +48,11 @@ describe('getImagePlaceholderForEnv', () => {
   })
 
   it('throws error if size is less than 4', async () => {
-    await expect(getImagePlaceholderForEnv('https://example.com/image.jpg', 3)).rejects.toThrow(
-      '[getImagePlaceholderForEnv]: size argument must be an integer between 4 and 64',
-    )
+    await expect(getImagePlaceholderForEnv('https://example.com/image.jpg', 3)).rejects.toThrow(ERRORS.INVALID_SIZE)
   })
 
   it('throws error if size is greater than 64', async () => {
-    await expect(getImagePlaceholderForEnv('https://example.com/image.jpg', 65)).rejects.toThrow(
-      '[getImagePlaceholderForEnv]: size argument must be an integer between 4 and 64',
-    )
+    await expect(getImagePlaceholderForEnv('https://example.com/image.jpg', 65)).rejects.toThrow(ERRORS.INVALID_SIZE)
   })
 
   describe('production error handling', () => {
