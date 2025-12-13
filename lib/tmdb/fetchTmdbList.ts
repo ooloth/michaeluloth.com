@@ -121,5 +121,5 @@ export default async function fetchTmdbList(
     page++
   } while (page <= totalPages)
 
-  return Ok(await Promise.all(items))
+  return Ok(items)
 }
