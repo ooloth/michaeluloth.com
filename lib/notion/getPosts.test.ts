@@ -1,10 +1,37 @@
-import { transformNotionPagesToPostListItems, INVALID_POST_ERROR, INVALID_POST_PROPERTIES_ERROR } from './getPosts'
+import getPosts, {
+  transformNotionPagesToPostListItems,
+  INVALID_POST_ERROR,
+  INVALID_POST_PROPERTIES_ERROR,
+} from './getPosts'
+import { type PostListItem } from './schemas/post'
 import {
   createRichTextProperty,
   createTitleProperty,
   createDateProperty,
   createFilesProperty,
 } from './testing/property-factories'
+import { isOk, isErr } from '@/utils/result'
+
+// Mock dependencies
+vi.mock('./client', () => ({
+  default: {
+    dataSources: {
+      query: vi.fn(),
+    },
+  },
+  collectPaginatedAPI: vi.fn(),
+}))
+
+vi.mock('@/lib/cache/filesystem', () => ({
+  getCached: vi.fn(),
+  setCached: vi.fn(),
+}))
+
+vi.mock('@/lib/env', () => ({
+  env: {
+    NOTION_DATA_SOURCE_ID_WRITING: 'writing-ds-id',
+  },
+}))
 
 describe('transformNotionPagesToPostListItems', () => {
   it('transforms valid Notion pages to post list items', () => {
@@ -200,5 +227,223 @@ describe('transformNotionPagesToPostListItems', () => {
     ]
 
     expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_ERROR)
+  })
+})
+
+describe('getPosts', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('success cases', () => {
+    it('returns Ok with valid posts from Notion API', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached, setCached } = await import('@/lib/cache/filesystem')
+
+      vi.mocked(getCached).mockResolvedValue(null)
+      vi.mocked(collectPaginatedAPI).mockResolvedValue([
+        {
+          id: '123',
+          properties: {
+            Slug: createRichTextProperty('test-post'),
+            Title: createTitleProperty('Test Post'),
+            Description: createRichTextProperty('A test'),
+            'First published': createDateProperty('2024-01-15'),
+            'Featured image': createFilesProperty([]),
+          },
+        },
+      ])
+
+      const result = await getPosts()
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value).toHaveLength(1)
+        expect(result.value[0]).toMatchObject({
+          id: '123',
+          slug: 'test-post',
+          title: 'Test Post',
+          description: 'A test',
+          firstPublished: '2024-01-15',
+        })
+      }
+
+      expect(setCached).toHaveBeenCalledWith('posts-list-ascending', expect.any(Array), 'notion')
+    })
+
+    it('returns Ok with cached data when available', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached } = await import('@/lib/cache/filesystem')
+
+      const cachedData: PostListItem[] = [
+        {
+          id: '456',
+          slug: 'cached-post',
+          title: 'Cached Post',
+          description: null,
+          firstPublished: '2024-01-01',
+          featuredImage: null,
+        },
+      ]
+      vi.mocked(getCached).mockResolvedValue(cachedData)
+
+      const result = await getPosts()
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value).toEqual(cachedData)
+      }
+
+      // Should not call API when cache hit
+      expect(collectPaginatedAPI).not.toHaveBeenCalled()
+    })
+
+    it('skips cache when skipCache is true', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached, setCached } = await import('@/lib/cache/filesystem')
+
+      vi.mocked(getCached).mockResolvedValue([
+        { id: 'old', slug: 'old', title: 'Old', description: null, firstPublished: '2020-01-01', featuredImage: null },
+      ])
+      vi.mocked(collectPaginatedAPI).mockResolvedValue([
+        {
+          id: '789',
+          properties: {
+            Slug: createRichTextProperty('fresh-post'),
+            Title: createTitleProperty('Fresh Post'),
+            Description: createRichTextProperty(null),
+            'First published': createDateProperty('2024-03-15'),
+            'Featured image': createFilesProperty([]),
+          },
+        },
+      ])
+
+      const result = await getPosts({ skipCache: true })
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value[0].slug).toBe('fresh-post')
+      }
+
+      // Should call API and update cache even with skipCache
+      expect(collectPaginatedAPI).toHaveBeenCalled()
+      expect(setCached).toHaveBeenCalled()
+    })
+
+    it('respects sortDirection parameter', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached } = await import('@/lib/cache/filesystem')
+
+      vi.mocked(getCached).mockResolvedValue(null)
+      vi.mocked(collectPaginatedAPI).mockResolvedValue([])
+
+      await getPosts({ sortDirection: 'descending' })
+
+      expect(collectPaginatedAPI).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({
+        sorts: [{ property: 'First published', direction: 'descending' }],
+      }))
+    })
+
+    it('uses correct cache key for different sort directions', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached, setCached } = await import('@/lib/cache/filesystem')
+
+      vi.mocked(getCached).mockResolvedValue(null)
+      vi.mocked(collectPaginatedAPI).mockResolvedValue([])
+
+      await getPosts({ sortDirection: 'descending' })
+
+      expect(getCached).toHaveBeenCalledWith('posts-list-descending', 'notion')
+      expect(setCached).toHaveBeenCalledWith('posts-list-descending', expect.any(Array), 'notion')
+    })
+
+    it('returns Ok with empty array when no posts', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached } = await import('@/lib/cache/filesystem')
+
+      vi.mocked(getCached).mockResolvedValue(null)
+      vi.mocked(collectPaginatedAPI).mockResolvedValue([])
+
+      const result = await getPosts()
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value).toEqual([])
+      }
+    })
+  })
+
+  describe('error cases', () => {
+    it('returns Err when Notion API call fails', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached } = await import('@/lib/cache/filesystem')
+
+      vi.mocked(getCached).mockResolvedValue(null)
+      const apiError = new Error('Notion API error')
+      vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
+
+      const result = await getPosts()
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBe(apiError)
+      }
+    })
+
+    it('returns Err when validation fails', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached } = await import('@/lib/cache/filesystem')
+
+      vi.mocked(getCached).mockResolvedValue(null)
+      vi.mocked(collectPaginatedAPI).mockResolvedValue([
+        {
+          id: '123',
+          properties: {
+            Slug: createRichTextProperty(null), // Invalid: missing slug
+            Title: createTitleProperty('Post'),
+            Description: createRichTextProperty(null),
+            'First published': createDateProperty('2024-01-15'),
+            'Featured image': createFilesProperty([]),
+          },
+        },
+      ])
+
+      const result = await getPosts()
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error.message).toBe(INVALID_POST_ERROR)
+      }
+    })
+
+    it('returns Err when cache read fails', async () => {
+      const { getCached } = await import('@/lib/cache/filesystem')
+
+      const cacheError = new Error('Cache read error')
+      vi.mocked(getCached).mockRejectedValue(cacheError)
+
+      const result = await getPosts()
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBe(cacheError)
+      }
+    })
+
+    it('wraps non-Error exceptions as Error', async () => {
+      const { collectPaginatedAPI } = await import('./client')
+      const { getCached } = await import('@/lib/cache/filesystem')
+
+      vi.mocked(getCached).mockResolvedValue(null)
+      vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
+
+      const result = await getPosts()
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBeInstanceOf(Error)
+        expect(result.error.message).toBe('string error')
+      }
+    })
   })
 })

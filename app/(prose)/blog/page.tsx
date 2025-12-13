@@ -3,6 +3,7 @@ import { type ReactElement } from 'react'
 import getPosts from '@/lib/notion/getPosts'
 import Heading from '@/ui/heading'
 import { getHumanReadableDate, getMachineReadableDate } from '@/utils/dates'
+import { unwrap } from '@/utils/result'
 
 type Props = Readonly<{
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -12,7 +13,7 @@ export default async function Blog({ searchParams }: Props): Promise<ReactElemen
   const params = await searchParams
   const skipCache = params.nocache === 'true'
 
-  const posts = await getPosts({ sortDirection: 'descending', skipCache })
+  const posts = unwrap(await getPosts({ sortDirection: 'descending', skipCache }))
 
   return (
     <main className="flex-auto">
