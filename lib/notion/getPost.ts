@@ -2,7 +2,7 @@ import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
 import notion, { type Client } from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
-import { PostListItemSchema, PostPropertiesSchema, type Post } from './schemas/post'
+import { PostListItemSchema, PostPropertiesSchema, PostSchema, type Post } from './schemas/post'
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
@@ -97,7 +97,7 @@ export default async function getPost({
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `post-${slug}-blocks-${includeBlocks}-nav-${includePrevAndNext}`
     if (!skipCache) {
-      const cached = await cache.get<Post>(cacheKey, 'notion')
+      const cached = await cache.get<Post>(cacheKey, 'notion', PostSchema)
       if (cached) {
         return Ok(cached)
       }

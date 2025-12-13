@@ -362,7 +362,7 @@ describe('getPosts', () => {
 
       await getPosts({ sortDirection: 'descending', cache: mockCache, notionClient: mockClient })
 
-      expect(mockCache.get).toHaveBeenCalledWith('posts-list-descending', 'notion')
+      expect(mockCache.get).toHaveBeenCalledWith('posts-list-descending', 'notion', expect.any(Object))
       expect(mockCache.set).toHaveBeenCalledWith('posts-list-descending', expect.any(Array), 'notion')
     })
 

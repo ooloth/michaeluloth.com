@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
+import { formatValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 import { type Result, Ok, Err, toErr } from '@/utils/result'
 
@@ -63,7 +64,7 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
           // Validate raw TMDB data at API boundary
           const parsedResult = TmdbApiResultSchema.safeParse(result)
           if (!parsedResult.success) {
-            console.log('Skipping invalid TMDB result:', parsedResult.error.format())
+            console.log('Skipping invalid TMDB result:', formatValidationError(parsedResult.error))
             continue
           }
 

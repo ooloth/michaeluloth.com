@@ -34,6 +34,17 @@ export const PostListItemSchema = z.object({
 // Infer TypeScript type from Zod schema (single source of truth)
 export type PostListItem = z.infer<typeof PostListItemSchema>
 
+// Schema for full post (includes blocks and all metadata)
+// Used for validating cached post data
+export const PostSchema = PostListItemSchema.extend({
+  // Blocks are stored as unknown[] in cache for flexibility,
+  // and are validated separately during fetching (see getBlockChildren)
+  blocks: z.array(z.unknown()),
+  lastEditedTime: z.string(),
+  prevPost: PostListItemSchema.nullable(),
+  nextPost: PostListItemSchema.nullable(),
+})
+
 // Full post (includes blocks and all metadata)
 // Note: blocks are validated in getBlockChildren, not here
 export type Post = PostListItem & {

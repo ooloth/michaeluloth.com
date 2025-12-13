@@ -5,6 +5,7 @@ import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 import { type Result, Ok, toErr } from '@/utils/result'
+import { z } from 'zod'
 
 type Options = {
   sortDirection?: 'ascending' | 'descending'
@@ -74,7 +75,7 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `posts-list-${sortDirection}`
     if (!skipCache) {
-      const cached = await cache.get<PostListItem[]>(cacheKey, 'notion')
+      const cached = await cache.get<PostListItem[]>(cacheKey, 'notion', z.array(PostListItemSchema))
       if (cached) {
         return Ok(cached)
       }
