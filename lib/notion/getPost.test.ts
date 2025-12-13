@@ -442,13 +442,13 @@ describe('getPost', () => {
       const mockClient = createMockNotionClient()
 
       await getPost({ slug: 'test', cache: mockCache, notionClient: mockClient })
-      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-false-nav-false', 'notion')
+      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-false-nav-false', 'notion', expect.any(Object))
 
       await getPost({ slug: 'test', includeBlocks: true, cache: mockCache, notionClient: mockClient })
-      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-true-nav-false', 'notion')
+      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-true-nav-false', 'notion', expect.any(Object))
 
       await getPost({ slug: 'test', includePrevAndNext: true, cache: mockCache, notionClient: mockClient })
-      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-false-nav-true', 'notion')
+      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-false-nav-true', 'notion', expect.any(Object))
     })
   })
 
