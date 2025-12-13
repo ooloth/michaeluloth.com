@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation'
 
 import getPost from '@/lib/notion/getPost'
 import getPosts from '@/lib/notion/getPosts'
-import { unwrap } from '@/utils/result'
 
 import Post from './ui/post'
 
@@ -96,7 +95,7 @@ export default async function DynamicRoute({ params, searchParams }: Props) {
  * @see https://nextjs.org/docs/app/api-reference/functions/generate-static-params
  */
 export async function generateStaticParams(): Promise<Params[]> {
-  const posts = unwrap(await getPosts({ sortDirection: 'ascending' }))
+  const posts = (await getPosts({ sortDirection: 'ascending' })).unwrap()
 
   return posts.map(post => ({ slug: post.slug }))
 }

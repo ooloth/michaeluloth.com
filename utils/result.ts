@@ -3,85 +3,136 @@
  * Represents either a successful value (Ok) or an error (Err).
  *
  * Inspired by Rust's Result type and functional error handling patterns.
+ *
+ * Usage:
+ * ```typescript
+ * const result = await fetchData()
+ *
+ * // Method-based API with autocomplete:
+ * const data = result.unwrap()                    // Throws on error
+ * const dataOrDefault = result.unwrapOr([])       // Returns default on error
+ * const mapped = result.map(d => d.length)        // Transform success value
+ *
+ * // Type narrowing still works:
+ * if (result.ok) {
+ *   result.value  // Type: T
+ * } else {
+ *   result.error  // Type: E
+ * }
+ * ```
  */
-export type Result<T, E = Error> = Ok<T> | Err<E>
+export type Result<T, E = Error> = OkResult<T> | ErrResult<E>
 
-export type Ok<T> = {
+export interface OkResult<T> {
   readonly ok: true
   readonly value: T
+
+  /** Extract value, or throw if Err */
+  unwrap(): T
+
+  /** Extract value, or return default if Err */
+  unwrapOr(defaultValue: T): T
+
+  /** Transform the value inside Ok */
+  map<U>(fn: (value: T) => U): OkResult<U>
+
+  /** Chain Result-returning operations */
+  flatMap<U, F>(fn: (value: T) => Result<U, F>): Result<U, F>
+
+  /** Transform the error (no-op for Ok) */
+  mapErr<F>(fn: (error: never) => F): OkResult<T>
 }
 
-export type Err<E> = {
+export interface ErrResult<E> {
   readonly ok: false
   readonly error: E
+
+  /** Extract value, or throw if Err */
+  unwrap(): never
+
+  /** Extract value, or return default if Err */
+  unwrapOr<T>(defaultValue: T): T
+
+  /** Transform the value (no-op for Err) */
+  map<U>(fn: (value: never) => U): ErrResult<E>
+
+  /** Chain Result-returning operations (no-op for Err) */
+  flatMap<U, F>(fn: (value: never) => Result<U, F>): ErrResult<E>
+
+  /** Transform the error inside Err */
+  mapErr<F>(fn: (error: E) => F): ErrResult<F>
 }
 
 /**
  * Create a successful Result
  */
-export function Ok<T>(value: T): Ok<T> {
-  return { ok: true, value }
+export function Ok<T>(value: T): OkResult<T> {
+  return {
+    ok: true,
+    value,
+
+    unwrap() {
+      return value
+    },
+
+    unwrapOr(_defaultValue: T) {
+      return value
+    },
+
+    map<U>(fn: (value: T) => U): OkResult<U> {
+      return Ok(fn(value))
+    },
+
+    flatMap<U, F>(fn: (value: T) => Result<U, F>): Result<U, F> {
+      return fn(value)
+    },
+
+    mapErr<F>(_fn: (error: never) => F): OkResult<T> {
+      return this
+    },
+  }
 }
 
 /**
  * Create a failed Result
  */
-export function Err<E>(error: E): Err<E> {
-  return { ok: false, error }
+export function Err<E>(error: E): ErrResult<E> {
+  return {
+    ok: false,
+    error,
+
+    unwrap(): never {
+      throw error
+    },
+
+    unwrapOr<T>(defaultValue: T): T {
+      return defaultValue
+    },
+
+    map<U>(_fn: (value: never) => U): ErrResult<E> {
+      return this
+    },
+
+    flatMap<U, F>(_fn: (value: never) => Result<U, F>): ErrResult<E> {
+      return this
+    },
+
+    mapErr<F>(fn: (error: E) => F): ErrResult<F> {
+      return Err(fn(error))
+    },
+  }
 }
 
 /**
  * Check if a Result is Ok
  */
-export function isOk<T, E>(result: Result<T, E>): result is Ok<T> {
+export function isOk<T, E>(result: Result<T, E>): result is OkResult<T> {
   return result.ok === true
 }
 
 /**
  * Check if a Result is Err
  */
-export function isErr<T, E>(result: Result<T, E>): result is Err<E> {
+export function isErr<T, E>(result: Result<T, E>): result is ErrResult<E> {
   return result.ok === false
-}
-
-/**
- * Extract value from Ok, or throw if Err
- * Use with caution - only when you're sure the operation succeeded
- */
-export function unwrap<T, E>(result: Result<T, E>): T {
-  if (result.ok) {
-    return result.value
-  }
-  throw result.error
-}
-
-/**
- * Extract value from Ok, or return a default value if Err
- */
-export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
-  return result.ok ? result.value : defaultValue
-}
-
-/**
- * Map over the value in an Ok Result
- */
-export function map<T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> {
-  return result.ok ? Ok(fn(result.value)) : result
-}
-
-/**
- * Map over the error in an Err Result
- */
-export function mapErr<T, E, F>(result: Result<T, E>, fn: (error: E) => F): Result<T, F> {
-  return result.ok ? result : Err(fn(result.error))
-}
-
-/**
- * Chain multiple Result-returning operations
- */
-export function flatMap<T, U, E>(
-  result: Result<T, E>,
-  fn: (value: T) => Result<U, E>
-): Result<U, E> {
-  return result.ok ? fn(result.value) : result
 }

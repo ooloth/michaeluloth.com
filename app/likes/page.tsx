@@ -6,7 +6,6 @@ import fetchTmdbList, { type TmdbItem } from '@/lib/tmdb/fetchTmdbList'
 import getMediaItems from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
 import { env } from '@/lib/env'
-import { unwrap } from '@/utils/result'
 
 export const metadata: Metadata = {
   title: 'Likes - Michael Uloth',
@@ -76,10 +75,10 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
 
   // Fetch all categories in parallel
   const [tv, movies, books, albums, podcasts] = await Promise.all([
-    fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then(unwrap),
-    fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then(unwrap),
+    fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then((r) => r.unwrap()),
+    fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then((r) => r.unwrap()),
     getMediaItems({ category: 'books', skipCache })
-      .then(unwrap)
+      .then((r) => r.unwrap())
       .then((items) =>
         fetchItunesItems(
           items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
@@ -87,9 +86,9 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
           'ebook',
         ),
       )
-      .then(unwrap),
+      .then((r) => r.unwrap()),
     getMediaItems({ category: 'albums', skipCache })
-      .then(unwrap)
+      .then((r) => r.unwrap())
       .then((items) =>
         fetchItunesItems(
           items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
@@ -97,9 +96,9 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
           'album',
         ),
       )
-      .then(unwrap),
+      .then((r) => r.unwrap()),
     getMediaItems({ category: 'podcasts', skipCache })
-      .then(unwrap)
+      .then((r) => r.unwrap())
       .then((items) =>
         fetchItunesItems(
           items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
@@ -107,7 +106,7 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
           'podcast',
         ),
       )
-      .then(unwrap),
+      .then((r) => r.unwrap()),
   ])
 
   return (

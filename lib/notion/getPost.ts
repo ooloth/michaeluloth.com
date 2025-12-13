@@ -6,7 +6,6 @@ import { PostListItemSchema, PostPropertiesSchema, type Post, type PostListItem 
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
-import { unwrap } from '@/utils/result'
 
 type Options = {
   slug: string | null
@@ -120,7 +119,7 @@ export default async function getPost({
   let post = transformNotionPageToPost(response.results[0])
 
   if (includePrevAndNext) {
-    const posts = unwrap(await getPosts({ sortDirection: 'ascending', skipCache }))
+    const posts = (await getPosts({ sortDirection: 'ascending', skipCache })).unwrap()
 
     const postSlugs = posts.map(post => post.slug)
     const index = postSlugs.indexOf(slug)
