@@ -1,3 +1,7 @@
+/**
+ * @vitest-environment happy-dom
+ */
+
 import { render, screen } from '@testing-library/react'
 import { fetchItunesMedia } from './page'
 import Likes from './page'

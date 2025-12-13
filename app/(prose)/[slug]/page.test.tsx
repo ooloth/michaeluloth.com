@@ -1,3 +1,7 @@
+/**
+ * @vitest-environment happy-dom
+ */
+
 import { render, screen } from '@testing-library/react'
 import { generateStaticParams } from './page'
 import DynamicRoute from './page'
