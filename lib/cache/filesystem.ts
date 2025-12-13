@@ -62,6 +62,7 @@ export async function getCached<T>(key: string, dir: string = 'default', schema?
     }
 
     console.log(`💾 Cache hit: ${key}`)
+    // Safe: cache file structure validated above, caller responsible for type safety without schema
     return data as T
   } catch {
     // Cache miss or read error - not a problem, just return null
