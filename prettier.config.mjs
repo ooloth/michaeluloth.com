@@ -1,8 +1,7 @@
 // See: https://prettier.io/docs/configuration
 
-import { type Config } from 'prettier'
-
-const config: Config = {
+/** @type {import('prettier').Config} */
+const config = {
   arrowParens: 'avoid',
   bracketSameLine: false,
   bracketSpacing: true,
