@@ -1,0 +1,213 @@
+# Build-Time Testing Gaps Analysis
+
+**Date**: 2025-12-13
+**Status**: Reference document
+
+## Overview
+
+This document identifies testing gaps in the build-time logic of the Next.js application. Build-time logic includes static page generation, data fetching, image processing, and validation that occurs during `next build`.
+
+## Major Testing Gaps
+
+### 1. `generateStaticParams` is completely untested ❌ CRITICAL
+
+**Location**: `app/(prose)/[slug]/page.tsx:97-101`
+
+**What it does**:
+- Queries Notion API to fetch all posts
+- Maps them to slug params for static page generation
+- Critical build-time function that determines which pages Next.js pre-renders
+
+**Current test coverage**: None
+
+**Risks**:
+- If `getPosts` returns an error, the build will crash with no test coverage
+- No validation that slugs are properly formatted
+- No test ensuring the function returns the correct shape for Next.js
+
+**What should be tested**:
+- Returns array of `{ slug: string }` objects
+- Handles `getPosts` error gracefully (or crashes intentionally)
+- Handles empty posts list (returns `[]`)
+- Handles posts with invalid/missing slugs
+- Sort direction is 'ascending' (consistent with current implementation)
+
+### 2. Build-time rendering logic in page components is untested ❌ HIGH
+
+**Locations**:
+- `app/(prose)/[slug]/page.tsx` (blog post pages)
+- `app/(prose)/blog/page.tsx` (blog index)
+- `app/likes/page.tsx` (likes page with multiple API calls)
+
+**What they do**:
+- Fetch data during build via Server Components
+- Call external APIs (Notion, TMDB, iTunes)
+- Handle errors and transform data for rendering
+
+**Current test coverage**: Only `app/likes/page.test.tsx` which tests the `fetchItunesMedia` helper, but not the actual page component
+
+**What should be tested**:
+- Blog index page fetches and displays posts correctly
+- Dynamic blog post page fetches post with blocks and navigation
+- Dynamic blog post page returns `notFound()` when slug doesn't exist
+- Likes page fetches all media types in parallel
+- All pages handle API errors gracefully during build
+- `skipCache` query param works correctly (`nocache=true`)
+
+### 3. Image placeholder generation in production builds is untested ⚠️ MEDIUM
+
+**Location**: `utils/getImagePlaceholderForEnv.test.ts`
+
+**What's tested**:
+- ✅ Development mode (returns gray pixel)
+- ✅ Production mode (mocked plaiceholder)
+- ✅ Parameter validation
+
+**What's NOT tested**:
+- Actual image fetching and buffer conversion (tests mock `fetch` but don't verify the real flow)
+- Real plaiceholder integration (the library is mocked, so you don't know if it actually works with real images)
+- Error handling when image URL is invalid (404, network error, etc.)
+- Error handling when plaiceholder fails (corrupted image, unsupported format)
+
+**Impact on build**: If plaiceholder fails in production during build, it could crash the entire build with no test coverage to catch it
+
+### 4. Notion block fetching is completely untested ❌ HIGH
+
+**Location**: `lib/notion/getBlockChildren.ts`
+
+**What it does**:
+- Fetches child blocks for blog post content
+- Recursively fetches nested blocks
+- Transforms and validates block data
+- Critical for rendering blog post content
+
+**Current test coverage**: None (only integration test that mocks it)
+
+**What should be tested**:
+- Fetches blocks for a valid page ID
+- Handles pagination for pages with many blocks
+- Recursively fetches child blocks
+- Validates block structure with Zod
+- Returns `Err` when API call fails
+- Handles empty blocks list
+- Properly groups blocks by type
+
+### 5. Zod validation error handling at build time is partially tested ⚠️ MEDIUM
+
+**What's tested**: Most API fetchers test that validation errors throw/return `Err`
+
+**What's NOT tested**:
+- Build-time behavior when validation fails - you test that functions return `Err`, but not what happens during actual Next.js build
+- Logging of validation errors - `logValidationError` utility is called everywhere but never tested
+- Whether builds abort or continue when validation fails - critical for catching data issues
+
+### 6. Cache behavior during builds is partially tested ⚠️ LOW
+
+**Location**: `lib/cache/filesystem.test.ts`
+
+**What's tested**:
+- ✅ Cache is disabled in production
+- ✅ Cache read/write in development
+- ✅ Schema validation
+
+**What's NOT tested**:
+- Behavior during Next.js production build - does the cache get used? Ignored? Cleared?
+- Cache key collisions - what happens if two different requests use the same sanitized key?
+- Cache directory initialization - what if `.local-cache` doesn't exist yet?
+- Concurrent cache writes - build parallelization could cause race conditions
+
+### 7. Cloudinary image transformation in build is untested ❌ MEDIUM
+
+**Location**: `lib/cloudinary/transformCloudinaryImage.ts`
+
+**Current test coverage**: None
+
+**What it does**: Transforms Cloudinary URLs during build for TMDB/iTunes images
+
+**What should be tested**:
+- Transforms image URL with correct parameters
+- Handles URLs that are already transformed
+- Handles invalid Cloudinary URLs
+- Returns correct format for Next.js Image component
+
+### 8. Media item fetching integration is untested ❌ MEDIUM
+
+**Location**: `lib/notion/getMediaItems.ts`
+
+**Current test coverage**: None (only used in tests via mocks)
+
+**What it does**:
+- Fetches books, albums, podcasts from Notion
+- Filters and transforms media data
+- Used by likes page during build
+
+**What should be tested**: Same pattern as `getPosts`/`getPost` tests
+
+### 9. Build environment variable validation is untested ❌ LOW
+
+**Location**: `lib/env.ts`
+
+**What's tested**: None
+
+**What it does**:
+- Validates all required env vars with Zod
+- Used throughout build-time logic
+
+**What should be tested**:
+- All required env vars are present
+- Validation fails with helpful errors for missing vars
+- Validation fails for invalid formats (e.g., non-numeric IDs)
+- Can detect when running in different environments
+
+### 10. Build-time error reporting and recovery is untested ⚠️ MEDIUM
+
+**Locations**: Throughout the codebase
+
+**Patterns used**:
+- `Result<T, Error>` for explicit error handling
+- `.unwrap()` calls that throw on error
+- Try-catch blocks
+
+**What's NOT tested**:
+- What happens when `.unwrap()` is called during build? - Does Next.js show the error? Crash gracefully? Continue?
+- Error message quality - Are build errors actionable for developers?
+- Partial build success - If TMDB succeeds but iTunes fails, what happens?
+
+## Test Coverage Summary
+
+| Build-Time Component | Unit Tests | Integration Tests | E2E/Build Tests |
+|---------------------|------------|-------------------|-----------------|
+| `generateStaticParams` | ❌ None | ❌ None | ❌ None |
+| Page components (Server Components) | ⚠️ Partial (1/4) | ❌ None | ❌ None |
+| Notion API fetching | ✅ Excellent | ⚠️ Mocked | ❌ None |
+| TMDB API fetching | ✅ Good | ❌ None | ❌ None |
+| iTunes API fetching | ✅ Good | ❌ None | ❌ None |
+| Cloudinary metadata | ✅ Good | ❌ None | ❌ None |
+| Image placeholders | ⚠️ Mocked | ❌ None | ❌ None |
+| Caching | ✅ Good | ❌ None | ❌ None |
+| Environment validation | ❌ None | ❌ None | ❌ None |
+| Block fetching | ❌ None | ❌ None | ❌ None |
+| Error handling/recovery | ⚠️ Partial | ❌ None | ❌ None |
+
+## Priority Order
+
+Based on criticality and impact on build reliability:
+
+1. **CRITICAL**: `generateStaticParams` - Directly affects what builds
+2. **HIGH**: Notion block fetching - Core content rendering, completely untested
+3. **HIGH**: Page component integration - Verifies the actual build-time data flow
+4. **MEDIUM**: Cloudinary image transformation - Used in multiple places
+5. **MEDIUM**: Media item fetching - Needed for likes page
+6. **MEDIUM**: Image placeholder error handling - Could crash builds
+7. **MEDIUM**: Error reporting and recovery - Overall build robustness
+8. **LOW**: Environment validation - Catches config issues early
+9. **LOW**: Cache behavior edge cases - Already has good coverage
+
+## Implementation Plan
+
+Work through the priority list one test at a time:
+- Create comprehensive unit tests for each component
+- Mock external dependencies appropriately
+- Test both success and error paths
+- Verify error messages are helpful
+- Ensure tests follow existing patterns in the codebase
