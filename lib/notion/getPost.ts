@@ -134,7 +134,7 @@ export default async function getPost({
     }
 
     if (includeBlocks) {
-      const blocks = await getBlockChildren(post.id)
+      const blocks = (await getBlockChildren(post.id)).unwrap()
 
       post = { ...post, blocks }
     }

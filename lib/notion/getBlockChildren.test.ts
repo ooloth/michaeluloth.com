@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import getBlockChildren, { validateBlocks, INVALID_BLOCK_ERROR } from './getBlockChildren'
 import * as client from './client'
 import type { GroupedBlock } from './schemas/block'
+import { isOk, isErr } from '@/utils/result'
 
 // Mock the client
 vi.mock('./client', () => ({
@@ -1005,25 +1006,28 @@ describe('getBlockChildren', () => {
       block_id: 'test-block-id',
     })
 
-    expect(result).toEqual([
-      {
-        type: 'paragraph',
-        richText: [
-          {
-            content: 'Test paragraph',
-            link: null,
-            bold: false,
-            italic: false,
-            strikethrough: false,
-            underline: false,
-            code: false,
-          },
-        ],
-      },
-    ])
+    expect(isOk(result)).toBe(true)
+    if (isOk(result)) {
+      expect(result.value).toEqual([
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'Test paragraph',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ])
+    }
   })
 
-  it('throws on invalid data from API', async () => {
+  it('returns Err on invalid data from API', async () => {
     const invalidBlocks = [
       {
         type: 'paragraph',
@@ -1033,6 +1037,35 @@ describe('getBlockChildren', () => {
 
     vi.mocked(client.collectPaginatedAPI).mockResolvedValue(invalidBlocks)
 
-    await expect(getBlockChildren('test-block-id')).rejects.toThrow(INVALID_BLOCK_ERROR)
+    const result = await getBlockChildren('test-block-id')
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error.message).toBe(INVALID_BLOCK_ERROR)
+    }
+  })
+
+  it('returns Err when Notion API call fails', async () => {
+    const apiError = new Error('Notion API error')
+    vi.mocked(client.collectPaginatedAPI).mockRejectedValue(apiError)
+
+    const result = await getBlockChildren('test-block-id')
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error).toBe(apiError)
+    }
+  })
+
+  it('wraps non-Error exceptions as Error', async () => {
+    vi.mocked(client.collectPaginatedAPI).mockRejectedValue('string error')
+
+    const result = await getBlockChildren('test-block-id')
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toBe('string error')
+    }
   })
 })

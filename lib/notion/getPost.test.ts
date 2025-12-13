@@ -325,6 +325,7 @@ describe('getPost', () => {
       const notion = (await import('./client')).default
       const { getCached } = await import('@/lib/cache/filesystem')
       const getBlockChildren = (await import('./getBlockChildren')).default
+      const { Ok } = await import('@/utils/result')
 
       vi.mocked(getCached).mockResolvedValue(null)
       vi.mocked(notion.dataSources.query).mockResolvedValue({
@@ -344,7 +345,7 @@ describe('getPost', () => {
       } as any)
 
       const mockBlocks = [{ id: 'block-1', type: 'paragraph' }]
-      vi.mocked(getBlockChildren).mockResolvedValue(mockBlocks as any)
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks as any))
 
       const result = await getPost({ slug: 'post-with-blocks', includeBlocks: true })
 
