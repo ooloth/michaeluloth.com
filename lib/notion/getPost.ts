@@ -121,8 +121,12 @@ export default async function getPost({
     let post = transformNotionPageToPost(response.results[0])
 
     if (includePrevAndNext) {
-      const posts = (await getPosts({ sortDirection: 'ascending', skipCache })).unwrap()
+      const postsResult = await getPosts({ sortDirection: 'ascending', skipCache })
+      if (!postsResult.ok) {
+        return Err(postsResult.error)
+      }
 
+      const posts = postsResult.value
       const postSlugs = posts.map(post => post.slug)
       const index = postSlugs.indexOf(slug)
 
@@ -134,9 +138,12 @@ export default async function getPost({
     }
 
     if (includeBlocks) {
-      const blocks = (await getBlockChildren(post.id)).unwrap()
+      const blocksResult = await getBlockChildren(post.id)
+      if (!blocksResult.ok) {
+        return Err(blocksResult.error)
+      }
 
-      post = { ...post, blocks }
+      post = { ...post, blocks: blocksResult.value }
     }
 
     // Cache the result (always caches, even when skipCache=true)

@@ -5,7 +5,7 @@ import {
   createDateProperty,
   createFilesProperty,
 } from './testing/property-factories'
-import { isOk, isErr } from '@/utils/result'
+import { isOk, isErr, Err } from '@/utils/result'
 import type { Post } from './schemas/post'
 
 // Mock dependencies
@@ -546,6 +546,74 @@ describe('getPost', () => {
       if (isErr(result)) {
         expect(result.error).toBeInstanceOf(Error)
         expect(result.error.message).toBe('string error')
+      }
+    })
+
+    it('returns Err when getPosts fails during navigation fetch', async () => {
+      const notion = (await import('./client')).default
+      const { getCached } = await import('@/lib/cache/filesystem')
+      const getPosts = (await import('./getPosts')).default
+
+      vi.mocked(getCached).mockResolvedValue(null)
+
+      const mockPage = {
+        id: '123',
+        last_edited_time: '2024-01-20T10:30:00.000Z',
+        properties: {
+          Slug: { type: 'rich_text', rich_text: [{ plain_text: 'test' }] },
+          Title: { type: 'title', title: [{ plain_text: 'Test Post' }] },
+          Description: { type: 'rich_text', rich_text: [] },
+          'First published': { type: 'date', date: { start: '2024-01-15' } },
+          'Featured image': { type: 'files', files: [] },
+        },
+      }
+
+      vi.mocked(notion.dataSources.query).mockResolvedValue({
+        results: [mockPage],
+      } as any)
+
+      const getPostsError = new Error('Failed to fetch posts')
+      vi.mocked(getPosts).mockResolvedValue(Err(getPostsError))
+
+      const result = await getPost({ slug: 'test', includePrevAndNext: true })
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBe(getPostsError)
+      }
+    })
+
+    it('returns Err when getBlockChildren fails during block fetch', async () => {
+      const notion = (await import('./client')).default
+      const { getCached } = await import('@/lib/cache/filesystem')
+      const getBlockChildren = (await import('./getBlockChildren')).default
+
+      vi.mocked(getCached).mockResolvedValue(null)
+
+      const mockPage = {
+        id: '123',
+        last_edited_time: '2024-01-20T10:30:00.000Z',
+        properties: {
+          Slug: { type: 'rich_text', rich_text: [{ plain_text: 'test' }] },
+          Title: { type: 'title', title: [{ plain_text: 'Test Post' }] },
+          Description: { type: 'rich_text', rich_text: [] },
+          'First published': { type: 'date', date: { start: '2024-01-15' } },
+          'Featured image': { type: 'files', files: [] },
+        },
+      }
+
+      vi.mocked(notion.dataSources.query).mockResolvedValue({
+        results: [mockPage],
+      } as any)
+
+      const getBlockChildrenError = new Error('Failed to fetch blocks')
+      vi.mocked(getBlockChildren).mockResolvedValue(Err(getBlockChildrenError))
+
+      const result = await getPost({ slug: 'test', includeBlocks: true })
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBe(getBlockChildrenError)
       }
     })
   })
