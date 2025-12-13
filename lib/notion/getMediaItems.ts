@@ -10,6 +10,7 @@ import {
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
+import { type Result, Ok, Err } from '@/utils/result'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'
 
@@ -107,38 +108,43 @@ const DATA_SOURCE_IDS: Record<MediaCategory, string> = {
  * @see https://developers.notion.com/reference/query-a-data-source
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
-export default async function getMediaItems(options: Options): Promise<NotionMediaItem[]> {
+export default async function getMediaItems(options: Options): Promise<Result<NotionMediaItem[], Error>> {
   const { category, skipCache = false } = options
 
-  // Check cache first (cache utility handles dev mode check)
-  const cacheKey = `media-${category}`
-  if (!skipCache) {
-    const cached = await getCached<NotionMediaItem[]>(cacheKey, 'notion')
-    if (cached) {
-      return cached
+  try {
+    // Check cache first (cache utility handles dev mode check)
+    const cacheKey = `media-${category}`
+    if (!skipCache) {
+      const cached = await getCached<NotionMediaItem[]>(cacheKey, 'notion')
+      if (cached) {
+        return Ok(cached)
+      }
     }
+
+    console.log(`📥 Fetching ${category} from Notion API`)
+
+    const pages = await collectPaginatedAPI(notion.dataSources.query, {
+      data_source_id: DATA_SOURCE_IDS[category],
+      filter: {
+        and: [
+          { property: 'Title', title: { is_not_empty: true } },
+          { property: 'Apple ID', number: { is_not_empty: true } },
+          { property: 'Date', date: { on_or_before: new Date().toISOString() } },
+        ],
+      },
+      sorts: [{ property: 'Date', direction: 'descending' }],
+    })
+
+    // Transform and validate external data at boundary
+    const items = transformNotionPagesToMediaItems(pages, category)
+
+    // Cache the result (always caches, even when skipCache=true)
+    // This ensures ?nocache=true refreshes the cache with latest data
+    await setCached(cacheKey, items, 'notion')
+
+    return Ok(items)
+  } catch (error) {
+    console.error(`getMediaItems error (${category}):`, error)
+    return Err(error instanceof Error ? error : new Error(String(error)))
   }
-
-  console.log(`📥 Fetching ${category} from Notion API`)
-
-  const pages = await collectPaginatedAPI(notion.dataSources.query, {
-    data_source_id: DATA_SOURCE_IDS[category],
-    filter: {
-      and: [
-        { property: 'Title', title: { is_not_empty: true } },
-        { property: 'Apple ID', number: { is_not_empty: true } },
-        { property: 'Date', date: { on_or_before: new Date().toISOString() } },
-      ],
-    },
-    sorts: [{ property: 'Date', direction: 'descending' }],
-  })
-
-  // Transform and validate external data at boundary
-  const items = transformNotionPagesToMediaItems(pages, category)
-
-  // Cache the result (always caches, even when skipCache=true)
-  // This ensures ?nocache=true refreshes the cache with latest data
-  await setCached(cacheKey, items, 'notion')
-
-  return items
 }
