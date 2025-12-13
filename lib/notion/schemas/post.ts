@@ -36,9 +36,10 @@ export type PostListItem = z.infer<typeof PostListItemSchema>
 
 // Schema for full post (includes blocks and all metadata)
 // Used for validating cached post data
-// Note: blocks are typed as unknown for cache validation since they're validated separately
 export const PostSchema = PostListItemSchema.extend({
-  blocks: z.array(z.unknown()), // Validated separately in getBlockChildren
+  // Blocks are stored as unknown[] in cache for flexibility,
+  // and are validated separately during fetching (see getBlockChildren)
+  blocks: z.array(z.unknown()),
   lastEditedTime: z.string(),
   prevPost: PostListItemSchema.nullable(),
   nextPost: PostListItemSchema.nullable(),
