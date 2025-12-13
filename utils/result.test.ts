@@ -1,4 +1,4 @@
-import { Ok, Err, isOk, isErr } from './result'
+import { Ok, Err, isOk, isErr, toErr, normalizeError } from './result'
 
 describe('Result type', () => {
   describe('Ok', () => {
@@ -218,5 +218,171 @@ describe('Result type', () => {
 
       expect(result).toEqual([4, 8])
     })
+  })
+})
+
+describe('normalizeError', () => {
+  it('returns Error instances unchanged', () => {
+    const error = new Error('Test error')
+    const normalized = normalizeError(error)
+
+    expect(normalized).toBe(error)
+    expect(normalized.message).toBe('Test error')
+  })
+
+  it('converts string to Error', () => {
+    const normalized = normalizeError('string error')
+
+    expect(normalized).toBeInstanceOf(Error)
+    expect(normalized.message).toBe('string error')
+  })
+
+  it('converts number to Error', () => {
+    const normalized = normalizeError(42)
+
+    expect(normalized).toBeInstanceOf(Error)
+    expect(normalized.message).toBe('42')
+  })
+
+  it('converts object to Error', () => {
+    const obj = { code: 'ERR_INVALID', details: 'Something went wrong' }
+    const normalized = normalizeError(obj)
+
+    expect(normalized).toBeInstanceOf(Error)
+    expect(normalized.message).toBe('[object Object]')
+  })
+
+  it('converts null to Error', () => {
+    const normalized = normalizeError(null)
+
+    expect(normalized).toBeInstanceOf(Error)
+    expect(normalized.message).toBe('null')
+  })
+
+  it('converts undefined to Error', () => {
+    const normalized = normalizeError(undefined)
+
+    expect(normalized).toBeInstanceOf(Error)
+    expect(normalized.message).toBe('undefined')
+  })
+
+  it('preserves Error stack traces', () => {
+    const error = new Error('With stack')
+    const normalized = normalizeError(error)
+
+    expect(normalized.stack).toBe(error.stack)
+  })
+})
+
+describe('toErr', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('wraps Error instances without modification', () => {
+    const error = new Error('Test error')
+    const result = toErr(error)
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error).toBe(error)
+      expect(result.error.message).toBe('Test error')
+    }
+  })
+
+  it('converts string to Error', () => {
+    const result = toErr('string error')
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toBe('string error')
+    }
+  })
+
+  it('converts number to Error', () => {
+    const result = toErr(42)
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toBe('42')
+    }
+  })
+
+  it('converts object to Error', () => {
+    const obj = { code: 'ERR_INVALID', details: 'Something went wrong' }
+    const result = toErr(obj)
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toBe('[object Object]')
+    }
+  })
+
+  it('converts null to Error', () => {
+    const result = toErr(null)
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toBe('null')
+    }
+  })
+
+  it('converts undefined to Error', () => {
+    const result = toErr(undefined)
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error).toBeInstanceOf(Error)
+      expect(result.error.message).toBe('undefined')
+    }
+  })
+
+  it('logs error with context when provided', () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = new Error('API failed')
+
+    toErr(error, 'fetchData')
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith('fetchData error:', error)
+
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('does not log when context is not provided', () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = new Error('API failed')
+
+    toErr(error)
+
+    expect(consoleErrorSpy).not.toHaveBeenCalled()
+
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('preserves Error stack traces', () => {
+    const error = new Error('With stack')
+    const result = toErr(error)
+
+    expect(isErr(result)).toBe(true)
+    if (isErr(result)) {
+      expect(result.error.stack).toBe(error.stack)
+    }
+  })
+
+  it('works in catch blocks', () => {
+    try {
+      throw new Error('Something failed')
+    } catch (error) {
+      const result = toErr(error, 'myFunction')
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error.message).toBe('Something failed')
+      }
+    }
   })
 })

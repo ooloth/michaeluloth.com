@@ -136,3 +136,57 @@ export function isOk<T, E>(result: Result<T, E>): result is OkResult<T> {
 export function isErr<T, E>(result: Result<T, E>): result is ErrResult<E> {
   return result.ok === false
 }
+
+/**
+ * Normalizes any caught value to an Error instance.
+ *
+ * JavaScript allows throwing any value (not just Error objects).
+ * This helper ensures the value is always an Error instance with proper stack traces.
+ *
+ * @param error - The caught exception (can be Error, string, number, object, etc.)
+ * @returns Error instance
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   riskyOperation()
+ * } catch (error) {
+ *   const normalizedError = normalizeError(error)
+ *   logger.error(normalizedError.message, normalizedError.stack)
+ *   throw normalizedError
+ * }
+ * ```
+ */
+export function normalizeError(error: unknown): Error {
+  return error instanceof Error ? error : new Error(String(error))
+}
+
+/**
+ * Converts caught exceptions to ErrResult<Error>.
+ *
+ * Combines error normalization with Result wrapping and optional logging.
+ * This is the most common pattern for catch blocks in Result-returning functions.
+ *
+ * @param error - The caught exception (can be Error, string, number, object, etc.)
+ * @param context - Optional context string for logging (e.g., function name)
+ * @returns ErrResult containing an Error instance
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   const data = await externalAPI()
+ *   return Ok(data)
+ * } catch (error) {
+ *   return toErr(error, 'fetchData')
+ * }
+ * ```
+ */
+export function toErr(error: unknown, context?: string): ErrResult<Error> {
+  const normalizedError = normalizeError(error)
+
+  if (context) {
+    console.error(`${context} error:`, error)
+  }
+
+  return Err(normalizedError)
+}
