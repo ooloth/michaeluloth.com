@@ -6,6 +6,7 @@ import fetchTmdbList, { type TmdbItem } from '@/lib/tmdb/fetchTmdbList'
 import getMediaItems from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
 import { env } from '@/lib/env'
+import { type Result } from '@/utils/result'
 
 export const metadata: Metadata = {
   title: 'Likes - Michael Uloth',
@@ -14,6 +15,32 @@ export const metadata: Metadata = {
 
 const TMDB_TV_LIST_ID = env.TMDB_TV_LIST_ID
 const TMDB_MOVIE_LIST_ID = env.TMDB_MOVIE_LIST_ID
+
+type iTunesMedium = 'ebook' | 'music' | 'podcast'
+type iTunesEntity = 'ebook' | 'album' | 'podcast'
+type MediaCategory = 'books' | 'albums' | 'podcasts'
+
+/**
+ * Fetches media items from Notion and enriches with iTunes metadata.
+ * Returns Result to enable explicit error propagation without intermediate unwraps.
+ */
+export async function fetchItunesMedia(
+  category: MediaCategory,
+  medium: iTunesMedium,
+  entity: iTunesEntity,
+  skipCache: boolean,
+): Promise<Result<iTunesItem[], Error>> {
+  const itemsResult = await getMediaItems({ category, skipCache })
+  if (!itemsResult.ok) {
+    return itemsResult
+  }
+
+  return fetchItunesItems(
+    itemsResult.value.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
+    medium,
+    entity,
+  )
+}
 
 type MediaSectionProps = {
   title: string
@@ -77,36 +104,9 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
   const [tv, movies, books, albums, podcasts] = await Promise.all([
     fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then((r) => r.unwrap()),
     fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then((r) => r.unwrap()),
-    getMediaItems({ category: 'books', skipCache })
-      .then((r) => r.unwrap())
-      .then((items) =>
-        fetchItunesItems(
-          items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
-          'ebook',
-          'ebook',
-        ),
-      )
-      .then((r) => r.unwrap()),
-    getMediaItems({ category: 'albums', skipCache })
-      .then((r) => r.unwrap())
-      .then((items) =>
-        fetchItunesItems(
-          items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
-          'music',
-          'album',
-        ),
-      )
-      .then((r) => r.unwrap()),
-    getMediaItems({ category: 'podcasts', skipCache })
-      .then((r) => r.unwrap())
-      .then((items) =>
-        fetchItunesItems(
-          items.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
-          'podcast',
-          'podcast',
-        ),
-      )
-      .then((r) => r.unwrap()),
+    fetchItunesMedia('books', 'ebook', 'ebook', skipCache).then((r) => r.unwrap()),
+    fetchItunesMedia('albums', 'music', 'album', skipCache).then((r) => r.unwrap()),
+    fetchItunesMedia('podcasts', 'podcast', 'podcast', skipCache).then((r) => r.unwrap()),
   ])
 
   return (
