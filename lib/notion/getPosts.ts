@@ -1,5 +1,5 @@
-import { getCached, setCached } from '@/lib/cache/filesystem'
-import notion, { collectPaginatedAPI } from './client'
+import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
+import notion, { collectPaginatedAPI, type Client } from './client'
 import { PostListItemSchema, PostPropertiesSchema, type PostListItem } from './schemas/post'
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
@@ -9,6 +9,8 @@ import { type Result, Ok, toErr } from '@/utils/result'
 type Options = {
   sortDirection?: 'ascending' | 'descending'
   skipCache?: boolean
+  cache?: CacheAdapter
+  notionClient?: Client
 }
 
 export const INVALID_POST_ERROR = 'Invalid post data - build aborted'
@@ -66,13 +68,13 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
  * @see https://developers.notion.com/reference/filter-data-source-entries
  */
 export default async function getPosts(options: Options = {}): Promise<Result<PostListItem[], Error>> {
-  const { sortDirection = 'ascending', skipCache = false } = options
+  const { sortDirection = 'ascending', skipCache = false, cache = filesystemCache, notionClient = notion } = options
 
   try {
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `posts-list-${sortDirection}`
     if (!skipCache) {
-      const cached = await getCached<PostListItem[]>(cacheKey, 'notion')
+      const cached = await cache.get<PostListItem[]>(cacheKey, 'notion')
       if (cached) {
         return Ok(cached)
       }
@@ -80,7 +82,7 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
 
     console.log(`📥 Fetching posts from Notion API`)
 
-    const pages = await collectPaginatedAPI(notion.dataSources.query, {
+    const pages = await collectPaginatedAPI(notionClient.dataSources.query, {
       data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
       filter: {
         and: [
@@ -102,7 +104,7 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
 
     // Cache the result (always caches, even when skipCache=true)
     // This ensures ?nocache=true refreshes the cache with latest data
-    await setCached(cacheKey, posts, 'notion')
+    await cache.set(cacheKey, posts, 'notion')
 
     return Ok(posts)
   } catch (error) {

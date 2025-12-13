@@ -1,5 +1,5 @@
-import { getCached, setCached } from '@/lib/cache/filesystem'
-import cloudinary from '@/lib/cloudinary/client'
+import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
+import cloudinary, { type CloudinaryClient } from '@/lib/cloudinary/client'
 import { type CloudinaryResource } from '@/lib/cloudinary/types'
 import { getErrorDetails } from '@/utils/logging'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
@@ -15,13 +15,21 @@ export type CloudinaryImageMetadata = {
   width: number
 }
 
+type Options = {
+  url: string
+  cache?: CacheAdapter
+  cloudinaryClient?: CloudinaryClient
+}
+
 /**
  * Fetches Cloudinary image metadata including alt text, caption, dimensions, and responsive image attributes.
  *
  */
-export default async function fetchCloudinaryImageMetadata(
-  url: string,
-): Promise<Result<CloudinaryImageMetadata, Error>> {
+export default async function fetchCloudinaryImageMetadata({
+  url,
+  cache = filesystemCache,
+  cloudinaryClient = cloudinary,
+}: Options): Promise<Result<CloudinaryImageMetadata, Error>> {
   try {
     const publicId = parsePublicIdFromCloudinaryUrl(url)
     if (!publicId) {
@@ -29,7 +37,7 @@ export default async function fetchCloudinaryImageMetadata(
     }
 
     // Check cache first (dev mode only)
-    const cached = await getCached<CloudinaryImageMetadata>(publicId, 'cloudinary')
+    const cached = await cache.get<CloudinaryImageMetadata>(publicId, 'cloudinary')
     if (cached) {
       return Ok(cached)
     }
@@ -38,7 +46,7 @@ export default async function fetchCloudinaryImageMetadata(
 
     // Fetch image details from Cloudinary Admin API
     // See: https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
-    const cloudinaryImage: CloudinaryResource = await cloudinary.api
+    const cloudinaryImage: CloudinaryResource = await cloudinaryClient.api
       .resource(publicId, {
         context: true, // include contextual metadata (alt, caption, plus any custom fields)
         type: publicId.startsWith('http') ? 'fetch' : 'upload',
@@ -92,7 +100,7 @@ export default async function fetchCloudinaryImageMetadata(
     ]
 
     // Generate URL with desired transformations
-    const src = cloudinary.url(cloudinaryImage.public_id, {
+    const src = cloudinaryClient.url(cloudinaryImage.public_id, {
       crop: 'scale',
       fetch_format: 'auto',
       quality: 'auto',
@@ -103,7 +111,7 @@ export default async function fetchCloudinaryImageMetadata(
     const srcSet = widths
       .map(
         width =>
-          `${cloudinary.url(cloudinaryImage.public_id, {
+          `${cloudinaryClient.url(cloudinaryImage.public_id, {
             crop: 'scale',
             fetch_format: 'auto',
             quality: 'auto',
@@ -125,7 +133,7 @@ export default async function fetchCloudinaryImageMetadata(
     }
 
     // Cache the result (dev mode only)
-    await setCached(publicId, metadata, 'cloudinary')
+    await cache.set(publicId, metadata, 'cloudinary')
 
     return Ok(metadata)
   } catch (error) {

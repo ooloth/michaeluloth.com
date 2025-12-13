@@ -151,5 +151,6 @@ export const FeaturedImagePropertySchema = z
 export function createPropertiesSchema<T extends Record<string, z.ZodTypeAny>>(
   propertySchemas: T,
 ): z.ZodType<{ [K in keyof T]: z.infer<T[K]> }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return z.object(propertySchemas as any) as any
 }

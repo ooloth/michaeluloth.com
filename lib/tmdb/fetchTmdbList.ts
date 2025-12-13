@@ -26,10 +26,7 @@ const TmdbItemSchema = z.object({
 
 export type TmdbItem = z.infer<typeof TmdbItemSchema>
 
-export default async function fetchTmdbList(
-  listId: string,
-  api: 'tv' | 'movie',
-): Promise<Result<TmdbItem[], Error>> {
+export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie'): Promise<Result<TmdbItem[], Error>> {
   if (!listId) {
     const error = new Error('fetchTmdbList: listId is required')
     console.error(error.message)

@@ -37,7 +37,7 @@ describe('fetchTmdbList', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'tv')
 
@@ -68,7 +68,7 @@ describe('fetchTmdbList', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -101,7 +101,7 @@ describe('fetchTmdbList', () => {
             ],
           }),
         }
-      }) as any
+      }) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -141,7 +141,7 @@ describe('fetchTmdbList', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -174,7 +174,7 @@ describe('fetchTmdbList', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -205,7 +205,7 @@ describe('fetchTmdbList', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -237,7 +237,7 @@ describe('fetchTmdbList', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -256,7 +256,7 @@ describe('fetchTmdbList', () => {
 
       global.fetch = vi.fn(async () => ({
         json: async () => mockResponse,
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -281,7 +281,7 @@ describe('fetchTmdbList', () => {
       const networkError = new Error('Network error')
       global.fetch = vi.fn(async () => {
         throw networkError
-      }) as any
+      }) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -296,7 +296,7 @@ describe('fetchTmdbList', () => {
         json: async () => {
           throw new Error('Invalid JSON')
         },
-      })) as any
+      })) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -309,7 +309,7 @@ describe('fetchTmdbList', () => {
     it('wraps non-Error exceptions as Error', async () => {
       global.fetch = vi.fn(async () => {
         throw 'string error'
-      }) as any
+      }) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 
@@ -340,7 +340,7 @@ describe('fetchTmdbList', () => {
             ],
           }),
         }
-      }) as any
+      }) as unknown as typeof global.fetch
 
       const result = await fetchTmdbList('test-list-id', 'movie')
 

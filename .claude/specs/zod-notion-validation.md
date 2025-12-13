@@ -3,6 +3,7 @@
 ## Context
 
 The `/likes` page (PR #6) established a pattern for parsing external data at I/O boundaries using Zod:
+
 - Parse raw API responses with Zod schemas
 - Transform to convenient internal domain objects
 - Infer TypeScript types from schemas (single source of truth)
@@ -10,6 +11,7 @@ The `/likes` page (PR #6) established a pattern for parsing external data at I/O
 - Separate pure transformation functions from I/O
 
 This pattern is already applied to:
+
 - ✅ `lib/notion/getMediaItems.ts` - Media items (books/albums/podcasts)
 - ✅ `lib/tmdb/fetchTmdbList.ts` - TMDB TV shows and movies
 - ✅ `lib/itunes/fetchItunesItems.ts` - iTunes metadata enrichment
@@ -17,6 +19,7 @@ This pattern is already applied to:
 ## Goal
 
 Apply this pattern to **all remaining Notion data fetching** to:
+
 1. Make no assumptions about data from the Notion SDK
 2. Parse and validate at the API boundary
 3. Output type-safe internal domain objects with ergonomic, flat APIs
@@ -116,19 +119,20 @@ export type Post = z.infer<typeof PostSchema>
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `lib/notion/schemas/post.ts` | **New** - Domain schemas |
-| `lib/notion/getPosts.ts` | Add transform, return `PostListItem[]` |
-| `lib/notion/getPost.ts` | Add transform, return `Post \| null` |
-| `lib/notion/getBlockChildren.ts` | Add minimal validation |
-| `app/(prose)/blog/page.tsx` | Use flat `post.title` API |
-| `app/(prose)/[slug]/page.tsx` | Use typed `Post` |
-| `app/(prose)/[slug]/ui/post.tsx` | Type props as `Post` |
+| File                             | Change                                 |
+| -------------------------------- | -------------------------------------- |
+| `lib/notion/schemas/post.ts`     | **New** - Domain schemas               |
+| `lib/notion/getPosts.ts`         | Add transform, return `PostListItem[]` |
+| `lib/notion/getPost.ts`          | Add transform, return `Post \| null`   |
+| `lib/notion/getBlockChildren.ts` | Add minimal validation                 |
+| `app/(prose)/blog/page.tsx`      | Use flat `post.title` API              |
+| `app/(prose)/[slug]/page.tsx`    | Use typed `Post`                       |
+| `app/(prose)/[slug]/ui/post.tsx` | Type props as `Post`                   |
 
 ## Testing
 
 Add tests for transform functions (follow `getMediaItems.test.ts` pattern):
+
 - Valid Notion page → correct domain object
 - Missing required field → filtered out with log
 - Optional fields → handled correctly

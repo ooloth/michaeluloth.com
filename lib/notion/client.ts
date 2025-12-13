@@ -12,3 +12,4 @@ const notion = new Client({
 
 export default notion
 export { collectPaginatedAPI }
+export type { Client }

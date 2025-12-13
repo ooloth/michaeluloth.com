@@ -105,7 +105,7 @@ describe('Result type', () => {
   describe('map method', () => {
     it('transforms Ok value', () => {
       const result = Ok(42)
-      const mapped = result.map((n) => n * 2)
+      const mapped = result.map(n => n * 2)
       expect(mapped).toMatchObject({ ok: true, value: 84 })
     })
 
@@ -118,13 +118,13 @@ describe('Result type', () => {
 
     it('can change value type', () => {
       const result = Ok(42)
-      const mapped = result.map((n) => String(n))
+      const mapped = result.map(n => String(n))
       expect(mapped).toMatchObject({ ok: true, value: '42' })
     })
 
     it('can chain map calls', () => {
       const result = Ok(10)
-      const mapped = result.map((n) => n * 2).map((n) => n + 5)
+      const mapped = result.map(n => n * 2).map(n => n + 5)
       expect(mapped).toMatchObject({ ok: true, value: 25 })
     })
   })
@@ -132,7 +132,7 @@ describe('Result type', () => {
   describe('mapErr method', () => {
     it('transforms Err error', () => {
       const result = Err(new Error('original'))
-      const mapped = result.mapErr((e) => new Error(`Wrapped: ${e.message}`))
+      const mapped = result.mapErr(e => new Error(`Wrapped: ${e.message}`))
       expect(isErr(mapped)).toBe(true)
       if (isErr(mapped)) {
         expect(mapped.error.message).toBe('Wrapped: original')
@@ -147,7 +147,7 @@ describe('Result type', () => {
 
     it('can change error type', () => {
       const result = Err(new Error('fail'))
-      const mapped = result.mapErr((e) => e.message)
+      const mapped = result.mapErr(e => e.message)
       expect(mapped).toMatchObject({ ok: false, error: 'fail' })
     })
   })
@@ -155,13 +155,13 @@ describe('Result type', () => {
   describe('flatMap method', () => {
     it('chains Ok results', () => {
       const result = Ok(42)
-      const chained = result.flatMap((n) => Ok(n * 2))
+      const chained = result.flatMap(n => Ok(n * 2))
       expect(chained).toMatchObject({ ok: true, value: 84 })
     })
 
     it('chains and converts Ok to Err', () => {
       const result = Ok(42)
-      const chained = result.flatMap((n) => (n > 50 ? Ok(n) : Err(new Error('too small'))))
+      const chained = result.flatMap(n => (n > 50 ? Ok(n) : Err(new Error('too small'))))
       expect(isErr(chained)).toBe(true)
       if (isErr(chained)) {
         expect(chained.error.message).toBe('too small')
@@ -177,7 +177,7 @@ describe('Result type', () => {
 
     it('can change value type through chaining', () => {
       const result = Ok(42)
-      const chained = result.flatMap((n) => Ok(String(n)))
+      const chained = result.flatMap(n => Ok(String(n)))
       expect(chained).toMatchObject({ ok: true, value: '42' })
     })
   })
@@ -186,7 +186,7 @@ describe('Result type', () => {
     it('chains multiple operations', () => {
       const divide = (a: number, b: number) => (b === 0 ? Err(new Error('divide by zero')) : Ok(a / b))
 
-      const result = divide(10, 2).flatMap((x) => divide(x, 5).flatMap((y) => Ok(y * 3)))
+      const result = divide(10, 2).flatMap(x => divide(x, 5).flatMap(y => Ok(y * 3)))
 
       expect(result).toMatchObject({ ok: true, value: 3 }) // (10 / 2) / 5 * 3 = 3
     })
@@ -194,17 +194,16 @@ describe('Result type', () => {
     it('handles error in chain', () => {
       const divide = (a: number, b: number) => (b === 0 ? Err(new Error('divide by zero')) : Ok(a / b))
 
-      const result = divide(10, 0).flatMap((x) => divide(x, 5).flatMap((y) => Ok(y * 3)))
+      const result = divide(10, 0).flatMap(x => divide(x, 5).flatMap(y => Ok(y * 3)))
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toBe('divide by zero')
+        expect((result.error as Error).message).toBe('divide by zero')
       }
     })
 
     it('provides default value for error case', () => {
-      const fetchUser = (id: number) =>
-        id > 0 ? Ok({ id, name: 'Alice' }) : Err(new Error('Invalid ID'))
+      const fetchUser = (id: number) => (id > 0 ? Ok({ id, name: 'Alice' }) : Err(new Error('Invalid ID')))
 
       const user = fetchUser(-1).unwrapOr({ id: 0, name: 'Guest' })
       expect(user).toEqual({ id: 0, name: 'Guest' })
@@ -212,8 +211,8 @@ describe('Result type', () => {
 
     it('fluent API with method chaining', () => {
       const result = Ok([1, 2, 3, 4, 5])
-        .map((arr) => arr.filter((n) => n % 2 === 0))
-        .map((arr) => arr.map((n) => n * 2))
+        .map(arr => arr.filter(n => n % 2 === 0))
+        .map(arr => arr.map(n => n * 2))
         .unwrapOr([])
 
       expect(result).toEqual([4, 8])

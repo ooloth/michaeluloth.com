@@ -116,6 +116,6 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
     default:
       // TypeScript exhaustiveness check
-      throw new Error(`Encountered unsupported Notion block type: "${(block as any).type}"`)
+      throw new Error(`Encountered unsupported Notion block type: "${(block as never as { type: string }).type}"`)
   }
 }

@@ -339,7 +339,6 @@ describe('Notion API Integration Tests', () => {
 
   describe('Error handling at API boundaries', () => {
     it('validates and rejects invalid Notion page data', async () => {
-      const notion = (await import('./client')).default
       const { collectPaginatedAPI } = await import('./client')
 
       // Missing required fields

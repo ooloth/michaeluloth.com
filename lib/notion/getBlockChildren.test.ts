@@ -1,18 +1,21 @@
 import { describe, it, expect, vi } from 'vitest'
 import getBlockChildren, { validateBlocks, INVALID_BLOCK_ERROR } from './getBlockChildren'
-import * as client from './client'
-import type { GroupedBlock } from './schemas/block'
+import { collectPaginatedAPI, type Client } from './client'
+import type { GroupedBlock, BulletedListBlock } from './schemas/block'
 import { isOk, isErr } from '@/utils/result'
 
-// Mock the client
-vi.mock('./client', () => ({
-  default: {
+// Test helper: creates a mock Notion client
+function createMockNotionClient(): Client {
+  return {
     blocks: {
       children: {
         list: vi.fn(),
       },
     },
-  },
+  } as unknown as Client
+}
+
+vi.mock('./client', () => ({
   collectPaginatedAPI: vi.fn(),
 }))
 
@@ -712,10 +715,10 @@ describe('validateBlocks', () => {
 
       expect(result).toHaveLength(3)
       expect(result[0].type).toBe('bulleted_list')
-      expect((result[0] as any).items).toHaveLength(1)
+      expect((result[0] as BulletedListBlock).items).toHaveLength(1)
       expect(result[1].type).toBe('paragraph')
       expect(result[2].type).toBe('bulleted_list')
-      expect((result[2] as any).items).toHaveLength(1)
+      expect((result[2] as BulletedListBlock).items).toHaveLength(1)
     })
   })
 
@@ -861,9 +864,11 @@ describe('validateBlocks', () => {
       const result = validateBlocks(blocks) as GroupedBlock[]
 
       expect(result[0].type).toBe('toggle')
-      expect((result[0] as any).children).toHaveLength(1)
-      expect((result[0] as any).children[0].type).toBe('bulleted_list')
-      expect((result[0] as any).children[0].items).toHaveLength(2)
+      if (result[0].type === 'toggle') {
+        expect(result[0].children).toHaveLength(1)
+        expect(result[0].children[0].type).toBe('bulleted_list')
+        expect((result[0].children[0] as BulletedListBlock).items).toHaveLength(2)
+      }
     })
 
     it('handles toggle blocks with no children', () => {
@@ -977,6 +982,7 @@ describe('validateBlocks', () => {
 
 describe('getBlockChildren', () => {
   it('fetches and validates blocks from Notion API', async () => {
+    const mockClient = createMockNotionClient()
     const mockBlocks = [
       {
         type: 'paragraph',
@@ -998,11 +1004,11 @@ describe('getBlockChildren', () => {
       },
     ]
 
-    vi.mocked(client.collectPaginatedAPI).mockResolvedValue(mockBlocks)
+    vi.mocked(collectPaginatedAPI).mockResolvedValue(mockBlocks)
 
-    const result = await getBlockChildren('test-block-id')
+    const result = await getBlockChildren('test-block-id', mockClient)
 
-    expect(client.collectPaginatedAPI).toHaveBeenCalledWith(client.default.blocks.children.list, {
+    expect(collectPaginatedAPI).toHaveBeenCalledWith(mockClient.blocks.children.list, {
       block_id: 'test-block-id',
     })
 
@@ -1028,6 +1034,7 @@ describe('getBlockChildren', () => {
   })
 
   it('returns Err on invalid data from API', async () => {
+    const mockClient = createMockNotionClient()
     const invalidBlocks = [
       {
         type: 'paragraph',
@@ -1035,9 +1042,9 @@ describe('getBlockChildren', () => {
       },
     ]
 
-    vi.mocked(client.collectPaginatedAPI).mockResolvedValue(invalidBlocks)
+    vi.mocked(collectPaginatedAPI).mockResolvedValue(invalidBlocks)
 
-    const result = await getBlockChildren('test-block-id')
+    const result = await getBlockChildren('test-block-id', mockClient)
 
     expect(isErr(result)).toBe(true)
     if (isErr(result)) {
@@ -1046,10 +1053,11 @@ describe('getBlockChildren', () => {
   })
 
   it('returns Err when Notion API call fails', async () => {
+    const mockClient = createMockNotionClient()
     const apiError = new Error('Notion API error')
-    vi.mocked(client.collectPaginatedAPI).mockRejectedValue(apiError)
+    vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-    const result = await getBlockChildren('test-block-id')
+    const result = await getBlockChildren('test-block-id', mockClient)
 
     expect(isErr(result)).toBe(true)
     if (isErr(result)) {
@@ -1058,9 +1066,10 @@ describe('getBlockChildren', () => {
   })
 
   it('wraps non-Error exceptions as Error', async () => {
-    vi.mocked(client.collectPaginatedAPI).mockRejectedValue('string error')
+    const mockClient = createMockNotionClient()
+    vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
 
-    const result = await getBlockChildren('test-block-id')
+    const result = await getBlockChildren('test-block-id', mockClient)
 
     expect(isErr(result)).toBe(true)
     if (isErr(result)) {

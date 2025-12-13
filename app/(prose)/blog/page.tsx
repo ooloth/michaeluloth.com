@@ -24,7 +24,10 @@ export default async function Blog({ searchParams }: Props): Promise<ReactElemen
             <li key={post.id} className="grid">
               <article>
                 <header>
-                  <time dateTime={getMachineReadableDate(post.firstPublished)} className="timestamp block mb-0.5 md:min-w-28">
+                  <time
+                    dateTime={getMachineReadableDate(post.firstPublished)}
+                    className="timestamp block mb-0.5 md:min-w-28"
+                  >
                     {getHumanReadableDate(post.firstPublished)}
                   </time>
 

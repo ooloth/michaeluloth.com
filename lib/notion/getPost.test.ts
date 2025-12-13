@@ -1,4 +1,8 @@
-import getPost, { transformNotionPageToPost, INVALID_POST_DETAILS_ERROR, INVALID_POST_PROPERTIES_ERROR } from './getPost'
+import getPost, {
+  transformNotionPageToPost,
+  INVALID_POST_DETAILS_ERROR,
+  INVALID_POST_PROPERTIES_ERROR,
+} from './getPost'
 import {
   createRichTextProperty,
   createTitleProperty,
@@ -7,21 +11,28 @@ import {
 } from './testing/property-factories'
 import { isOk, isErr, Err } from '@/utils/result'
 import type { Post } from './schemas/post'
+import type { GroupedBlock } from './schemas/block'
+import { type CacheAdapter } from '@/lib/cache/adapter'
+import { type Client } from './client'
 
-// Mock dependencies
-vi.mock('./client', () => ({
-  default: {
+// Test helper: creates a mock cache adapter
+function createMockCache(cachedValue: unknown = null): CacheAdapter {
+  return {
+    get: vi.fn().mockResolvedValue(cachedValue),
+    set: vi.fn(),
+  }
+}
+
+// Test helper: creates a mock Notion client
+function createMockNotionClient(): Client {
+  return {
     dataSources: {
       query: vi.fn(),
     },
-  },
-}))
+  } as Client
+}
 
-vi.mock('@/lib/cache/filesystem', () => ({
-  getCached: vi.fn(),
-  setCached: vi.fn(),
-}))
-
+// Mock dependencies
 vi.mock('./getBlockChildren', () => ({
   default: vi.fn(),
 }))
@@ -189,7 +200,10 @@ describe('getPost', () => {
 
   describe('success cases', () => {
     it('returns Ok(null) when slug is null', async () => {
-      const result = await getPost({ slug: null })
+      const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
+
+      const result = await getPost({ slug: null, cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -198,7 +212,10 @@ describe('getPost', () => {
     })
 
     it('returns Ok(null) when slug is empty string', async () => {
-      const result = await getPost({ slug: '' })
+      const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
+
+      const result = await getPost({ slug: '', cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -207,8 +224,6 @@ describe('getPost', () => {
     })
 
     it('returns Ok with cached post when available', async () => {
-      const { getCached } = await import('@/lib/cache/filesystem')
-
       const cachedPost: Post = {
         id: '456',
         slug: 'cached-post',
@@ -221,9 +236,11 @@ describe('getPost', () => {
         prevPost: null,
         nextPost: null,
       }
-      vi.mocked(getCached).mockResolvedValue(cachedPost)
 
-      const result = await getPost({ slug: 'cached-post' })
+      const mockCache = createMockCache(cachedPost)
+      const mockClient = createMockNotionClient()
+
+      const result = await getPost({ slug: 'cached-post', cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -232,11 +249,10 @@ describe('getPost', () => {
     })
 
     it('returns Ok with post from Notion API', async () => {
-      const notion = (await import('./client')).default
-      const { getCached, setCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
 
-      vi.mocked(getCached).mockResolvedValue(null)
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      const mockCache = createMockCache()
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [
           {
             id: '123',
@@ -250,9 +266,9 @@ describe('getPost', () => {
             },
           },
         ],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
-      const result = await getPost({ slug: 'test-post' })
+      const result = await getPost({ slug: 'test-post', cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -265,23 +281,18 @@ describe('getPost', () => {
         })
       }
 
-      expect(setCached).toHaveBeenCalledWith(
-        'post-test-post-blocks-false-nav-false',
-        expect.any(Object),
-        'notion'
-      )
+      expect(mockCache.set).toHaveBeenCalledWith('post-test-post-blocks-false-nav-false', expect.any(Object), 'notion')
     })
 
     it('returns Ok(null) when post not found', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
 
-      vi.mocked(getCached).mockResolvedValue(null)
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      const mockCache = createMockCache()
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
-      const result = await getPost({ slug: 'nonexistent' })
+      const result = await getPost({ slug: 'nonexistent', cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -290,11 +301,10 @@ describe('getPost', () => {
     })
 
     it('skips cache when skipCache is true', async () => {
-      const notion = (await import('./client')).default
-      const { getCached, setCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
 
-      vi.mocked(getCached).mockResolvedValue({ id: 'old' } as any)
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      const mockCache = createMockCache({ id: 'old' })
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [
           {
             id: '789',
@@ -308,27 +318,27 @@ describe('getPost', () => {
             },
           },
         ],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
-      const result = await getPost({ slug: 'fresh-post', skipCache: true })
+      const result = await getPost({ slug: 'fresh-post', skipCache: true, cache: mockCache, notionClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
         expect(result.value?.slug).toBe('fresh-post')
       }
 
-      expect(getCached).not.toHaveBeenCalled()
-      expect(setCached).toHaveBeenCalled()
+      expect(mockCache.get).not.toHaveBeenCalled()
+      expect(mockCache.set).toHaveBeenCalled()
     })
 
     it('includes blocks when includeBlocks is true', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
       const getBlockChildren = (await import('./getBlockChildren')).default
       const { Ok } = await import('@/utils/result')
 
-      vi.mocked(getCached).mockResolvedValue(null)
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      const mockCache = createMockCache()
+
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [
           {
             id: '123',
@@ -342,12 +352,17 @@ describe('getPost', () => {
             },
           },
         ],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
       const mockBlocks = [{ id: 'block-1', type: 'paragraph' }]
-      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks as any))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks as GroupedBlock[]))
 
-      const result = await getPost({ slug: 'post-with-blocks', includeBlocks: true })
+      const result = await getPost({
+        slug: 'post-with-blocks',
+        includeBlocks: true,
+        cache: mockCache,
+        notionClient: mockClient,
+      })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -358,13 +373,13 @@ describe('getPost', () => {
     })
 
     it('includes prev/next navigation when includePrevAndNext is true', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
       const getPosts = (await import('./getPosts')).default
       const { Ok } = await import('@/utils/result')
 
-      vi.mocked(getCached).mockResolvedValue(null)
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      const mockCache = createMockCache()
+
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [
           {
             id: '222',
@@ -378,7 +393,7 @@ describe('getPost', () => {
             },
           },
         ],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
       const mockPosts = [
         {
@@ -408,7 +423,12 @@ describe('getPost', () => {
       ]
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
-      const result = await getPost({ slug: 'middle-post', includePrevAndNext: true })
+      const result = await getPost({
+        slug: 'middle-post',
+        includePrevAndNext: true,
+        cache: mockCache,
+        notionClient: mockClient,
+      })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -418,31 +438,30 @@ describe('getPost', () => {
     })
 
     it('uses correct cache keys for different options', async () => {
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockCache = createMockCache()
+      const mockClient = createMockNotionClient()
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      await getPost({ slug: 'test', cache: mockCache, notionClient: mockClient })
+      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-false-nav-false', 'notion')
 
-      await getPost({ slug: 'test' })
-      expect(getCached).toHaveBeenCalledWith('post-test-blocks-false-nav-false', 'notion')
+      await getPost({ slug: 'test', includeBlocks: true, cache: mockCache, notionClient: mockClient })
+      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-true-nav-false', 'notion')
 
-      await getPost({ slug: 'test', includeBlocks: true })
-      expect(getCached).toHaveBeenCalledWith('post-test-blocks-true-nav-false', 'notion')
-
-      await getPost({ slug: 'test', includePrevAndNext: true })
-      expect(getCached).toHaveBeenCalledWith('post-test-blocks-false-nav-true', 'notion')
+      await getPost({ slug: 'test', includePrevAndNext: true, cache: mockCache, notionClient: mockClient })
+      expect(mockCache.get).toHaveBeenCalledWith('post-test-blocks-false-nav-true', 'notion')
     })
   })
 
   describe('error cases', () => {
     it('returns Err when Notion API call fails', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
+
       const apiError = new Error('Notion API error')
-      vi.mocked(notion.dataSources.query).mockRejectedValue(apiError)
+      vi.mocked(mockClient.dataSources.query).mockRejectedValue(apiError)
 
-      const result = await getPost({ slug: 'failing-post' })
+      const result = await getPost({ slug: 'failing-post', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -451,11 +470,11 @@ describe('getPost', () => {
     })
 
     it('returns Err when multiple posts found for slug', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
 
-      vi.mocked(getCached).mockResolvedValue(null)
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      const mockCache = createMockCache()
+
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [
           {
             id: '123',
@@ -480,9 +499,9 @@ describe('getPost', () => {
             },
           },
         ],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
-      const result = await getPost({ slug: 'duplicate' })
+      const result = await getPost({ slug: 'duplicate', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -491,11 +510,11 @@ describe('getPost', () => {
     })
 
     it('returns Err when validation fails', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
 
-      vi.mocked(getCached).mockResolvedValue(null)
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      const mockCache = createMockCache()
+
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [
           {
             id: '123',
@@ -509,9 +528,9 @@ describe('getPost', () => {
             },
           },
         ],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
-      const result = await getPost({ slug: 'invalid' })
+      const result = await getPost({ slug: 'invalid', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -520,12 +539,14 @@ describe('getPost', () => {
     })
 
     it('returns Err when cache read fails', async () => {
-      const { getCached } = await import('@/lib/cache/filesystem')
-
       const cacheError = new Error('Cache read error')
-      vi.mocked(getCached).mockRejectedValue(cacheError)
+      const mockCache: CacheAdapter = {
+        get: vi.fn().mockRejectedValue(cacheError),
+        set: vi.fn(),
+      }
+      const mockClient = createMockNotionClient()
 
-      const result = await getPost({ slug: 'test' })
+      const result = await getPost({ slug: 'test', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -534,13 +555,13 @@ describe('getPost', () => {
     })
 
     it('wraps non-Error exceptions as Error', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
 
-      vi.mocked(getCached).mockResolvedValue(null)
-      vi.mocked(notion.dataSources.query).mockRejectedValue('string error')
+      const mockCache = createMockCache()
 
-      const result = await getPost({ slug: 'test' })
+      vi.mocked(mockClient.dataSources.query).mockRejectedValue('string error')
+
+      const result = await getPost({ slug: 'test', cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -550,11 +571,10 @@ describe('getPost', () => {
     })
 
     it('returns Err when getPosts fails during navigation fetch', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
       const getPosts = (await import('./getPosts')).default
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
 
       const mockPage = {
         id: '123',
@@ -568,14 +588,19 @@ describe('getPost', () => {
         },
       }
 
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [mockPage],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
       const getPostsError = new Error('Failed to fetch posts')
       vi.mocked(getPosts).mockResolvedValue(Err(getPostsError))
 
-      const result = await getPost({ slug: 'test', includePrevAndNext: true })
+      const result = await getPost({
+        slug: 'test',
+        includePrevAndNext: true,
+        cache: mockCache,
+        notionClient: mockClient,
+      })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -584,11 +609,10 @@ describe('getPost', () => {
     })
 
     it('returns Err when getBlockChildren fails during block fetch', async () => {
-      const notion = (await import('./client')).default
-      const { getCached } = await import('@/lib/cache/filesystem')
+      const mockClient = createMockNotionClient()
       const getBlockChildren = (await import('./getBlockChildren')).default
 
-      vi.mocked(getCached).mockResolvedValue(null)
+      const mockCache = createMockCache()
 
       const mockPage = {
         id: '123',
@@ -602,14 +626,14 @@ describe('getPost', () => {
         },
       }
 
-      vi.mocked(notion.dataSources.query).mockResolvedValue({
+      vi.mocked(mockClient.dataSources.query).mockResolvedValue({
         results: [mockPage],
-      } as any)
+      } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
       const getBlockChildrenError = new Error('Failed to fetch blocks')
       vi.mocked(getBlockChildren).mockResolvedValue(Err(getBlockChildrenError))
 
-      const result = await getPost({ slug: 'test', includeBlocks: true })
+      const result = await getPost({ slug: 'test', includeBlocks: true, cache: mockCache, notionClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {

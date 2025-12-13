@@ -3,10 +3,11 @@
 
 import Card from '@/ui/card'
 import Emoji from '@/ui/emoji'
+import type { PostListItem } from '@/lib/notion/schemas/post'
 
 type Props = Readonly<{
-  prevPost: any | null
-  nextPost: any | null
+  prevPost: PostListItem | null
+  nextPost: PostListItem | null
 }>
 
 export default function PaginationLinks({ prevPost, nextPost }: Props) {

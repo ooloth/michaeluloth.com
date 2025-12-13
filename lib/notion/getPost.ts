@@ -1,8 +1,8 @@
-import { getCached, setCached } from '@/lib/cache/filesystem'
-import notion from './client'
+import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
+import notion, { type Client } from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
-import { PostListItemSchema, PostPropertiesSchema, type Post, type PostListItem } from './schemas/post'
+import { PostListItemSchema, PostPropertiesSchema, type Post } from './schemas/post'
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
@@ -13,6 +13,8 @@ type Options = {
   includeBlocks?: boolean
   includePrevAndNext?: boolean
   skipCache?: boolean
+  cache?: CacheAdapter
+  notionClient?: Client
 }
 
 export const INVALID_POST_DETAILS_ERROR = 'Invalid post details data - build aborted'
@@ -84,6 +86,8 @@ export default async function getPost({
   includeBlocks = false,
   includePrevAndNext = false,
   skipCache = false,
+  cache = filesystemCache,
+  notionClient = notion,
 }: Options): Promise<Result<Post | null, Error>> {
   try {
     if (!slug) {
@@ -93,7 +97,7 @@ export default async function getPost({
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `post-${slug}-blocks-${includeBlocks}-nav-${includePrevAndNext}`
     if (!skipCache) {
-      const cached = await getCached<Post>(cacheKey, 'notion')
+      const cached = await cache.get<Post>(cacheKey, 'notion')
       if (cached) {
         return Ok(cached)
       }
@@ -101,7 +105,7 @@ export default async function getPost({
 
     console.info(`📥 Fetching post from Notion API: ${slug}`)
 
-    const response = await notion.dataSources.query({
+    const response = await notionClient.dataSources.query({
       data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
       filter: {
         and: [{ property: 'Slug', rich_text: { equals: slug } }],
@@ -121,7 +125,7 @@ export default async function getPost({
     let post = transformNotionPageToPost(response.results[0])
 
     if (includePrevAndNext) {
-      const postsResult = await getPosts({ sortDirection: 'ascending', skipCache })
+      const postsResult = await getPosts({ sortDirection: 'ascending', skipCache, cache, notionClient })
       if (!postsResult.ok) {
         return Err(postsResult.error)
       }
@@ -148,7 +152,7 @@ export default async function getPost({
 
     // Cache the result (always caches, even when skipCache=true)
     // This ensures ?nocache=true refreshes the cache with latest data
-    await setCached(cacheKey, post, 'notion')
+    await cache.set(cacheKey, post, 'notion')
 
     return Ok(post)
   } catch (error) {

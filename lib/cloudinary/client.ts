@@ -11,3 +11,4 @@ cloudinary.config({
 })
 
 export default cloudinary
+export type CloudinaryClient = typeof cloudinary
