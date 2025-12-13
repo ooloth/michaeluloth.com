@@ -2,6 +2,7 @@ import fetchCloudinaryImageMetadata from './fetchCloudinaryImageMetadata'
 import { isOk, isErr } from '@/utils/result'
 import type { CloudinaryResource } from './types'
 import { type CacheAdapter } from '@/lib/cache/adapter'
+import { type CloudinaryClient } from './client'
 
 // Test helper: creates a mock cache adapter
 function createMockCache(cachedValue: unknown = null): CacheAdapter {
@@ -11,17 +12,17 @@ function createMockCache(cachedValue: unknown = null): CacheAdapter {
   }
 }
 
-// Mock dependencies
-vi.mock('./client', () => ({
-  default: {
+// Test helper: creates a mock Cloudinary client
+function createMockCloudinaryClient(): CloudinaryClient {
+  return {
     api: {
       resource: vi.fn(),
     },
     url: vi.fn((publicId: string, options: any) => {
       return `https://res.cloudinary.com/test/image/upload/w_${options.width}/${publicId}`
     }),
-  },
-}))
+  } as CloudinaryClient
+}
 
 vi.mock('./parsePublicIdFromCloudinaryUrl', () => ({
   default: vi.fn(),
@@ -34,10 +35,10 @@ describe('fetchCloudinaryImageMetadata', () => {
 
   describe('success cases', () => {
     it('returns Ok with image metadata from Cloudinary API', async () => {
-      const cloudinary = (await import('./client')).default
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
@@ -53,9 +54,9 @@ describe('fetchCloudinaryImageMetadata', () => {
         },
       } as any
 
-      vi.mocked(cloudinary.api.resource).mockResolvedValue(mockCloudinaryResource)
+      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -71,7 +72,7 @@ describe('fetchCloudinaryImageMetadata', () => {
         expect(result.value.srcSet).toContain('2160w')
       }
 
-      expect(cloudinary.api.resource).toHaveBeenCalledWith('sample/image', {
+      expect(mockClient.api.resource).toHaveBeenCalledWith('sample/image', {
         context: true,
         type: 'upload',
       })
@@ -95,8 +96,9 @@ describe('fetchCloudinaryImageMetadata', () => {
       }
 
       const mockCache = createMockCache(cachedMetadata)
+      const mockClient = createMockCloudinaryClient()
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -105,10 +107,10 @@ describe('fetchCloudinaryImageMetadata', () => {
     })
 
     it('handles images with missing alt text', async () => {
-      const cloudinary = (await import('./client')).default
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
@@ -123,9 +125,9 @@ describe('fetchCloudinaryImageMetadata', () => {
         },
       } as any
 
-      vi.mocked(cloudinary.api.resource).mockResolvedValue(mockCloudinaryResource)
+      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -135,10 +137,10 @@ describe('fetchCloudinaryImageMetadata', () => {
     })
 
     it('handles images with missing caption', async () => {
-      const cloudinary = (await import('./client')).default
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
@@ -153,9 +155,9 @@ describe('fetchCloudinaryImageMetadata', () => {
         },
       } as any
 
-      vi.mocked(cloudinary.api.resource).mockResolvedValue(mockCloudinaryResource)
+      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -165,10 +167,10 @@ describe('fetchCloudinaryImageMetadata', () => {
     })
 
     it('uses type "fetch" for URLs starting with http', async () => {
-      const cloudinary = (await import('./client')).default
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('http://example.com/image.jpg')
 
@@ -183,12 +185,12 @@ describe('fetchCloudinaryImageMetadata', () => {
         },
       } as any
 
-      vi.mocked(cloudinary.api.resource).mockResolvedValue(mockCloudinaryResource)
+      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://cloudinary.com/fetch/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://cloudinary.com/fetch/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isOk(result)).toBe(true)
-      expect(cloudinary.api.resource).toHaveBeenCalledWith('http://example.com/image.jpg', {
+      expect(mockClient.api.resource).toHaveBeenCalledWith('http://example.com/image.jpg', {
         context: true,
         type: 'fetch',
       })
@@ -200,10 +202,11 @@ describe('fetchCloudinaryImageMetadata', () => {
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue(null)
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://invalid-url.com', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://invalid-url.com', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -212,17 +215,17 @@ describe('fetchCloudinaryImageMetadata', () => {
     })
 
     it('returns Err when Cloudinary API call fails', async () => {
-      const cloudinary = (await import('./client')).default
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
       const apiError = new Error('Cloudinary API error')
-      vi.mocked(cloudinary.api.resource).mockRejectedValue(apiError)
+      vi.mocked(mockClient.api.resource).mockRejectedValue(apiError)
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -231,10 +234,10 @@ describe('fetchCloudinaryImageMetadata', () => {
     })
 
     it('returns Err when image is missing width', async () => {
-      const cloudinary = (await import('./client')).default
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
@@ -248,9 +251,9 @@ describe('fetchCloudinaryImageMetadata', () => {
         },
       } as any
 
-      vi.mocked(cloudinary.api.resource).mockResolvedValue(mockCloudinaryResource)
+      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -259,10 +262,10 @@ describe('fetchCloudinaryImageMetadata', () => {
     })
 
     it('returns Err when image is missing height', async () => {
-      const cloudinary = (await import('./client')).default
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
@@ -276,9 +279,9 @@ describe('fetchCloudinaryImageMetadata', () => {
         },
       } as any
 
-      vi.mocked(cloudinary.api.resource).mockResolvedValue(mockCloudinaryResource)
+      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -296,8 +299,9 @@ describe('fetchCloudinaryImageMetadata', () => {
         get: vi.fn().mockRejectedValue(cacheError),
         set: vi.fn(),
       }
+      const mockClient = createMockCloudinaryClient()
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -306,15 +310,15 @@ describe('fetchCloudinaryImageMetadata', () => {
     })
 
     it('wraps non-Error exceptions as Error', async () => {
-      const cloudinary = (await import('./client')).default
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
-      vi.mocked(cloudinary.api.resource).mockRejectedValue('string error')
+      vi.mocked(mockClient.api.resource).mockRejectedValue('string error')
 
-      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache })
+      const result = await fetchCloudinaryImageMetadata({ url: 'https://res.cloudinary.com/test/image.jpg', cache: mockCache, cloudinaryClient: mockClient })
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {

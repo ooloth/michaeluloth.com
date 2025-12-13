@@ -1,5 +1,5 @@
 import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
-import cloudinary from '@/lib/cloudinary/client'
+import cloudinary, { type CloudinaryClient } from '@/lib/cloudinary/client'
 import { type CloudinaryResource } from '@/lib/cloudinary/types'
 import { getErrorDetails } from '@/utils/logging'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
@@ -18,6 +18,7 @@ export type CloudinaryImageMetadata = {
 type Options = {
   url: string
   cache?: CacheAdapter
+  cloudinaryClient?: CloudinaryClient
 }
 
 /**
@@ -27,6 +28,7 @@ type Options = {
 export default async function fetchCloudinaryImageMetadata({
   url,
   cache = filesystemCache,
+  cloudinaryClient = cloudinary,
 }: Options): Promise<Result<CloudinaryImageMetadata, Error>> {
   try {
     const publicId = parsePublicIdFromCloudinaryUrl(url)
@@ -44,7 +46,7 @@ export default async function fetchCloudinaryImageMetadata({
 
     // Fetch image details from Cloudinary Admin API
     // See: https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
-    const cloudinaryImage: CloudinaryResource = await cloudinary.api
+    const cloudinaryImage: CloudinaryResource = await cloudinaryClient.api
       .resource(publicId, {
         context: true, // include contextual metadata (alt, caption, plus any custom fields)
         type: publicId.startsWith('http') ? 'fetch' : 'upload',
@@ -98,7 +100,7 @@ export default async function fetchCloudinaryImageMetadata({
     ]
 
     // Generate URL with desired transformations
-    const src = cloudinary.url(cloudinaryImage.public_id, {
+    const src = cloudinaryClient.url(cloudinaryImage.public_id, {
       crop: 'scale',
       fetch_format: 'auto',
       quality: 'auto',
@@ -109,7 +111,7 @@ export default async function fetchCloudinaryImageMetadata({
     const srcSet = widths
       .map(
         width =>
-          `${cloudinary.url(cloudinaryImage.public_id, {
+          `${cloudinaryClient.url(cloudinaryImage.public_id, {
             crop: 'scale',
             fetch_format: 'auto',
             quality: 'auto',
