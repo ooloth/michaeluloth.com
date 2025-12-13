@@ -3,7 +3,7 @@ import cloudinary from '@/lib/cloudinary/client'
 import { type CloudinaryResource } from '@/lib/cloudinary/types'
 import { getErrorDetails } from '@/utils/logging'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
-import { Ok, Err, type Result } from '@/utils/result'
+import { Ok, toErr, type Result } from '@/utils/result'
 
 export type CloudinaryImageMetadata = {
   alt: string
@@ -129,7 +129,6 @@ export default async function fetchCloudinaryImageMetadata(
 
     return Ok(metadata)
   } catch (error) {
-    console.error('fetchCloudinaryImageMetadata error:', error)
-    return Err(error instanceof Error ? error : new Error(String(error)))
+    return toErr(error, 'fetchCloudinaryImageMetadata')
   }
 }

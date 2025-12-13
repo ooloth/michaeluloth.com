@@ -2,7 +2,7 @@ import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
 import { env } from '@/lib/env'
-import { type Result, Ok, Err } from '@/utils/result'
+import { type Result, Ok, Err, toErr } from '@/utils/result'
 
 // Schema for raw TMDB API response item
 const TmdbApiResultSchema = z.object({
@@ -114,8 +114,7 @@ export default async function fetchTmdbList(
         }
       }
     } catch (error) {
-      console.error('fetchTmdbList error:', error)
-      return Err(error instanceof Error ? error : new Error(String(error)))
+      return toErr(error, 'fetchTmdbList')
     }
 
     page++

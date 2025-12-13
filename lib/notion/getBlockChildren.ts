@@ -1,7 +1,7 @@
 import notion, { collectPaginatedAPI } from './client'
 import { BlockSchema, type Block, type GroupedBlock, type BulletedListBlock, type NumberedListBlock } from './schemas/block'
 import { logValidationError } from '@/utils/zod'
-import { Ok, Err, type Result } from '@/utils/result'
+import { Ok, toErr, type Result } from '@/utils/result'
 
 export const INVALID_BLOCK_ERROR = 'Invalid block data - build aborted'
 
@@ -100,7 +100,6 @@ export default async function getBlockChildren(blockId: string): Promise<Result<
     const blocks = validateBlocks(children)
     return Ok(blocks)
   } catch (error) {
-    console.error('getBlockChildren error:', error)
-    return Err(error instanceof Error ? error : new Error(String(error)))
+    return toErr(error, 'getBlockChildren')
   }
 }

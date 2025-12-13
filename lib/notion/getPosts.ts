@@ -4,7 +4,7 @@ import { PostListItemSchema, PostPropertiesSchema, type PostListItem } from './s
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
-import { type Result, Ok, Err } from '@/utils/result'
+import { type Result, Ok, toErr } from '@/utils/result'
 
 type Options = {
   sortDirection?: 'ascending' | 'descending'
@@ -106,7 +106,6 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
 
     return Ok(posts)
   } catch (error) {
-    console.error('getPosts error:', error)
-    return Err(error instanceof Error ? error : new Error(String(error)))
+    return toErr(error, 'getPosts')
   }
 }

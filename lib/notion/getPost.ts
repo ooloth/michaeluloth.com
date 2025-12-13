@@ -6,7 +6,7 @@ import { PostListItemSchema, PostPropertiesSchema, type Post, type PostListItem 
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
-import { Ok, Err, type Result } from '@/utils/result'
+import { Ok, Err, toErr, type Result } from '@/utils/result'
 
 type Options = {
   slug: string | null
@@ -152,7 +152,6 @@ export default async function getPost({
 
     return Ok(post)
   } catch (error) {
-    console.error('getPost error:', error)
-    return Err(error instanceof Error ? error : new Error(String(error)))
+    return toErr(error, 'getPost')
   }
 }

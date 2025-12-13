@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
-import { type Result, Ok, Err } from '@/utils/result'
+import { type Result, Ok, toErr } from '@/utils/result'
 
 interface iTunesListItem {
   date: string
@@ -128,7 +128,6 @@ export default async function fetchItunesItems(
     const sortedResults = uniqueResults.sort((a, b) => b.date.localeCompare(a.date))
     return Ok(sortedResults)
   } catch (error) {
-    console.error('fetchItunesItems error:', error)
-    return Err(error instanceof Error ? error : new Error(String(error)))
+    return toErr(error, 'fetchItunesItems')
   }
 }
