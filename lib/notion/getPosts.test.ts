@@ -346,9 +346,12 @@ describe('getPosts', () => {
 
       await getPosts({ sortDirection: 'descending', cache: mockCache, notionClient: mockClient })
 
-      expect(collectPaginatedAPI).toHaveBeenCalledWith(expect.any(Function), expect.objectContaining({
-        sorts: [{ property: 'First published', direction: 'descending' }],
-      }))
+      expect(collectPaginatedAPI).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          sorts: [{ property: 'First published', direction: 'descending' }],
+        }),
+      )
     })
 
     it('uses correct cache key for different sort directions', async () => {

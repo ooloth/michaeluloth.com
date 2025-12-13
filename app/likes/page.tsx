@@ -36,7 +36,7 @@ export async function fetchItunesMedia(
   }
 
   return fetchItunesItems(
-    itemsResult.value.map((i) => ({ id: i.appleId, name: i.name, date: i.date })),
+    itemsResult.value.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
     medium,
     entity,
   )
@@ -102,11 +102,11 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
 
   // Fetch all categories in parallel
   const [tv, movies, books, albums, podcasts] = await Promise.all([
-    fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then((r) => r.unwrap()),
-    fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then((r) => r.unwrap()),
-    fetchItunesMedia('books', 'ebook', 'ebook', skipCache).then((r) => r.unwrap()),
-    fetchItunesMedia('albums', 'music', 'album', skipCache).then((r) => r.unwrap()),
-    fetchItunesMedia('podcasts', 'podcast', 'podcast', skipCache).then((r) => r.unwrap()),
+    fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then(r => r.unwrap()),
+    fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then(r => r.unwrap()),
+    fetchItunesMedia('books', 'ebook', 'ebook', skipCache).then(r => r.unwrap()),
+    fetchItunesMedia('albums', 'music', 'album', skipCache).then(r => r.unwrap()),
+    fetchItunesMedia('podcasts', 'podcast', 'podcast', skipCache).then(r => r.unwrap()),
   ])
 
   return (

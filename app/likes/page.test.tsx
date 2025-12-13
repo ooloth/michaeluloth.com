@@ -20,8 +20,22 @@ describe('fetchItunesMedia', () => {
       ]
 
       const mockItunesItems = [
-        { id: '1', title: 'Book 1', date: '2024-01-15', imageUrl: 'https://example.com/1.jpg', imagePlaceholder: 'base64', link: 'https://books.apple.com/1' },
-        { id: '2', title: 'Book 2', date: '2024-02-20', imageUrl: 'https://example.com/2.jpg', imagePlaceholder: 'base64', link: 'https://books.apple.com/2' },
+        {
+          id: '1',
+          title: 'Book 1',
+          date: '2024-01-15',
+          imageUrl: 'https://example.com/1.jpg',
+          imagePlaceholder: 'base64',
+          link: 'https://books.apple.com/1',
+        },
+        {
+          id: '2',
+          title: 'Book 2',
+          date: '2024-02-20',
+          imageUrl: 'https://example.com/2.jpg',
+          imagePlaceholder: 'base64',
+          link: 'https://books.apple.com/2',
+        },
       ]
 
       vi.mocked(getMediaItems).mockResolvedValue(Ok(mockMediaItems as unknown as NotionMediaItem[]))
@@ -46,12 +60,18 @@ describe('fetchItunesMedia', () => {
     })
 
     it('fetches albums with correct iTunes parameters', async () => {
-      const mockMediaItems = [
-        { appleId: 123, name: 'Album 1', date: '2024-03-10' },
-      ]
+      const mockMediaItems = [{ appleId: 123, name: 'Album 1', date: '2024-03-10' }]
 
       const mockItunesItems = [
-        { id: '123', title: 'Album 1', artist: 'Artist 1', date: '2024-03-10', imageUrl: 'https://example.com/1.jpg', imagePlaceholder: 'base64', link: 'https://music.apple.com/123' },
+        {
+          id: '123',
+          title: 'Album 1',
+          artist: 'Artist 1',
+          date: '2024-03-10',
+          imageUrl: 'https://example.com/1.jpg',
+          imagePlaceholder: 'base64',
+          link: 'https://music.apple.com/123',
+        },
       ]
 
       vi.mocked(getMediaItems).mockResolvedValue(Ok(mockMediaItems as unknown as NotionMediaItem[]))
@@ -69,12 +89,17 @@ describe('fetchItunesMedia', () => {
     })
 
     it('fetches podcasts with correct iTunes parameters', async () => {
-      const mockMediaItems = [
-        { appleId: 456, name: 'Podcast 1', date: '2024-04-01' },
-      ]
+      const mockMediaItems = [{ appleId: 456, name: 'Podcast 1', date: '2024-04-01' }]
 
       const mockItunesItems = [
-        { id: '456', title: 'Podcast 1', date: '2024-04-01', imageUrl: 'https://example.com/1.jpg', imagePlaceholder: 'base64', link: 'https://podcasts.apple.com/456' },
+        {
+          id: '456',
+          title: 'Podcast 1',
+          date: '2024-04-01',
+          imageUrl: 'https://example.com/1.jpg',
+          imagePlaceholder: 'base64',
+          link: 'https://podcasts.apple.com/456',
+        },
       ]
 
       vi.mocked(getMediaItems).mockResolvedValue(Ok(mockMediaItems as unknown as NotionMediaItem[]))
@@ -109,9 +134,7 @@ describe('fetchItunesMedia', () => {
     })
 
     it('returns Err when fetchItunesItems fails', async () => {
-      const mockMediaItems = [
-        { appleId: 1, name: 'Book 1', date: '2024-01-15' },
-      ]
+      const mockMediaItems = [{ appleId: 1, name: 'Book 1', date: '2024-01-15' }]
 
       const itunesError = new Error('iTunes API error')
       vi.mocked(getMediaItems).mockResolvedValue(Ok(mockMediaItems as unknown as NotionMediaItem[]))

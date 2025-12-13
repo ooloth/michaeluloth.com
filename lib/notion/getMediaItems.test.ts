@@ -130,7 +130,7 @@ describe('transformNotionPagesToMediaItems', () => {
     ]
 
     expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(
-      expectedError || INVALID_MEDIA_ITEM_ERROR.books
+      expectedError || INVALID_MEDIA_ITEM_ERROR.books,
     )
   })
 
@@ -200,9 +200,7 @@ describe('getMediaItems', () => {
     })
 
     it('returns Ok with cached data when available', async () => {
-      const cachedData: NotionMediaItem[] = [
-        { id: '456', name: 'Cached Book', appleId: 99999, date: '2024-01-01' },
-      ]
+      const cachedData: NotionMediaItem[] = [{ id: '456', name: 'Cached Book', appleId: 99999, date: '2024-01-01' }]
 
       const mockCache = createMockCache(cachedData)
       const mockClient = createMockNotionClient()
@@ -233,7 +231,12 @@ describe('getMediaItems', () => {
         },
       ])
 
-      const result = await getMediaItems({ category: 'books', skipCache: true, cache: mockCache, notionClient: mockClient })
+      const result = await getMediaItems({
+        category: 'books',
+        skipCache: true,
+        cache: mockCache,
+        notionClient: mockClient,
+      })
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {

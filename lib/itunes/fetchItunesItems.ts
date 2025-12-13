@@ -72,8 +72,7 @@ export default async function fetchItunesItems(
           return null
         }
 
-        const { artistName, artworkUrl100, collectionId, collectionViewUrl, trackId, trackViewUrl } =
-          parsedResult.data
+        const { artistName, artworkUrl100, collectionId, collectionViewUrl, trackId, trackViewUrl } = parsedResult.data
 
         const resultID = collectionId || trackId
         const matchingItem: iTunesListItem | undefined = items.find(item => item.id === resultID)
