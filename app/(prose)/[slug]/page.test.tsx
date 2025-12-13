@@ -1,9 +1,16 @@
 import { generateStaticParams } from './page'
+import DynamicRoute from './page'
 import getPosts from '@/lib/notion/getPosts'
+import getPost from '@/lib/notion/getPost'
+import { notFound } from 'next/navigation'
 import { Ok, Err } from '@/utils/result'
 
 // Mock dependencies
 vi.mock('@/lib/notion/getPosts')
+vi.mock('@/lib/notion/getPost')
+vi.mock('next/navigation', () => ({
+  notFound: vi.fn(),
+}))
 
 describe('generateStaticParams', () => {
   beforeEach(() => {
@@ -100,6 +107,187 @@ describe('generateStaticParams', () => {
       vi.mocked(getPosts).mockRejectedValue(error)
 
       await expect(generateStaticParams()).rejects.toThrow('Network error')
+    })
+  })
+})
+
+describe('DynamicRoute page', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('success cases', () => {
+    it('fetches and renders post with blocks and navigation', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'test-post',
+        title: 'Test Post',
+        description: 'Test description',
+        firstPublished: '2024-01-15',
+        featuredImage: null,
+        blocks: [
+          {
+            type: 'paragraph',
+            richText: [{ type: 'text', text: 'Test content' }],
+          },
+        ],
+        prevPost: {
+          slug: 'previous-post',
+          title: 'Previous Post',
+        },
+        nextPost: {
+          slug: 'next-post',
+          title: 'Next Post',
+        },
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'test-post' })
+      const searchParams = Promise.resolve({})
+      const result = await DynamicRoute({ params, searchParams })
+
+      expect(getPost).toHaveBeenCalledWith({
+        slug: 'test-post',
+        includeBlocks: true,
+        includePrevAndNext: true,
+        skipCache: false,
+      })
+
+      expect(result.type).toBeDefined()
+      expect(result.props).toBeDefined()
+    })
+
+    it('passes skipCache=true when nocache query param is present', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'test-post',
+        title: 'Test Post',
+        description: null,
+        firstPublished: '2024-01-15',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'test-post' })
+      const searchParams = Promise.resolve({ nocache: 'true' })
+      await DynamicRoute({ params, searchParams })
+
+      expect(getPost).toHaveBeenCalledWith({
+        slug: 'test-post',
+        includeBlocks: true,
+        includePrevAndNext: true,
+        skipCache: true,
+      })
+    })
+
+    it('passes skipCache=false when nocache is not "true"', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'test-post',
+        title: 'Test Post',
+        description: null,
+        firstPublished: '2024-01-15',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'test-post' })
+      const searchParams = Promise.resolve({ nocache: 'false' })
+      await DynamicRoute({ params, searchParams })
+
+      expect(getPost).toHaveBeenCalledWith({
+        slug: 'test-post',
+        includeBlocks: true,
+        includePrevAndNext: true,
+        skipCache: false,
+      })
+    })
+
+    it('calls getPost with correct options', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'my-post',
+        title: 'My Post',
+        description: null,
+        firstPublished: '2024-01-15',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'my-post' })
+      const searchParams = Promise.resolve({})
+      await DynamicRoute({ params, searchParams })
+
+      expect(getPost).toHaveBeenCalledWith({
+        slug: 'my-post',
+        includeBlocks: true,
+        includePrevAndNext: true,
+        skipCache: false,
+      })
+    })
+  })
+
+  describe('notFound behavior', () => {
+    it('calls notFound() when post is null', async () => {
+      vi.mocked(getPost).mockResolvedValue(Ok(null))
+      vi.mocked(notFound).mockImplementation(() => {
+        throw new Error('NEXT_NOT_FOUND')
+      })
+
+      const params = Promise.resolve({ slug: 'nonexistent-post' })
+      const searchParams = Promise.resolve({})
+
+      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('NEXT_NOT_FOUND')
+      expect(notFound).toHaveBeenCalled()
+    })
+
+    it('calls notFound() when post is undefined', async () => {
+      vi.mocked(getPost).mockResolvedValue(Ok(undefined as any))
+      vi.mocked(notFound).mockImplementation(() => {
+        throw new Error('NEXT_NOT_FOUND')
+      })
+
+      const params = Promise.resolve({ slug: 'missing-post' })
+      const searchParams = Promise.resolve({})
+
+      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('NEXT_NOT_FOUND')
+      expect(notFound).toHaveBeenCalled()
+    })
+  })
+
+  describe('error cases', () => {
+    it('throws when getPost returns Err', async () => {
+      const error = new Error('Failed to fetch post from Notion')
+      vi.mocked(getPost).mockResolvedValue(Err(error))
+
+      const params = Promise.resolve({ slug: 'test-post' })
+      const searchParams = Promise.resolve({})
+
+      // The .unwrap() call should throw, causing build to fail
+      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('Failed to fetch post from Notion')
+    })
+
+    it('throws when getPost rejects', async () => {
+      const error = new Error('Network error')
+      vi.mocked(getPost).mockRejectedValue(error)
+
+      const params = Promise.resolve({ slug: 'test-post' })
+      const searchParams = Promise.resolve({})
+
+      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('Network error')
     })
   })
 })

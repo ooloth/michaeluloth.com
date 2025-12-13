@@ -178,7 +178,7 @@ This document identifies testing gaps in the build-time logic of the Next.js app
 | Build-Time Component | Unit Tests | Integration Tests | E2E/Build Tests |
 |---------------------|------------|-------------------|-----------------|
 | `generateStaticParams` | ✅ **Complete** (6 tests) | ❌ None | ❌ None |
-| Page components (Server Components) | ⚠️ Partial (14/20+ tests) | ❌ None | ❌ None |
+| Page components (Server Components) | ⚠️ Good (22 tests - blog + dynamic route) | ❌ None | ❌ None |
 | Notion API fetching | ✅ Excellent (26 tests) | ⚠️ Mocked | ❌ None |
 | TMDB API fetching | ✅ Good (13 tests) | ❌ None | ❌ None |
 | iTunes API fetching | ✅ Good (10 tests) | ❌ None | ❌ None |
@@ -252,3 +252,17 @@ Work through the priority list one test at a time:
    - All tests passing
 
 **Updated Test Count:** 254 tests total (was 246)
+
+### 2025-12-13 - Session 3
+
+**Completed:**
+4. ✅ **Dynamic route page component** - Extended `app/(prose)/[slug]/page.test.tsx`
+   - 8 additional tests for the page component's default export
+   - Tests successful post fetching with blocks and navigation
+   - Tests skipCache query param handling
+   - Tests `notFound()` behavior when post doesn't exist
+   - Tests error propagation (build failures when getPost fails)
+   - Total tests in file: 14 (6 generateStaticParams + 8 page component)
+   - All tests passing
+
+**Updated Test Count:** 262 tests total (was 254)
