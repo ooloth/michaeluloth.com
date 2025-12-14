@@ -6,7 +6,7 @@ import rehypeStringify from 'rehype-stringify'
 import rehypePrettyCode from 'rehype-pretty-code'
 
 // See: https://github.com/atomiks/rehype-pretty-code/blob/master/website/assets/moonlight-ii.json
-const moonlightV2 = JSON.parse(fs.readFileSync('./lib/rehype-pretty-code/themes/moonlight-ii.json', 'utf-8'))
+const moonlightV2 = JSON.parse(fs.readFileSync('./styles/rehype-pretty-code/themes/moonlight-ii.json', 'utf-8'))
 
 type Props = Readonly<{
   code: string
