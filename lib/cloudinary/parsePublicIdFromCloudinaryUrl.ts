@@ -1,3 +1,10 @@
+export const ERRORS = {
+  NOT_A_STRING: (url: unknown) => `URL must be a string, but was ${typeof url}: ${url}`,
+  NOT_CLOUDINARY_URL: (url: string) => `URL must be a Cloudinary URL, but was: ${url}`,
+  INVALID_FOLDER: (url: string) => `Cloudinary URL image must be in the "mu/" or "fetch/" folders, but was: ${url}`,
+  PARSE_FAILED: (url: string) => `Failed to parse Public ID from Cloudinary URL: ${url}`,
+} as const
+
 /**
  * Parses the public ID from a Cloudinary URL.
  * Assumes the image is stored in the "mu/" or "fetch/" folder.
@@ -13,22 +20,22 @@
  */
 export default function parsePublicIdFromCloudinaryUrl(url: string): string | null {
   if (typeof url !== 'string') {
-    throw new TypeError(`URL must be a string, but was ${typeof url}: ${url}`)
+    throw new TypeError(ERRORS.NOT_A_STRING(url))
   }
 
   if (!url.includes('cloudinary')) {
-    throw new Error(`URL must be a Cloudinary URL, but was: ${url}`)
+    throw new Error(ERRORS.NOT_CLOUDINARY_URL(url))
   }
 
   if (!url.includes('/mu/') && !url.includes('/fetch/')) {
-    throw new Error(`Cloudinary URL image must be in the "mu/" or "fetch/" folders, but was: ${url}`)
+    throw new Error(ERRORS.INVALID_FOLDER(url))
   }
 
   const muPublicIdStart = url.indexOf('/mu/')
   const fetchPublicIdStart = url.indexOf('/fetch/')
 
   if (muPublicIdStart === -1 && fetchPublicIdStart === -1) {
-    throw new Error(`Failed to parse Public ID from Cloudinary URL: ${url}`)
+    throw new Error(ERRORS.PARSE_FAILED(url))
   }
 
   const publicIdStart =
