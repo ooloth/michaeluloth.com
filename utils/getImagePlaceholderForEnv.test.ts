@@ -1,5 +1,8 @@
 import getImagePlaceholderForEnv, { ERRORS } from './getImagePlaceholderForEnv'
 
+const TEST_PLACEHOLDER_SIZE = 16
+const TEST_PLACEHOLDER_SIZE_SMALL = 8
+
 // Mock plaiceholder (vi is globally available)
 vi.mock('plaiceholder', () => ({
   getPlaiceholder: vi.fn(async () => ({
@@ -20,7 +23,7 @@ describe('getImagePlaceholderForEnv', () => {
   it('returns gray pixel placeholder in development', async () => {
     vi.stubEnv('NODE_ENV', 'development')
 
-    const result = await getImagePlaceholderForEnv('https://example.com/image.jpg', 16)
+    const result = await getImagePlaceholderForEnv('https://example.com/image.jpg', TEST_PLACEHOLDER_SIZE)
 
     expect(result).toBe(
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mOUkJD+DwAB5wFMR598EAAAAABJRU5ErkJggg==',
@@ -31,10 +34,10 @@ describe('getImagePlaceholderForEnv', () => {
     vi.stubEnv('NODE_ENV', 'production')
 
     const { getPlaiceholder } = await import('plaiceholder')
-    const result = await getImagePlaceholderForEnv('https://example.com/image.jpg', 16)
+    const result = await getImagePlaceholderForEnv('https://example.com/image.jpg', TEST_PLACEHOLDER_SIZE)
 
     // getPlaiceholder should be called with a Buffer (from fetch), not the URL string
-    expect(getPlaiceholder).toHaveBeenCalledWith(expect.any(Buffer), { size: 16 })
+    expect(getPlaiceholder).toHaveBeenCalledWith(expect.any(Buffer), { size: TEST_PLACEHOLDER_SIZE })
     expect(result).toBe('data:image/png;base64,mockedBase64String')
   })
 
@@ -147,10 +150,10 @@ describe('getImagePlaceholderForEnv', () => {
         base64: 'data:image/png;base64,test',
       } as Awaited<ReturnType<typeof getPlaiceholder>>)
 
-      await getImagePlaceholderForEnv('https://example.com/image.jpg', 8)
+      await getImagePlaceholderForEnv('https://example.com/image.jpg', TEST_PLACEHOLDER_SIZE_SMALL)
 
       // Verify Buffer.from was called with the ArrayBuffer
-      expect(getPlaiceholder).toHaveBeenCalledWith(expect.any(Buffer), { size: 8 })
+      expect(getPlaiceholder).toHaveBeenCalledWith(expect.any(Buffer), { size: TEST_PLACEHOLDER_SIZE_SMALL })
 
       // Verify the Buffer contains the image data
       const callArgs = vi.mocked(getPlaiceholder).mock.calls[0]
