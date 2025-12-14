@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isCloudinaryUrl } from '@/lib/cloudinary/validation'
 
 /**
  * Property schemas validate Notion property structures at I/O boundary
@@ -137,6 +138,9 @@ export const FeaturedImagePropertySchema = z
       }),
   ])
   .nullable()
+  .refine(isCloudinaryUrl, {
+    message: 'Featured image must be a Cloudinary URL in the "mu/" or "fetch/" folders',
+  })
 
 /**
  * Helper to create a schema for a specific set of page properties.

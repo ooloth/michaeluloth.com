@@ -57,7 +57,7 @@ describe('transformNotionPageToPost', () => {
         Title: createTitleProperty('Hello World'),
         Description: createRichTextProperty('A great post'),
         'First published': createDateProperty('2024-01-15'),
-        'Featured image': createFilesProperty(['https://example.com/image.jpg']),
+        'Featured image': createFilesProperty(['https://res.cloudinary.com/ooloth/image/upload/mu/test-image.jpg']),
       },
     }
 
@@ -69,7 +69,7 @@ describe('transformNotionPageToPost', () => {
       title: 'Hello World',
       description: 'A great post',
       firstPublished: '2024-01-15',
-      featuredImage: 'https://example.com/image.jpg',
+      featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test-image.jpg',
       lastEditedTime: '2024-01-20T10:30:00.000Z',
       blocks: [],
       prevPost: null,

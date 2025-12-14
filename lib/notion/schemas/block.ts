@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isCloudinaryUrl } from '@/lib/cloudinary/validation'
 
 /**
  * Rich text schema - validates and transforms Notion rich text to ergonomic shape
@@ -144,6 +145,9 @@ const ImageBlockSchema = z
     type: 'image' as const,
     url: data.image.type === 'external' ? data.image.external.url : data.image.file.url,
   }))
+  .refine(data => isCloudinaryUrl(data.url), {
+    message: 'Image block must use a Cloudinary URL in the "mu/" or "fetch/" folders',
+  })
 
 /**
  * Video block schema

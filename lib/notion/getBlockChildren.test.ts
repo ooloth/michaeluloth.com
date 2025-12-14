@@ -355,7 +355,7 @@ describe('validateBlocks', () => {
           type: 'image',
           image: {
             type: 'external',
-            external: { url: 'https://example.com/image.png' },
+            external: { url: 'https://res.cloudinary.com/ooloth/image/upload/mu/test-image.png' },
           },
         },
       ]
@@ -365,7 +365,7 @@ describe('validateBlocks', () => {
       expect(result).toEqual([
         {
           type: 'image',
-          url: 'https://example.com/image.png',
+          url: 'https://res.cloudinary.com/ooloth/image/upload/mu/test-image.png',
         },
       ])
     })
@@ -376,7 +376,7 @@ describe('validateBlocks', () => {
           type: 'image',
           image: {
             type: 'file',
-            file: { url: 'https://notion.so/files/image.png' },
+            file: { url: 'https://res.cloudinary.com/ooloth/image/fetch/https://notion.so/files/image.png' },
           },
         },
       ]
@@ -386,7 +386,7 @@ describe('validateBlocks', () => {
       expect(result).toEqual([
         {
           type: 'image',
-          url: 'https://notion.so/files/image.png',
+          url: 'https://res.cloudinary.com/ooloth/image/fetch/https://notion.so/files/image.png',
         },
       ])
     })
