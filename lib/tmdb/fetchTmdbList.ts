@@ -2,7 +2,7 @@ import { z } from 'zod'
 import transformCloudinaryImage from '@/lib/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
 import { formatValidationError } from '@/utils/zod'
-import { env } from '@/lib/env'
+import { env } from '@/lib/env/env'
 import { type Result, Ok, Err, toErr } from '@/utils/errors/result'
 
 // Schema for raw TMDB API response item

@@ -1,7 +1,7 @@
 // see: https://cloudinary.com/documentation/node_integration#installation_and_setup
 
 import { v2 as cloudinary } from 'cloudinary'
-import { env } from '@/lib/env'
+import { env } from '@/lib/env/env'
 
 cloudinary.config({
   cloud_name: env.CLOUDINARY_CLOUD_NAME,

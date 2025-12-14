@@ -3,7 +3,7 @@ import notion, { collectPaginatedAPI, type Client } from './client'
 import { PostListItemSchema, PostPropertiesSchema, type PostListItem } from './schemas/post'
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
-import { env } from '@/lib/env'
+import { env } from '@/lib/env/env'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { z } from 'zod'
 

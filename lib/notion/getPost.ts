@@ -5,7 +5,7 @@ import getPosts from '@/lib/notion/getPosts'
 import { PostListItemSchema, PostPropertiesSchema, PostSchema, type Post } from './schemas/post'
 import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
-import { env } from '@/lib/env'
+import { env } from '@/lib/env/env'
 import { Ok, Err, toErr, type Result } from '@/utils/errors/result'
 
 type Options = {

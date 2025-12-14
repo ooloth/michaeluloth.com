@@ -5,7 +5,7 @@ import Heading from '@/ui/heading'
 import fetchTmdbList, { type TmdbItem } from '@/lib/tmdb/fetchTmdbList'
 import getMediaItems from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
-import { env } from '@/lib/env'
+import { env } from '@/lib/env/env'
 import { type Result } from '@/utils/errors/result'
 
 export const metadata: Metadata = {

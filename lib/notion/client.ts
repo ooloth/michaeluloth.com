@@ -2,7 +2,7 @@
 // TODO: notion mcp server: https://developers.notion.com/docs/mcp
 
 import { Client, collectPaginatedAPI } from '@notionhq/client'
-import { env } from '@/lib/env'
+import { env } from '@/lib/env/env'
 
 // See: https://github.com/makenotion/notion-sdk-js
 const notion = new Client({
