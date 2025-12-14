@@ -1,5 +1,5 @@
 import fetchTmdbList from './fetchTmdbList'
-import { isOk, isErr } from '@/utils/result'
+import { isOk, isErr } from '@/utils/errors/result'
 
 // Mock dependencies
 vi.mock('@/lib/cloudinary/transformCloudinaryImage', () => ({

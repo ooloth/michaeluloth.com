@@ -4,7 +4,7 @@ import { PostListItemSchema, PostPropertiesSchema, type PostListItem } from './s
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
-import { type Result, Ok, toErr } from '@/utils/result'
+import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { z } from 'zod'
 
 type Options = {

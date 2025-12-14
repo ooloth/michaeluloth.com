@@ -1,5 +1,5 @@
 import { invariant, InvariantViolationError } from './invariant'
-import { assertInstanceOf } from './test-helpers'
+import { assertInstanceOf } from '@/utils/test-helpers'
 
 describe('invariant', () => {
   describe('when condition is true', () => {

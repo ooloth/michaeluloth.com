@@ -10,7 +10,7 @@ import {
   createDateProperty,
   createFilesProperty,
 } from './testing/property-factories'
-import { isOk, isErr } from '@/utils/result'
+import { isOk, isErr } from '@/utils/errors/result'
 import { type CacheAdapter } from '@/lib/cache/adapter'
 import { type Client, collectPaginatedAPI } from './client'
 

@@ -9,7 +9,7 @@ import {
   createDateProperty,
   createFilesProperty,
 } from './testing/property-factories'
-import { isOk, isErr, Err } from '@/utils/result'
+import { isOk, isErr, Err } from '@/utils/errors/result'
 import type { Post } from './schemas/post'
 import type { GroupedBlock } from './schemas/block'
 import { type CacheAdapter } from '@/lib/cache/adapter'
@@ -334,7 +334,7 @@ describe('getPost', () => {
     it('includes blocks when includeBlocks is true', async () => {
       const mockClient = createMockNotionClient()
       const getBlockChildren = (await import('./getBlockChildren')).default
-      const { Ok } = await import('@/utils/result')
+      const { Ok } = await import('@/utils/errors/result')
 
       const mockCache = createMockCache()
 
@@ -375,7 +375,7 @@ describe('getPost', () => {
     it('includes prev/next navigation when includePrevAndNext is true', async () => {
       const mockClient = createMockNotionClient()
       const getPosts = (await import('./getPosts')).default
-      const { Ok } = await import('@/utils/result')
+      const { Ok } = await import('@/utils/errors/result')
 
       const mockCache = createMockCache()
 

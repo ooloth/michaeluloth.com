@@ -1,4 +1,4 @@
-import { invariant } from '@/utils/invariant'
+import { invariant } from '@/utils/errors/invariant'
 
 const emojiLabel = {
   '📖': 'An emoji of an open book.',

@@ -8,7 +8,7 @@ import DynamicRoute from './page'
 import getPosts from '@/lib/notion/getPosts'
 import getPost from '@/lib/notion/getPost'
 import { notFound } from 'next/navigation'
-import { Ok, Err } from '@/utils/result'
+import { Ok, Err } from '@/utils/errors/result'
 
 // Mock dependencies
 vi.mock('@/lib/notion/getPosts')

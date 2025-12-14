@@ -2,7 +2,7 @@ import getPost from './getPost'
 import getPosts from './getPosts'
 import getBlockChildren from './getBlockChildren'
 import getMediaItems from './getMediaItems'
-import { isOk, isErr } from '@/utils/result'
+import { isOk, isErr } from '@/utils/errors/result'
 
 /**
  * Integration tests for Notion API functions.

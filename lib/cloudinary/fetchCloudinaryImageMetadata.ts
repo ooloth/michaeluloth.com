@@ -3,7 +3,7 @@ import cloudinary, { type CloudinaryClient } from '@/lib/cloudinary/client'
 import { getErrorDetails } from '@/utils/logging'
 import { formatValidationError } from '@/utils/zod'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
-import { Ok, toErr, type Result } from '@/utils/result'
+import { Ok, toErr, type Result } from '@/utils/errors/result'
 import { z } from 'zod'
 
 export const ERRORS = {

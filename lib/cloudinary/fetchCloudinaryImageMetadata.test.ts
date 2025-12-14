@@ -1,5 +1,5 @@
 import fetchCloudinaryImageMetadata, { generateResponsiveImageUrls, ERRORS } from './fetchCloudinaryImageMetadata'
-import { isOk, isErr } from '@/utils/result'
+import { isOk, isErr } from '@/utils/errors/result'
 import type { CloudinaryResource } from './types'
 import { type CacheAdapter } from '@/lib/cache/adapter'
 import { type CloudinaryClient } from './client'

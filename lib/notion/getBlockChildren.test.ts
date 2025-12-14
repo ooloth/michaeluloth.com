@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import getBlockChildren, { validateBlocks, INVALID_BLOCK_ERROR } from './getBlockChildren'
 import { collectPaginatedAPI, type Client } from './client'
 import type { GroupedBlock, BulletedListBlock } from './schemas/block'
-import { isOk, isErr } from '@/utils/result'
+import { isOk, isErr } from '@/utils/errors/result'
 
 // Test helper: creates a mock Notion client
 function createMockNotionClient(): Client {

@@ -7,7 +7,7 @@ import { render, screen } from '@testing-library/react'
 import Blog from './page'
 import getPosts from '@/lib/notion/getPosts'
 import type { PostListItem } from '@/lib/notion/schemas/post'
-import { Ok, Err } from '@/utils/result'
+import { Ok, Err } from '@/utils/errors/result'
 
 // Mock dependencies
 vi.mock('@/lib/notion/getPosts')

@@ -8,7 +8,7 @@ import Likes from './page'
 import getMediaItems, { type NotionMediaItem } from '@/lib/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
 import fetchTmdbList from '@/lib/tmdb/fetchTmdbList'
-import { Ok, Err, isOk, isErr } from '@/utils/result'
+import { Ok, Err, isOk, isErr } from '@/utils/errors/result'
 
 // Mock dependencies
 vi.mock('@/lib/notion/getMediaItems')

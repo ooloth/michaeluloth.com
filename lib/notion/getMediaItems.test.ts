@@ -5,7 +5,7 @@ import getMediaItems, {
   type NotionMediaItem,
 } from './getMediaItems'
 import { createTitleProperty, createNumberProperty, createDateProperty } from './testing/property-factories'
-import { isOk, isErr } from '@/utils/result'
+import { isOk, isErr } from '@/utils/errors/result'
 import { type CacheAdapter } from '@/lib/cache/adapter'
 import { type Client, collectPaginatedAPI } from './client'
 

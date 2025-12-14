@@ -7,7 +7,7 @@ import {
   type NumberedListBlock,
 } from './schemas/block'
 import { logValidationError } from '@/utils/zod'
-import { Ok, toErr, type Result } from '@/utils/result'
+import { Ok, toErr, type Result } from '@/utils/errors/result'
 
 export const INVALID_BLOCK_ERROR = 'Invalid block data - build aborted'
 

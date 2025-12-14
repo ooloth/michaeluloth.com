@@ -6,7 +6,7 @@ import { PostListItemSchema, PostPropertiesSchema, PostSchema, type Post } from 
 import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
-import { Ok, Err, toErr, type Result } from '@/utils/result'
+import { Ok, Err, toErr, type Result } from '@/utils/errors/result'
 
 type Options = {
   slug: string | null

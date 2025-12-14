@@ -10,7 +10,7 @@ import {
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
-import { type Result, Ok, toErr } from '@/utils/result'
+import { type Result, Ok, toErr } from '@/utils/errors/result'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'
 
