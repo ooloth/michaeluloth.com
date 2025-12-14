@@ -10,7 +10,7 @@ import { z } from 'zod'
 export const ERRORS = {
   FETCH_FAILED: '🚨 Error fetching Cloudinary image',
   INVALID_API_RESPONSE: '🚨 Invalid Cloudinary API response',
-  PARSE_PUBLIC_ID_FAILED: 'Cloudinary URL must have parseable public ID',
+  PARSE_PUBLIC_ID_FAILED: 'Parser must find publicId in validated Cloudinary URL',
 } as const
 
 export type CloudinaryImageMetadata = {
