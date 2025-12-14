@@ -36,14 +36,8 @@ describe('invariant', () => {
     })
 
     it('throws an InvariantViolationError instance', () => {
-      try {
-        invariant(false, 'test')
-        throw new Error('should have thrown')
-      } catch (error) {
-        assertInstanceOf(error, InvariantViolationError)
-        expect(error).toBeInstanceOf(Error)
-        expect(error.name).toBe('InvariantViolationError')
-      }
+      expect(() => invariant(false, 'test')).toThrow(InvariantViolationError)
+      expect(() => invariant(false, 'test')).toThrow(Error)
     })
   })
 
@@ -55,23 +49,29 @@ describe('invariant', () => {
         height: 200,
       }
 
+      let caughtError: InvariantViolationError | undefined
       try {
         invariant(false, 'Invalid dimensions', context)
-        throw new Error('should have thrown')
       } catch (error) {
         assertInstanceOf(error, InvariantViolationError)
-        expect(error.context).toEqual(context)
+        caughtError = error
       }
+
+      expect(caughtError).toBeDefined()
+      expect(caughtError?.context).toEqual(context)
     })
 
     it('does not set context when not provided', () => {
+      let caughtError: InvariantViolationError | undefined
       try {
         invariant(false, 'No context')
-        throw new Error('should have thrown')
       } catch (error) {
         assertInstanceOf(error, InvariantViolationError)
-        expect(error.context).toBeUndefined()
+        caughtError = error
       }
+
+      expect(caughtError).toBeDefined()
+      expect(caughtError?.context).toBeUndefined()
     })
 
     it('handles complex context objects', () => {
@@ -82,13 +82,16 @@ describe('invariant', () => {
         undefinedValue: undefined,
       }
 
+      let caughtError: InvariantViolationError | undefined
       try {
         invariant(false, 'Complex context', context)
-        throw new Error('should have thrown')
       } catch (error) {
         assertInstanceOf(error, InvariantViolationError)
-        expect(error.context).toEqual(context)
+        caughtError = error
       }
+
+      expect(caughtError).toBeDefined()
+      expect(caughtError?.context).toEqual(context)
     })
   })
 
