@@ -38,7 +38,7 @@ describe('invariant', () => {
     it('throws an InvariantViolationError instance', () => {
       try {
         invariant(false, 'test')
-        fail('should have thrown')
+        throw new Error('should have thrown')
       } catch (error) {
         assertInstanceOf(error, InvariantViolationError)
         expect(error).toBeInstanceOf(Error)
@@ -57,7 +57,7 @@ describe('invariant', () => {
 
       try {
         invariant(false, 'Invalid dimensions', context)
-        fail('should have thrown')
+        throw new Error('should have thrown')
       } catch (error) {
         assertInstanceOf(error, InvariantViolationError)
         expect(error.context).toEqual(context)
@@ -67,7 +67,7 @@ describe('invariant', () => {
     it('does not set context when not provided', () => {
       try {
         invariant(false, 'No context')
-        fail('should have thrown')
+        throw new Error('should have thrown')
       } catch (error) {
         assertInstanceOf(error, InvariantViolationError)
         expect(error.context).toBeUndefined()
@@ -84,7 +84,7 @@ describe('invariant', () => {
 
       try {
         invariant(false, 'Complex context', context)
-        fail('should have thrown')
+        throw new Error('should have thrown')
       } catch (error) {
         assertInstanceOf(error, InvariantViolationError)
         expect(error.context).toEqual(context)
