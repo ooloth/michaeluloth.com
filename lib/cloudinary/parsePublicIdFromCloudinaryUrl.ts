@@ -16,7 +16,7 @@ export const ERRORS = {
  * @param url - Cloudinary URL (validated as string by TypeScript and Zod)
  * @throws {Error} If the URL is not a Cloudinary URL or is not in the "mu/" or "fetch/" folders
  */
-export default function parsePublicIdFromCloudinaryUrl(url: string): string | null {
+export default function parsePublicIdFromCloudinaryUrl(url: string): string {
   if (!url.includes('cloudinary')) {
     throw new Error(`${ERRORS.NOT_CLOUDINARY_URL}, but was: ${url}`)
   }
@@ -38,6 +38,14 @@ export default function parsePublicIdFromCloudinaryUrl(url: string): string | nu
   return publicIdAndExtension.startsWith('mu/') ? removeFileExtension(publicIdAndExtension) : publicIdAndExtension
 }
 
+/**
+ * Removes file extension from a filename.
+ * Intentionally removes query parameters and URL fragments as well,
+ * since they appear after the extension (e.g., "image.jpg?v=123#anchor" becomes "image").
+ *
+ * @param filename - Filename or path to process
+ * @returns Filename without extension, query params, or fragments
+ */
 const removeFileExtension = (filename: string): string => {
   const lastDotIndex = filename.lastIndexOf('.')
   if (lastDotIndex === -1) {

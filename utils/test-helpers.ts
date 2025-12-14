@@ -24,6 +24,7 @@
  */
 export function assertInstanceOf<T>(
   value: unknown,
+  // Constructor signature requires `any[]` for arbitrary class arguments
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor: new (...args: any[]) => T,
   message?: string,

@@ -30,9 +30,9 @@ export class InvariantViolationError extends Error {
  * @example
  * ```typescript
  * // Type narrowing
- * const publicId = parsePublicIdFromCloudinaryUrl(url)
- * invariant(publicId, 'URL must have parseable public ID')
- * // TypeScript knows publicId is non-null here
+ * const user = getUser(id)
+ * invariant(user, 'User must exist after authentication')
+ * // TypeScript knows user is non-null here
  *
  * // Documenting assumptions with context
  * invariant(width > 0 && height > 0,
@@ -44,6 +44,7 @@ export class InvariantViolationError extends Error {
  * invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
  * ```
  */
+// Allow `any` type for condition to accept any truthy/falsy value for runtime checks
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function invariant(condition: any, message: string, context?: Record<string, unknown>): asserts condition {
   if (!condition) {

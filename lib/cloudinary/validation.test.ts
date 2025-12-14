@@ -33,6 +33,11 @@ describe('isCloudinaryUrl', () => {
       expect(isCloudinaryUrl(url)).toBe(false)
     })
 
+    it('rejects malicious URLs with cloudinary in path but wrong domain', () => {
+      const url = 'https://evil.com/cloudinary/mu/image.jpg'
+      expect(isCloudinaryUrl(url)).toBe(false)
+    })
+
     it('rejects Cloudinary URLs not in mu/ or fetch/ folders', () => {
       const url = 'https://res.cloudinary.com/ooloth/image/upload/other-folder/image.jpg'
       expect(isCloudinaryUrl(url)).toBe(false)
@@ -50,6 +55,11 @@ describe('isCloudinaryUrl', () => {
 
     it('rejects empty strings', () => {
       expect(isCloudinaryUrl('')).toBe(false)
+    })
+
+    it('rejects malformed URLs', () => {
+      const url = 'not-a-valid-url'
+      expect(isCloudinaryUrl(url)).toBe(false)
     })
   })
 })

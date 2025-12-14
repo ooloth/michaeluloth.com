@@ -224,7 +224,9 @@ describe('fetchCloudinaryImageMetadata', () => {
       const mockCache = createMockCache()
       const mockClient = createMockCloudinaryClient()
 
-      vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue(null)
+      vi.mocked(parsePublicIdFromCloudinaryUrl).mockImplementation(() => {
+        throw new Error('URL must be a Cloudinary URL')
+      })
 
       const result = await fetchCloudinaryImageMetadata({
         url: 'https://invalid-url.com',
@@ -234,7 +236,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toContain(ERRORS.PARSE_PUBLIC_ID_FAILED)
+        expect(result.error.message).toContain('URL must be a Cloudinary URL')
       }
     })
 
