@@ -4,12 +4,13 @@ import { getErrorDetails } from '@/utils/logging'
 import { formatValidationError } from '@/utils/zod'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/result'
+import { invariant } from '@/utils/invariant'
 import { z } from 'zod'
 
 export const ERRORS = {
-  PARSE_PUBLIC_ID_FAILED: (url: string) => `🚨 Could not parse Cloudinary public ID from URL: "${url}"`,
   INVALID_API_RESPONSE: (publicId: string, errors: string) =>
     `🚨 Invalid Cloudinary API response for "${publicId}": ${errors}`,
+  PARSE_PUBLIC_ID_FAILED: (url: string) => `Could not parse Cloudinary public ID from URL: "${url}"`,
 } as const
 
 export type CloudinaryImageMetadata = {
@@ -115,9 +116,7 @@ export default async function fetchCloudinaryImageMetadata({
 }: Options): Promise<Result<CloudinaryImageMetadata, Error>> {
   try {
     const publicId = parsePublicIdFromCloudinaryUrl(url)
-    if (!publicId) {
-      throw new Error(ERRORS.PARSE_PUBLIC_ID_FAILED(url))
-    }
+    invariant(publicId, ERRORS.PARSE_PUBLIC_ID_FAILED(url))
 
     // Check cache first (dev mode only)
     const cached = await cache.get<CloudinaryImageMetadata>(publicId, 'cloudinary', CloudinaryImageMetadataSchema)
