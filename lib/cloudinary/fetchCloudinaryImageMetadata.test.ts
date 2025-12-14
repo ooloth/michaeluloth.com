@@ -234,7 +234,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toContain('Could not parse Cloudinary public ID')
+        expect(result.error.message).toContain('Cloudinary URL must have parseable public ID')
       }
     })
 

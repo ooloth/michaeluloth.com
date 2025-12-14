@@ -10,7 +10,7 @@ import { z } from 'zod'
 export const ERRORS = {
   INVALID_API_RESPONSE: (publicId: string, errors: string) =>
     `🚨 Invalid Cloudinary API response for "${publicId}": ${errors}`,
-  PARSE_PUBLIC_ID_FAILED: (url: string) => `Could not parse Cloudinary public ID from URL: "${url}"`,
+  PARSE_PUBLIC_ID_FAILED: 'Cloudinary URL must have parseable public ID',
 } as const
 
 export type CloudinaryImageMetadata = {
@@ -116,7 +116,7 @@ export default async function fetchCloudinaryImageMetadata({
 }: Options): Promise<Result<CloudinaryImageMetadata, Error>> {
   try {
     const publicId = parsePublicIdFromCloudinaryUrl(url)
-    invariant(publicId, ERRORS.PARSE_PUBLIC_ID_FAILED(url))
+    invariant(publicId, ERRORS.PARSE_PUBLIC_ID_FAILED, { url })
 
     // Check cache first (dev mode only)
     const cached = await cache.get<CloudinaryImageMetadata>(publicId, 'cloudinary', CloudinaryImageMetadataSchema)

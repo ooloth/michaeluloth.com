@@ -27,7 +27,7 @@ export type EmojiProps = {
 export default function Emoji({ symbol, className }: EmojiProps) {
   const ariaLabel = emojiLabel[symbol]
 
-  invariant(ariaLabel, `No aria-label found for emoji: ${symbol}`, { symbol })
+  invariant(ariaLabel, `Emoji must have aria-label`, { symbol })
 
   return (
     <span role="img" aria-label={ariaLabel} className={`flex-none ${className ?? ''}`}>

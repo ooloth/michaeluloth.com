@@ -18,8 +18,12 @@ export class InvariantViolationError extends Error {
  * Use this to document and enforce invariants - assumptions that should never be violated.
  * If an invariant fails, it indicates a bug in the code, not a runtime error.
  *
+ * Message convention: Use "X must Y" pattern to state the invariant clearly.
+ * Since InvariantViolationError already signals "this shouldn't happen",
+ * the message should describe what must be true, not what operation failed.
+ *
  * @param condition - The condition that must be true
- * @param message - Error message describing what invariant was violated
+ * @param message - Error message stating the invariant (use "X must Y" pattern)
  * @param context - Optional context object for debugging (attached to error)
  * @throws {InvariantViolationError} If condition is falsy
  *
@@ -27,14 +31,17 @@ export class InvariantViolationError extends Error {
  * ```typescript
  * // Type narrowing
  * const publicId = parsePublicIdFromCloudinaryUrl(url)
- * invariant(publicId, 'Failed to parse Cloudinary public ID')
+ * invariant(publicId, 'URL must have parseable public ID')
  * // TypeScript knows publicId is non-null here
  *
- * // Documenting assumptions
+ * // Documenting assumptions with context
  * invariant(width > 0 && height > 0,
  *   'Image dimensions must be positive',
  *   { width, height, publicId }
  * )
+ *
+ * // State must have required property
+ * invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
  * ```
  */
 export function invariant(
