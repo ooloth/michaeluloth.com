@@ -257,7 +257,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toContain('Error fetching Cloudinary image')
+        expect(result.error.message).toContain(ERRORS.FETCH_FAILED)
       }
     })
 
@@ -289,7 +289,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toContain('Invalid Cloudinary API response')
+        expect(result.error.message).toContain(ERRORS.INVALID_API_RESPONSE)
       }
     })
 
@@ -317,7 +317,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toContain('Invalid Cloudinary API response')
+        expect(result.error.message).toContain(ERRORS.INVALID_API_RESPONSE)
       }
     })
 

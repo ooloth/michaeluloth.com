@@ -8,8 +8,8 @@ import { invariant } from '@/utils/invariant'
 import { z } from 'zod'
 
 export const ERRORS = {
-  INVALID_API_RESPONSE: (publicId: string, errors: string) =>
-    `🚨 Invalid Cloudinary API response for "${publicId}": ${errors}`,
+  FETCH_FAILED: '🚨 Error fetching Cloudinary image',
+  INVALID_API_RESPONSE: '🚨 Invalid Cloudinary API response',
   PARSE_PUBLIC_ID_FAILED: 'Cloudinary URL must have parseable public ID',
 } as const
 
@@ -131,14 +131,14 @@ export default async function fetchCloudinaryImageMetadata({
         type: publicId.startsWith('http') ? 'fetch' : 'upload',
       })
       .catch(error => {
-        throw Error(`🚨 Error fetching Cloudinary image: "${publicId}":\n\n${getErrorDetails(error)}\n`)
+        throw Error(`${ERRORS.FETCH_FAILED}: "${publicId}":\n\n${getErrorDetails(error)}\n`)
       })
 
     // Validate response with Zod
     const parseResult = CloudinaryResourceSchema.safeParse(cloudinaryResponse)
     if (!parseResult.success) {
       const errors = formatValidationError(parseResult.error)
-      throw new Error(ERRORS.INVALID_API_RESPONSE(publicId, errors))
+      throw new Error(`${ERRORS.INVALID_API_RESPONSE} for "${publicId}": ${errors}`)
     }
 
     const { public_id, width, height, context } = parseResult.data
