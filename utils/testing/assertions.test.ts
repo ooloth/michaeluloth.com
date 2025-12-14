@@ -1,4 +1,4 @@
-import { assertInstanceOf } from './test-helpers'
+import { assertInstanceOf } from './assertions'
 
 class CustomError extends Error {
   code: string
