@@ -1,3 +1,5 @@
+import { invariant } from '@/utils/invariant'
+
 const emojiLabel = {
   '📖': 'An emoji of an open book.',
   '✍': 'An emoji of a hand writing with a pen.',
@@ -25,11 +27,7 @@ export type EmojiProps = {
 export default function Emoji({ symbol, className }: EmojiProps) {
   const ariaLabel = emojiLabel[symbol]
 
-  if (!ariaLabel) {
-    // TODO: throw in dev, log in prod?
-    // console.error(`No aria-label found for emoji: ${symbol}`)
-    throw new Error(`No aria-label found for emoji: ${symbol}`)
-  }
+  invariant(ariaLabel, `No aria-label found for emoji: ${symbol}`, { symbol })
 
   return (
     <span role="img" aria-label={ariaLabel} className={`flex-none ${className ?? ''}`}>
