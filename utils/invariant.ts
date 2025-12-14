@@ -1,4 +1,18 @@
 /**
+ * Custom error class for invariant violations.
+ * Indicates a bug in the code - a condition that should be impossible was encountered.
+ */
+export class InvariantViolationError extends Error {
+  context?: Record<string, unknown>
+
+  constructor(message: string, context?: Record<string, unknown>) {
+    super(message)
+    this.name = 'InvariantViolationError'
+    this.context = context
+  }
+}
+
+/**
  * Runtime assertion helper for conditions that should be impossible if code is correct.
  *
  * Use this to document and enforce invariants - assumptions that should never be violated.
@@ -7,7 +21,7 @@
  * @param condition - The condition that must be true
  * @param message - Error message describing what invariant was violated
  * @param context - Optional context object for debugging (attached to error)
- * @throws {Error} If condition is falsy
+ * @throws {InvariantViolationError} If condition is falsy
  *
  * @example
  * ```typescript
@@ -29,13 +43,6 @@ export function invariant(
   context?: Record<string, unknown>,
 ): asserts condition {
   if (!condition) {
-    const error = new Error(`Invariant violation: ${message}`)
-
-    // Attach context for debugging
-    if (context) {
-      Object.assign(error, { context })
-    }
-
-    throw error
+    throw new InvariantViolationError(message, context)
   }
 }

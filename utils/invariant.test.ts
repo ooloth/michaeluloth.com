@@ -1,4 +1,5 @@
-import { invariant } from './invariant'
+import { invariant, InvariantViolationError } from './invariant'
+import { assertInstanceOf } from './test-helpers'
 
 describe('invariant', () => {
   describe('when condition is true', () => {
@@ -23,29 +24,25 @@ describe('invariant', () => {
   })
 
   describe('when condition is false', () => {
-    it('throws with formatted message', () => {
-      expect(() => invariant(false, 'something went wrong')).toThrow(
-        'Invariant violation: something went wrong',
-      )
+    it('throws InvariantViolationError with message', () => {
+      expect(() => invariant(false, 'something went wrong')).toThrow('something went wrong')
     })
 
-    it('throws for falsy values', () => {
-      expect(() => invariant(0, 'zero is falsy')).toThrow('Invariant violation: zero is falsy')
-      expect(() => invariant('', 'empty string is falsy')).toThrow(
-        'Invariant violation: empty string is falsy',
-      )
-      expect(() => invariant(null, 'null is falsy')).toThrow('Invariant violation: null is falsy')
-      expect(() => invariant(undefined, 'undefined is falsy')).toThrow(
-        'Invariant violation: undefined is falsy',
-      )
+    it('throws InvariantViolationError for falsy values', () => {
+      expect(() => invariant(0, 'zero is falsy')).toThrow('zero is falsy')
+      expect(() => invariant('', 'empty string is falsy')).toThrow('empty string is falsy')
+      expect(() => invariant(null, 'null is falsy')).toThrow('null is falsy')
+      expect(() => invariant(undefined, 'undefined is falsy')).toThrow('undefined is falsy')
     })
 
-    it('throws an Error instance', () => {
+    it('throws an InvariantViolationError instance', () => {
       try {
         invariant(false, 'test')
         fail('should have thrown')
       } catch (error) {
+        assertInstanceOf(error, InvariantViolationError)
         expect(error).toBeInstanceOf(Error)
+        expect(error.name).toBe('InvariantViolationError')
       }
     })
   })
@@ -62,18 +59,18 @@ describe('invariant', () => {
         invariant(false, 'Invalid dimensions', context)
         fail('should have thrown')
       } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect((error as any).context).toEqual(context)
+        assertInstanceOf(error, InvariantViolationError)
+        expect(error.context).toEqual(context)
       }
     })
 
-    it('does not modify error when context is not provided', () => {
+    it('does not set context when not provided', () => {
       try {
         invariant(false, 'No context')
         fail('should have thrown')
       } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect((error as any).context).toBeUndefined()
+        assertInstanceOf(error, InvariantViolationError)
+        expect(error.context).toBeUndefined()
       }
     })
 
@@ -89,7 +86,8 @@ describe('invariant', () => {
         invariant(false, 'Complex context', context)
         fail('should have thrown')
       } catch (error) {
-        expect((error as any).context).toEqual(context)
+        assertInstanceOf(error, InvariantViolationError)
+        expect(error.context).toEqual(context)
       }
     })
   })
