@@ -1,4 +1,4 @@
-import fetchCloudinaryImageMetadata, { generateResponsiveImageUrls } from './fetchCloudinaryImageMetadata'
+import fetchCloudinaryImageMetadata, { generateResponsiveImageUrls, ERRORS } from './fetchCloudinaryImageMetadata'
 import { isOk, isErr } from '@/utils/result'
 import type { CloudinaryResource } from './types'
 import { type CacheAdapter } from '@/lib/cache/adapter'
@@ -234,7 +234,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error.message).toContain('Cloudinary URL must have parseable public ID')
+        expect(result.error.message).toContain(ERRORS.PARSE_PUBLIC_ID_FAILED)
       }
     })
 
