@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { z } from 'zod'
-import { formatValidationError } from '@/utils/zod'
+import { formatValidationError } from '@/utils/logging/zod'
 
 /**
  * Sanitizes a cache key to be safe for use as a filename.

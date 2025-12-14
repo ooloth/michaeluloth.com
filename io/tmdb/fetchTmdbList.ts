@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
 import getImagePlaceholderForEnv from '@/utils/getImagePlaceholderForEnv'
-import { formatValidationError } from '@/utils/zod'
+import { formatValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, Err, toErr } from '@/utils/errors/result'
 

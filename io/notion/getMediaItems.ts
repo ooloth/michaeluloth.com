@@ -8,7 +8,7 @@ import {
   DatePropertySchema,
 } from './schemas/properties'
 import { PageMetadataSchema } from './schemas/page'
-import { logValidationError } from '@/utils/zod'
+import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 
