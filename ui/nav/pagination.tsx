@@ -25,10 +25,6 @@ type PaginationLinkProps = Readonly<{
 }>
 
 function PaginationLink({ post, direction }: PaginationLinkProps) {
-  if (!post.title) {
-    throw new Error(`Post is missing a title: ${JSON.stringify(post)}`)
-  }
-
   const href = `/${post.slug}/`
   const emoji = direction === 'Previous' ? '👈' : '👉'
   const directionText = direction === 'Previous' ? 'Older' : 'Newer'
