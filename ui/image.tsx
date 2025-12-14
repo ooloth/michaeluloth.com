@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 // TODO: handle non-Cloudinary images?
 
-import fetchCloudinaryImageMetadata from '@/lib/cloudinary/fetchCloudinaryImageMetadata'
+import fetchCloudinaryImageMetadata from '@/io/cloudinary/fetchCloudinaryImageMetadata'
 
 const outerStylesDefault = 'my-6'
 const imageStylesDefault = 'shadow-xl rounded bg-zinc-800'

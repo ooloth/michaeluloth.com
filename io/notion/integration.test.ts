@@ -49,7 +49,7 @@ vi.mock('./client', () => ({
 }))
 
 // Mock cache to avoid filesystem I/O
-vi.mock('@/lib/cache/filesystem', () => ({
+vi.mock('@/io/cache/filesystem', () => ({
   getCached: vi.fn().mockResolvedValue(null),
   setCached: vi.fn().mockResolvedValue(undefined),
 }))

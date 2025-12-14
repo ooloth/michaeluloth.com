@@ -5,7 +5,7 @@ import '@testing-library/jest-dom/vitest'
 ;(global as unknown as { vi: typeof vi }).vi = vi
 
 // Mock environment variables globally for all tests
-vi.mock('@/lib/env/env', () => ({
+vi.mock('@/io/env/env', () => ({
   env: {
     TMDB_TV_LIST_ID: 'test-tv-list',
     TMDB_MOVIE_LIST_ID: 'test-movie-list',

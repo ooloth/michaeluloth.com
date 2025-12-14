@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { isCloudinaryUrl } from '@/lib/cloudinary/validation'
+import { isCloudinaryUrl } from '@/io/cloudinary/validation'
 
 /**
  * Property schemas validate Notion property structures at I/O boundary

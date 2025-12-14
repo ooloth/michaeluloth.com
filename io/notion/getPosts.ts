@@ -1,9 +1,9 @@
-import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
+import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 import notion, { collectPaginatedAPI, type Client } from './client'
 import { PostListItemSchema, PostPropertiesSchema, type PostListItem } from './schemas/post'
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
-import { env } from '@/lib/env/env'
+import { env } from '@/io/env/env'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { z } from 'zod'
 

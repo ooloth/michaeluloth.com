@@ -3,7 +3,7 @@
 
 import Link from '@/ui/link'
 import { Code } from '@/ui/code'
-import { type RichTextItem } from '@/lib/notion/schemas/block'
+import { type RichTextItem } from '@/io/notion/schemas/block'
 
 type RichTextTag = 'code' | 'em' | 'span'
 

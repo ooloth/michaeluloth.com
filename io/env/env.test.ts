@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Unmock the env module so we can test the actual validation logic
-vi.doUnmock('@/lib/env/env')
+vi.doUnmock('@/io/env/env')
 
 describe('env', () => {
   // Valid environment variables for testing
@@ -24,7 +24,7 @@ describe('env', () => {
     vi.resetModules()
     vi.unstubAllEnvs()
     // Ensure the env module is unmocked for each test
-    vi.doUnmock('@/lib/env/env')
+    vi.doUnmock('@/io/env/env')
   })
 
   describe('success cases', () => {

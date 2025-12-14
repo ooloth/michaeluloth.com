@@ -1,11 +1,11 @@
-import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
+import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 import notion, { type Client } from './client'
-import getBlockChildren from '@/lib/notion/getBlockChildren'
-import getPosts from '@/lib/notion/getPosts'
+import getBlockChildren from '@/io/notion/getBlockChildren'
+import getPosts from '@/io/notion/getPosts'
 import { PostListItemSchema, PostPropertiesSchema, PostSchema, type Post } from './schemas/post'
 import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
-import { env } from '@/lib/env/env'
+import { env } from '@/io/env/env'
 import { Ok, Err, toErr, type Result } from '@/utils/errors/result'
 
 type Options = {

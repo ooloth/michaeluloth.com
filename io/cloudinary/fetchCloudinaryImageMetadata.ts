@@ -1,5 +1,5 @@
-import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
-import cloudinary, { type CloudinaryClient } from '@/lib/cloudinary/client'
+import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
+import cloudinary, { type CloudinaryClient } from '@/io/cloudinary/client'
 import { getErrorDetails } from '@/utils/logging'
 import { formatValidationError } from '@/utils/zod'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'

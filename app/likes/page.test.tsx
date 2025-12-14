@@ -5,15 +5,15 @@
 import { render, screen } from '@testing-library/react'
 import { fetchItunesMedia } from './page'
 import Likes from './page'
-import getMediaItems, { type NotionMediaItem } from '@/lib/notion/getMediaItems'
-import fetchItunesItems, { type iTunesItem } from '@/lib/itunes/fetchItunesItems'
-import fetchTmdbList from '@/lib/tmdb/fetchTmdbList'
+import getMediaItems, { type NotionMediaItem } from '@/io/notion/getMediaItems'
+import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
+import fetchTmdbList from '@/io/tmdb/fetchTmdbList'
 import { Ok, Err, isOk, isErr } from '@/utils/errors/result'
 
 // Mock dependencies
-vi.mock('@/lib/notion/getMediaItems')
-vi.mock('@/lib/itunes/fetchItunesItems')
-vi.mock('@/lib/tmdb/fetchTmdbList')
+vi.mock('@/io/notion/getMediaItems')
+vi.mock('@/io/itunes/fetchItunesItems')
+vi.mock('@/io/tmdb/fetchTmdbList')
 
 describe('fetchItunesMedia', () => {
   beforeEach(() => {

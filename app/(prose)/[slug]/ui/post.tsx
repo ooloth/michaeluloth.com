@@ -1,5 +1,5 @@
-import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
-import type { Post as PostType, PostListItem } from '@/lib/notion/schemas/post'
+import NotionBlocks from '@/io/notion/ui/NotionBlocks'
+import type { Post as PostType, PostListItem } from '@/io/notion/schemas/post'
 // import { Code } from '@/ui/code'
 import PaginationLinks from '@/ui/nav/pagination'
 

@@ -2,7 +2,7 @@ import fetchItunesItems from './fetchItunesItems'
 import { isOk, isErr } from '@/utils/errors/result'
 
 // Mock dependencies
-vi.mock('@/lib/cloudinary/transformCloudinaryImage', () => ({
+vi.mock('@/io/cloudinary/transformCloudinaryImage', () => ({
   default: vi.fn((url: string) => url), // Return URL unchanged for simplicity
 }))
 

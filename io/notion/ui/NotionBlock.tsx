@@ -1,8 +1,8 @@
 import { type ReactElement } from 'react'
 
-import { type GroupedBlock, type RichTextItem } from '@/lib/notion/schemas/block'
-import NotionBlocks from '@/lib/notion/ui/NotionBlocks'
-import NotionRichText from '@/lib/notion/ui/NotionRichText'
+import { type GroupedBlock, type RichTextItem } from '@/io/notion/schemas/block'
+import NotionBlocks from '@/io/notion/ui/NotionBlocks'
+import NotionRichText from '@/io/notion/ui/NotionRichText'
 
 import { Code } from '@/ui/code'
 import Heading from '@/ui/heading'

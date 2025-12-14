@@ -6,7 +6,7 @@ import getMediaItems, {
 } from './getMediaItems'
 import { createTitleProperty, createNumberProperty, createDateProperty } from './testing/property-factories'
 import { isOk, isErr } from '@/utils/errors/result'
-import { type CacheAdapter } from '@/lib/cache/adapter'
+import { type CacheAdapter } from '@/io/cache/adapter'
 import { type Client, collectPaginatedAPI } from './client'
 
 // Test helper: creates a mock cache adapter
@@ -30,7 +30,7 @@ vi.mock('./client', () => ({
   collectPaginatedAPI: vi.fn(),
 }))
 
-vi.mock('@/lib/env', () => ({
+vi.mock('@/io/env', () => ({
   env: {
     NOTION_DATA_SOURCE_ID_BOOKS: 'book-ds-id',
     NOTION_DATA_SOURCE_ID_ALBUMS: 'album-ds-id',

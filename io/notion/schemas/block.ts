@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { isCloudinaryUrl } from '@/lib/cloudinary/validation'
+import { isCloudinaryUrl } from '@/io/cloudinary/validation'
 
 /**
  * Rich text schema - validates and transforms Notion rich text to ergonomic shape

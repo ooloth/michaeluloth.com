@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { filesystemCache, type CacheAdapter } from '@/lib/cache/adapter'
+import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 import notion, { collectPaginatedAPI, type Client } from './client'
 import {
   createPropertiesSchema,
@@ -9,7 +9,7 @@ import {
 } from './schemas/properties'
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
-import { env } from '@/lib/env/env'
+import { env } from '@/io/env/env'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'

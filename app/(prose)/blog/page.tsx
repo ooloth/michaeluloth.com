@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 
-import getPosts from '@/lib/notion/getPosts'
+import getPosts from '@/io/notion/getPosts'
 import Heading from '@/ui/heading'
 import { getHumanReadableDate, getMachineReadableDate } from '@/utils/dates'
 

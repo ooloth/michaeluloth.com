@@ -5,14 +5,14 @@
 import { render, screen } from '@testing-library/react'
 import { generateStaticParams } from './page'
 import DynamicRoute from './page'
-import getPosts from '@/lib/notion/getPosts'
-import getPost from '@/lib/notion/getPost'
+import getPosts from '@/io/notion/getPosts'
+import getPost from '@/io/notion/getPost'
 import { notFound } from 'next/navigation'
 import { Ok, Err } from '@/utils/errors/result'
 
 // Mock dependencies
-vi.mock('@/lib/notion/getPosts')
-vi.mock('@/lib/notion/getPost')
+vi.mock('@/io/notion/getPosts')
+vi.mock('@/io/notion/getPost')
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(),
 }))

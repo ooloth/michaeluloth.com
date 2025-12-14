@@ -1,5 +1,5 @@
-import { type GroupedBlock } from '@/lib/notion/schemas/block'
-import NotionBlock from '@/lib/notion/ui/NotionBlock'
+import { type GroupedBlock } from '@/io/notion/schemas/block'
+import NotionBlock from '@/io/notion/ui/NotionBlock'
 
 type Props = Readonly<{
   blocks: GroupedBlock[]

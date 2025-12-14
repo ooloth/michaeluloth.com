@@ -12,7 +12,7 @@ import {
 import { isOk, isErr, Err } from '@/utils/errors/result'
 import type { Post } from './schemas/post'
 import type { GroupedBlock } from './schemas/block'
-import { type CacheAdapter } from '@/lib/cache/adapter'
+import { type CacheAdapter } from '@/io/cache/adapter'
 import { type Client } from './client'
 
 // Test helper: creates a mock cache adapter
@@ -41,7 +41,7 @@ vi.mock('./getPosts', () => ({
   default: vi.fn(),
 }))
 
-vi.mock('@/lib/env', () => ({
+vi.mock('@/io/env', () => ({
   env: {
     NOTION_DATA_SOURCE_ID_WRITING: 'writing-ds-id',
   },

@@ -3,7 +3,7 @@
 
 import Card from '@/ui/card'
 import Emoji from '@/ui/emoji'
-import type { PostListItem } from '@/lib/notion/schemas/post'
+import type { PostListItem } from '@/io/notion/schemas/post'
 
 type Props = Readonly<{
   prevPost: PostListItem | null
