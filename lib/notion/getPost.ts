@@ -3,7 +3,7 @@ import notion, { type Client } from './client'
 import getBlockChildren from '@/lib/notion/getBlockChildren'
 import getPosts from '@/lib/notion/getPosts'
 import { PostListItemSchema, PostPropertiesSchema, PostSchema, type Post } from './schemas/post'
-import { PageMetadataSchema } from './schemas/page'
+import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/zod'
 import { env } from '@/lib/env'
 import { Ok, Err, toErr, type Result } from '@/utils/result'
@@ -26,15 +26,10 @@ export const INVALID_POST_PROPERTIES_ERROR = 'Invalid post properties - build ab
  * Can be tested without mocking I/O.
  */
 export function transformNotionPageToPost(page: unknown): Post {
-  // Validate page metadata structure
-  const pageMetadata = PageMetadataSchema.safeParse(page)
+  // Validate page metadata structure (includes required last_edited_time for posts)
+  const pageMetadata = PostPageMetadataSchema.safeParse(page)
   if (!pageMetadata.success) {
     logValidationError(pageMetadata.error, 'page metadata')
-    throw new Error(INVALID_POST_DETAILS_ERROR)
-  }
-
-  // Validate last_edited_time exists (required for posts)
-  if (!pageMetadata.data.last_edited_time) {
     throw new Error(INVALID_POST_DETAILS_ERROR)
   }
 
