@@ -61,7 +61,7 @@ export function transformNotionPageToPost(page: unknown): Post {
   // Blocks are validated separately in getBlockChildren
   return {
     ...parsed.data,
-    lastEditedTime: pageMetadata.data.last_edited_time,
+    lastEditedTime: pageMetadata.data.lastEditedTime,
     blocks: [],
     prevPost: null,
     nextPost: null,
