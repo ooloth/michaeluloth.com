@@ -118,7 +118,7 @@ const validData = result.data // TypeScript knows this is valid
 Use these helpers for cleaner, more consistent error messages:
 
 ```typescript
-import { formatValidationError, logValidationError } from '@/utils/zod'
+import { formatValidationError, logValidationError } from '@/utils/logging/zod'
 
 // For throwing errors - extracts field names and messages
 const result = MySchema.safeParse(data)

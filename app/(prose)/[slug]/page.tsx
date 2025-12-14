@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 
-import getPost from '@/lib/notion/getPost'
-import getPosts from '@/lib/notion/getPosts'
+import getPost from '@/io/notion/getPost'
+import getPosts from '@/io/notion/getPosts'
 
 import Post from './ui/post'
 
