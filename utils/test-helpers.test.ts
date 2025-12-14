@@ -22,9 +22,7 @@ describe('assertInstanceOf', () => {
   it('throws when value is not instance of constructor', () => {
     const error = new Error('regular error')
 
-    expect(() => assertInstanceOf(error, CustomError)).toThrow(
-      'Expected instance of CustomError, got object',
-    )
+    expect(() => assertInstanceOf(error, CustomError)).toThrow('Expected instance of CustomError, got object')
   })
 
   it('uses custom error message when provided', () => {
@@ -45,8 +43,6 @@ describe('assertInstanceOf', () => {
   })
 
   it('works with undefined values', () => {
-    expect(() => assertInstanceOf(undefined, Error)).toThrow(
-      'Expected instance of Error, got undefined',
-    )
+    expect(() => assertInstanceOf(undefined, Error)).toThrow('Expected instance of Error, got undefined')
   })
 })

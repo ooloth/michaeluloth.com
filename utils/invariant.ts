@@ -44,11 +44,8 @@ export class InvariantViolationError extends Error {
  * invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
  * ```
  */
-export function invariant(
-  condition: any,
-  message: string,
-  context?: Record<string, unknown>,
-): asserts condition {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function invariant(condition: any, message: string, context?: Record<string, unknown>): asserts condition {
   if (!condition) {
     throw new InvariantViolationError(message, context)
   }

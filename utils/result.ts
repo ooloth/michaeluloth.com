@@ -75,6 +75,7 @@ export function Ok<T>(value: T): OkResult<T> {
       return value
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     unwrapOr(_defaultValue: T) {
       return value
     },
@@ -87,6 +88,7 @@ export function Ok<T>(value: T): OkResult<T> {
       return fn(value)
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapErr<F>(_fn: (error: never) => F): OkResult<T> {
       return this
     },
@@ -109,10 +111,12 @@ export function Err<E>(error: E): ErrResult<E> {
       return defaultValue
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map<U>(_fn: (value: never) => U): ErrResult<E> {
       return this
     },
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     flatMap<U, F>(_fn: (value: never) => Result<U, F>): ErrResult<E> {
       return this
     },

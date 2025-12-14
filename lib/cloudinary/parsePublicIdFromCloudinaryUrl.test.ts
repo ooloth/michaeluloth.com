@@ -10,7 +10,8 @@ describe('parsePublicIdFromCloudinaryUrl', () => {
     })
 
     it('parses public ID from fetch/ URL', () => {
-      const url = 'https://res.cloudinary.com/ooloth/image/fetch/https://media.giphy.com/media/l0HlGPNqhq07VzPeU/giphy.gif'
+      const url =
+        'https://res.cloudinary.com/ooloth/image/fetch/https://media.giphy.com/media/l0HlGPNqhq07VzPeU/giphy.gif'
       const result = parsePublicIdFromCloudinaryUrl(url)
 
       expect(result).toBe('https://media.giphy.com/media/l0HlGPNqhq07VzPeU/giphy.gif')
@@ -76,7 +77,9 @@ describe('parsePublicIdFromCloudinaryUrl', () => {
     it('includes url in error message for invalid folder', () => {
       const url = 'https://res.cloudinary.com/ooloth/image/upload/wrong/image.jpg'
 
-      expect(() => parsePublicIdFromCloudinaryUrl(url)).toThrow('but was: https://res.cloudinary.com/ooloth/image/upload/wrong/image.jpg')
+      expect(() => parsePublicIdFromCloudinaryUrl(url)).toThrow(
+        'but was: https://res.cloudinary.com/ooloth/image/upload/wrong/image.jpg',
+      )
     })
   })
 
