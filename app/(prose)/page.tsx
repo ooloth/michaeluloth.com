@@ -8,7 +8,7 @@ function Summary(): ReactElement {
   return (
     <section className="md:flex md:justify-between md:items-end md:gap-x-8">
       <div>
-        <h2 className="leading-tight text-[2.5rem] font-bold text-bright">Hey, I&apos;m Michael</h2>
+        <h1 className="leading-tight text-[2.5rem] font-bold text-bright">Hey, I&apos;m Michael</h1>
         <Paragraph className="text-lg text-zinc-300">
           I write code for a living. And for fun. It&apos;s hard to stop. Have you tried Claude Code? You really should.
         </Paragraph>
