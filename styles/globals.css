@@ -4,6 +4,11 @@
 
 @import './components/syntax-highlighting';
 
+@theme {
+  --breakpoint-xs: 30rem;
+  --breakpoint-3xl: 120rem;
+}
+
 @layer base {
   :root {
     --accent: #ff98a4;
