@@ -9,7 +9,7 @@ type PostListProps = Readonly<{
   skipCache?: boolean
 }>
 
-export default async function PostList({ limit = 999, skipCache = false }: PostListProps): Promise<ReactElement> {
+export default async function PostList({ limit = Infinity, skipCache = false }: PostListProps): Promise<ReactElement> {
   const posts = (await getPosts({ sortDirection: 'descending', skipCache })).unwrap()
   const postsToShow = posts.slice(0, limit) // we avoid limiting at the query level to keep local caching simple
 
