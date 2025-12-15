@@ -13,12 +13,9 @@ function Summary(): ReactElement {
           I write code for a living. And for fun. It&apos;s hard to stop. Have you tried Claude Code? You really should.
         </Paragraph>
         <Paragraph className="text-zinc-300">
-          {/* I&apos;ve built dozens of polished UIs. And a resilient shopping cart. And highly-validated data pipelines. I */}
-          {/* care about reliability, ergonomics, and the tracking the details. I overcommunicate and think about what could */}
-          {/* go wrong and build systems that ensure that doesn&apos;t happen. */}
           I&apos;ve built dozens of polished UIs. And a resilient shopping cart. And highly validated data pipelines. I
-          care about reliability, ergonomics and getting the details right. I'd rather not get paged, so I spend time
-          thinking about what could go wrong and how to make sure it doesn&apos;t.
+          care about reliability, ergonomics and getting the details right. I&apos;d rather not get paged, so I spend
+          time thinking about what could go wrong and how to make sure it doesn&apos;t.
         </Paragraph>
       </div>
 
