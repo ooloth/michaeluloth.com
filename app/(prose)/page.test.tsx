@@ -47,7 +47,7 @@ describe('Home page', () => {
       expect(screen.getByRole('main')).toBeInTheDocument()
 
       // Verify bio heading
-      expect(screen.getByRole('heading', { level: 2, name: /hey, i'm michael/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 1, name: /hey, i'm michael/i })).toBeInTheDocument()
 
       // Verify bio text is present
       expect(screen.getByText(/i write code for a living/i)).toBeInTheDocument()
@@ -124,7 +124,7 @@ describe('Home page', () => {
       render(jsx)
 
       expect(screen.getByRole('main')).toBeInTheDocument()
-      expect(screen.getByRole('heading', { level: 2, name: /hey, i'm michael/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 1, name: /hey, i'm michael/i })).toBeInTheDocument()
       expect(screen.getByRole('heading', { level: 2, name: /recent writing/i })).toBeInTheDocument()
     })
 
@@ -141,7 +141,7 @@ describe('Home page', () => {
       expect(main).toHaveClass('flex-auto')
 
       // Verify both sections are present
-      expect(screen.getByRole('heading', { level: 2, name: /hey, i'm michael/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 1, name: /hey, i'm michael/i })).toBeInTheDocument()
       expect(screen.getByRole('heading', { level: 2, name: /recent writing/i })).toBeInTheDocument()
     })
   })
