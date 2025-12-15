@@ -8,10 +8,10 @@ import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { z } from 'zod'
 
 type Options = {
-  sortDirection?: 'ascending' | 'descending'
-  skipCache?: boolean
   cache?: CacheAdapter
   notionClient?: Client
+  skipCache?: boolean
+  sortDirection?: 'ascending' | 'descending'
 }
 
 export const INVALID_POST_ERROR = 'Invalid post data - build aborted'
