@@ -95,7 +95,6 @@ export function generateResponsiveImageUrls(
     quality: 'auto',
   } as const
 
-  console.log(`🖼️ Generating responsive image URLs for "${publicId}"`)
   const src = cloudinaryClient.url(publicId, { ...baseOptions, width: 1440, effect })
 
   const srcSet = widths
