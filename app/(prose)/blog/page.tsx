@@ -1,6 +1,5 @@
 import { type ReactElement } from 'react'
 
-import Heading from '@/ui/typography/heading'
 import PostList from '@/ui/post-list'
 
 type Props = Readonly<{

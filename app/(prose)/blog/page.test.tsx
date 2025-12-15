@@ -7,7 +7,7 @@ import { render, screen } from '@testing-library/react'
 import Blog from './page'
 import getPosts from '@/io/notion/getPosts'
 import type { PostListItem } from '@/io/notion/schemas/post'
-import { Ok, Err } from '@/utils/errors/result'
+import { Ok } from '@/utils/errors/result'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
@@ -17,7 +17,8 @@ vi.mock('@/io/notion/getPosts')
 vi.mock('@/ui/post-list', () => ({
   default: ({ limit, skipCache }: { limit?: number; skipCache?: boolean }) => {
     // Call getPosts to verify it's called with correct params
-    const mockCall = getPosts({ sortDirection: 'descending', skipCache: skipCache ?? false })
+    // This ensures the mock is called during render which we verify in tests
+    void getPosts({ sortDirection: 'descending', skipCache: skipCache ?? false })
 
     // Return a simple placeholder
     return <div data-testid="post-list" data-limit={limit} data-skip-cache={skipCache} />
@@ -98,7 +99,6 @@ describe('Blog page', () => {
       // Verify PostList is rendered
       expect(screen.getByTestId('post-list')).toBeInTheDocument()
     })
-
   })
 
   // Note: Error handling for getPosts is tested in ui/post-list.test.tsx

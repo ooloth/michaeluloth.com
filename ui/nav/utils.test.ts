@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { isCurrentPage } from './utils'
 import type { NavItem } from './types'
-import type { Post } from '@/io/notion/schemas/post'
+import type { PostListItem } from '@/io/notion/schemas/post'
 
 describe('isCurrentPage', () => {
-  const mockPosts: Post[] = [
+  const mockPosts: PostListItem[] = [
     {
       id: '1',
       slug: 'test-post',

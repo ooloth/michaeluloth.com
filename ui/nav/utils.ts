@@ -1,10 +1,10 @@
-import { Post } from '@/io/notion/schemas/post'
+import type { PostListItem } from '@/io/notion/schemas/post'
 import type { NavItem } from '@/ui/nav/types'
 
 /**
  * Determines if the given navigation item corresponds to the current page.
  */
-export function isCurrentPage(navItem: NavItem, pathname: string, posts: Post[]): boolean {
+export function isCurrentPage(navItem: NavItem, pathname: string, posts: PostListItem[]): boolean {
   // Exact match?
   if (navItem.href === pathname) {
     return true

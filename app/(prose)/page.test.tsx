@@ -7,11 +7,12 @@ import { render, screen } from '@testing-library/react'
 import Home from './page'
 import getPosts from '@/io/notion/getPosts'
 import type { PostListItem } from '@/io/notion/schemas/post'
-import { Ok, Err } from '@/utils/errors/result'
+import { Ok } from '@/utils/errors/result'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
 vi.mock('@/ui/image', () => ({
+  // eslint-disable-next-line @next/next/no-img-element -- Using img in test mock is acceptable
   default: ({ url }: { url: string }) => <img src={url} alt="Michael Uloth" />,
 }))
 
@@ -20,8 +21,8 @@ vi.mock('@/ui/image', () => ({
 vi.mock('@/ui/post-list', () => ({
   default: ({ limit, skipCache }: { limit?: number; skipCache?: boolean }) => {
     // Call getPosts to verify it's called with correct params
-    // In tests, this will use the mocked version
-    const mockCall = getPosts({ sortDirection: 'descending', skipCache: skipCache ?? false })
+    // This ensures the mock is called during render which we verify in tests
+    void getPosts({ sortDirection: 'descending', skipCache: skipCache ?? false })
 
     // Return a simple placeholder that indicates PostList was rendered
     return <div data-testid="post-list" data-limit={limit} data-skip-cache={skipCache} />
