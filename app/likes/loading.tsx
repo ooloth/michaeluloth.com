@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import Heading from '@/ui/heading'
+import Heading from '@/ui/typography/heading'
 
 function SkeletonCard({ height }: { height: 'h-72' | 'h-48' }): ReactElement {
   return (
@@ -20,7 +20,7 @@ function SkeletonSection({ title, height }: { title: string; height: 'h-72' | 'h
     <section>
       <Heading level={2}>{title}</Heading>
       <div className="flex gap-10 overflow-x-auto hide-scrollbar mt-4">
-        {Array.from({ length: 6 }).map((_, i) => (
+        {Array.from({ length: 10 }).map((_, i) => (
           <SkeletonCard key={i} height={height} />
         ))}
       </div>

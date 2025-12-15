@@ -18,8 +18,10 @@ function createMockCloudinaryClient(): CloudinaryClient {
     api: {
       resource: vi.fn(),
     },
-    url: vi.fn((publicId: string, options: { width: number }) => {
-      return `https://res.cloudinary.com/test/image/upload/w_${options.width}/${publicId}`
+    url: vi.fn((publicId: string, options: { width: number; effect?: unknown }) => {
+      const effectParam = options.effect ? `e_${options.effect}` : ''
+      const parts = [effectParam, `w_${options.width}`].filter(Boolean).join(',')
+      return `https://res.cloudinary.com/test/image/upload/${parts}/${publicId}`
     }),
   } as CloudinaryClient
 }
@@ -179,6 +181,42 @@ describe('fetchCloudinaryImageMetadata', () => {
       if (isOk(result)) {
         expect(result.value.alt).toBe('Test image')
         expect(result.value.caption).toBe('') // Empty string when caption is missing
+      }
+    })
+
+    it('passes effect parameter to responsive image URL generation', async () => {
+      const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
+
+      const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
+
+      vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
+
+      const mockCloudinaryResource = {
+        public_id: 'sample/image',
+        width: 1200,
+        height: 800,
+        context: {
+          custom: {
+            alt: 'Test image',
+            caption: '',
+          },
+        },
+      } as CloudinaryResource
+
+      vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
+
+      const result = await fetchCloudinaryImageMetadata({
+        url: 'https://res.cloudinary.com/test/image.jpg',
+        cache: mockCache,
+        cloudinaryClient: mockClient,
+        effect: 'grayscale',
+      })
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value.src).toContain('e_grayscale')
+        expect(result.value.srcSet).toContain('e_grayscale')
       }
     })
 
@@ -407,6 +445,43 @@ describe('generateResponsiveImageUrls', () => {
     expect(parts).toHaveLength(9) // 9 different widths
     parts.forEach(part => {
       expect(part).toMatch(/^https:\/\/.*\/w_\d+\/.*\s\d+w$/)
+    })
+  })
+
+  describe('with effect parameter', () => {
+    it('includes effect in src URL when effect is provided', () => {
+      const mockClient = createMockCloudinaryClient()
+      const result = generateResponsiveImageUrls('sample/image', mockClient, 'grayscale')
+
+      expect(result.src).toContain('e_grayscale')
+      expect(result.src).toContain('w_1440')
+      expect(result.src).toBe('https://res.cloudinary.com/test/image/upload/e_grayscale,w_1440/sample/image')
+    })
+
+    it('includes effect in all srcSet URLs when effect is provided', () => {
+      const mockClient = createMockCloudinaryClient()
+      const result = generateResponsiveImageUrls('sample/image', mockClient, 'grayscale')
+
+      const parts = result.srcSet.split(', ')
+      expect(parts).toHaveLength(9)
+
+      parts.forEach(part => {
+        expect(part).toContain('e_grayscale')
+        expect(part).toMatch(/^https:\/\/.*\/e_grayscale,w_\d+\/.*\s\d+w$/)
+      })
+    })
+
+    it('does not include effect when undefined', () => {
+      const mockClient = createMockCloudinaryClient()
+      const result = generateResponsiveImageUrls('sample/image', mockClient, undefined)
+
+      expect(result.src).not.toContain('e_')
+      expect(result.src).toBe('https://res.cloudinary.com/test/image/upload/w_1440/sample/image')
+
+      const parts = result.srcSet.split(', ')
+      parts.forEach(part => {
+        expect(part).not.toContain('e_')
+      })
     })
   })
 })

@@ -1,7 +1,7 @@
 'use client'
 
 import { type ReactElement } from 'react'
-import Heading from '@/ui/heading'
+import Heading from '@/ui/typography/heading'
 
 type Props = {
   error: Error & { digest?: string }

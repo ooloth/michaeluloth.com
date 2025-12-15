@@ -1,7 +1,7 @@
 import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 import Image from 'next/image'
-import Heading from '@/ui/heading'
+import Heading from '@/ui/typography/heading'
 import fetchTmdbList, { type TmdbItem } from '@/io/tmdb/fetchTmdbList'
 import getMediaItems from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'

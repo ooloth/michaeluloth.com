@@ -5,6 +5,7 @@ import { formatValidationError } from '@/utils/logging/zod'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
 import { z } from 'zod'
+import { ImageEffect } from 'cloudinary'
 
 export const ERRORS = {
   FETCH_FAILED: '🚨 Error fetching Cloudinary image',
@@ -39,6 +40,7 @@ type Options = {
   url: string
   cache?: CacheAdapter
   cloudinaryClient?: CloudinaryClient
+  effect?: ImageEffect
 }
 
 /**
@@ -67,11 +69,13 @@ const CloudinaryResourceSchema = z.object({
  *
  * @param publicId - Cloudinary public ID
  * @param cloudinaryClient - Cloudinary client instance
+ * @param effect - Optional image effect to apply
  * @returns Object with src, srcSet, and sizes strings for responsive images
  */
 export function generateResponsiveImageUrls(
   publicId: string,
   cloudinaryClient: CloudinaryClient,
+  effect?: ImageEffect,
 ): { src: string; srcSet: string; sizes: string } {
   const widths = [
     350, // image layout width on phone at 1x DPR
@@ -91,10 +95,10 @@ export function generateResponsiveImageUrls(
     quality: 'auto',
   } as const
 
-  const src = cloudinaryClient.url(publicId, { ...baseOptions, width: 1440 })
+  const src = cloudinaryClient.url(publicId, { ...baseOptions, width: 1440, effect })
 
   const srcSet = widths
-    .map(width => `${cloudinaryClient.url(publicId, { ...baseOptions, width })} ${width}w`)
+    .map(width => `${cloudinaryClient.url(publicId, { ...baseOptions, width, effect })} ${width}w`)
     .join(', ')
 
   const sizes = '(min-width: 768px) 768px, 100vw'
@@ -111,6 +115,7 @@ export default async function fetchCloudinaryImageMetadata({
   url,
   cache = filesystemCache,
   cloudinaryClient = cloudinary,
+  effect,
 }: Options): Promise<Result<CloudinaryImageMetadata, Error>> {
   try {
     const publicId = parsePublicIdFromCloudinaryUrl(url)
@@ -153,7 +158,7 @@ export default async function fetchCloudinaryImageMetadata({
       caption: context?.custom?.caption ?? '',
       width,
       height,
-      ...generateResponsiveImageUrls(public_id, cloudinaryClient),
+      ...generateResponsiveImageUrls(public_id, cloudinaryClient, effect),
     }
 
     // Cache result (dev mode only)
