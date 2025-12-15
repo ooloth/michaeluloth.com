@@ -20,6 +20,7 @@
     "types": ["vitest/globals"]
   },
   "include": [
+    "svg.d.ts", // before next-env.d.ts to avoid conflicts - see: https://github.com/vitalets/turbopack-inline-svg-loader?tab=readme-ov-file#typescript
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
