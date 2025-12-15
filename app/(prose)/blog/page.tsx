@@ -1,8 +1,8 @@
 import { type ReactElement } from 'react'
 
 import getPosts from '@/io/notion/getPosts'
-import Heading from '@/ui/heading'
 import { getHumanReadableDate, getMachineReadableDate } from '@/utils/dates'
+import Heading from '@/ui/typography/heading'
 
 type Props = Readonly<{
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>

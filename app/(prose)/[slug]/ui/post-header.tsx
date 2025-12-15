@@ -1,7 +1,7 @@
 import { format } from 'timeago.js'
 
-import Heading from '@/ui/heading'
-import Paragraph from '@/ui/paragraph'
+import Heading from '@/ui/typography/heading'
+import Paragraph from '@/ui/typography/paragraph'
 import Dot from '@/ui/dot'
 import { getHumanReadableDate } from '@/utils/dates'
 

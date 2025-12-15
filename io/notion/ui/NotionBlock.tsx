@@ -5,9 +5,9 @@ import NotionBlocks from '@/io/notion/ui/NotionBlocks'
 import NotionRichText from '@/io/notion/ui/NotionRichText'
 
 import { Code } from '@/ui/code'
-import Heading from '@/ui/heading'
+import Heading from '@/ui/typography/heading'
 import Image from '@/ui/image'
-import Paragraph from '@/ui/paragraph'
+import Paragraph from '@/ui/typography/paragraph'
 import Video from '@/ui/video'
 
 type Props = {
