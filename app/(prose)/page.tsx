@@ -10,12 +10,12 @@ function Summary(): ReactElement {
       <div>
         <h2 className="leading-tight text-[2.5rem] font-bold text-bright">Hey, I&apos;m Michael</h2>
         <Paragraph className="text-lg text-zinc-300">
-          I write code for a living. And for fun. It's hard to stop. Have you tried Claude Code? You really should.
+          I write code for a living. And for fun. It&apos;s hard to stop. Have you tried Claude Code? You really should.
         </Paragraph>
         <Paragraph className="text-zinc-300">
-          I've built dozens of polished UIs. And a resilient shopping cart. And highly-validated data pipelines. I care
-          about reliability, ergonomics, and all the tiny details that help projects succeed. I think about what could
-          go wrong and then build systems to ensure that won't happen.
+          I&apos;ve built dozens of polished UIs. And a resilient shopping cart. And highly-validated data pipelines. I
+          care about reliability, ergonomics, and all the tiny details that help projects succeed. I focus on what could
+          go wrong and building systems to ensure that won&apos;t happen.
         </Paragraph>
       </div>
 
