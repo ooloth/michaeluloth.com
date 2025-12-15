@@ -1,20 +1,21 @@
 import { invariant } from '@/utils/errors/invariant'
 
 const emojiLabel = {
-  '📖': 'An emoji of an open book.',
+  '📖': 'An open book emoji.',
   '✍': 'An emoji of a hand writing with a pen.',
-  '📺': 'An emoji of a televison.',
+  '📺': 'A televison emoji.',
   '🎧': 'An emoji of a pair of large headphones.',
   '🧑‍🏫': 'An emoji of a teacher in front of a green chalkboard.',
   '👩‍💻': 'An emoji of a person using a laptop.',
-  '📤': 'An emoji of an outbox tray.',
-  '🧰': 'An emoji of a red toolbox.',
+  '📤': 'An outbox tray emoji.',
+  '🧰': 'A red toolbox emoji.',
   '🎉': 'An emoji of confetti flying out of a striped party decoration.',
-  '☀️': 'An emoji of a sun.',
-  '🌙️': 'An emoji of a crescent moon.',
-  '🔖': 'An emoji of a bookmark.',
+  '☀️': 'A sun emoji.',
+  '🌙️': 'A crescent moon emoji.',
+  '🔖': 'A bookmark emoji.',
   '👈': 'A finger pointing left.',
   '👉': 'A finger pointing right.',
+  '👋': 'A waving hand emoji.',
 } as const
 
 export type EmojiSymbol = keyof typeof emojiLabel

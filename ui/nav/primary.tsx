@@ -7,6 +7,7 @@ import Link from '@/ui/link'
 import { type NavItem } from '@/ui/nav/types'
 import { isCurrentPage } from '@/ui/nav/utils'
 import { type PostListItem } from '@/io/notion/schemas/post'
+import Emoji from '../emoji'
 
 const nav: NavItem[] = [
   { text: 'Home', href: '/' },
@@ -29,7 +30,7 @@ export default function PrimaryNav({ posts }: Props): ReactElement {
       <ul className="flex flex-wrap">
         <li className="pb-1 w-full">
           <Link href="/" className="text-lg font-semibold text-white">
-            Michael Uloth 👋
+            Michael Uloth <Emoji symbol="👋" />
           </Link>
         </li>
 
