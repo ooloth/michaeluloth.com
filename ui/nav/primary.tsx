@@ -14,7 +14,7 @@ const nav: NavItem[] = [
   { text: 'Blog', href: '/blog/' },
   // { text: 'Videos', href: '/videos/' },
   // { text: 'Projects', href: '/projects/' },
-  { text: 'About', href: '/about/' },
+  // { text: 'About', href: '/about/' },
   { text: 'Likes', href: '/likes/' },
 ]
 
