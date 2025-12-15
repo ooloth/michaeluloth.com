@@ -6,7 +6,7 @@ import PostList from '@/ui/post-list'
 
 function Summary(): ReactElement {
   return (
-    <section className="md:flex md:justify-between md:items-end md:gap-x-8">
+    <section className="md:flex md:justify-between md:items-end md:gap-x-9">
       <div>
         <h1 className="leading-tight text-[2.5rem] font-bold text-bright">Hey, I&apos;m Michael</h1>
         <Paragraph className="text-lg text-zinc-300">
@@ -14,8 +14,8 @@ function Summary(): ReactElement {
         </Paragraph>
         <Paragraph className="text-zinc-300">
           I&apos;ve built dozens of polished UIs. And a resilient shopping cart. And highly validated data pipelines. I
-          care about reliability, ergonomics and getting the details right. I&apos;d rather not get paged, so I spend
-          time thinking about what could go wrong and how to make sure it doesn&apos;t.
+          care about reliability, ergonomics and getting the details right. And since I&apos;d rather not get paged, I
+          often think about what else could go wrong and how to make sure it doesn&apos;t.
         </Paragraph>
       </div>
 
