@@ -29,11 +29,6 @@ describe('isCurrentPage', () => {
       expect(isCurrentPage(navItem, '/', mockPosts)).toBe(true)
     })
 
-    it('returns true when navItem href matches pathname for /about/', () => {
-      const navItem: NavItem = { text: 'About', href: '/about/' }
-      expect(isCurrentPage(navItem, '/about/', mockPosts)).toBe(true)
-    })
-
     it('returns true when navItem href matches pathname for /likes/', () => {
       const navItem: NavItem = { text: 'Likes', href: '/likes/' }
       expect(isCurrentPage(navItem, '/likes/', mockPosts)).toBe(true)
@@ -41,7 +36,7 @@ describe('isCurrentPage', () => {
 
     it('returns false when navItem href does not match pathname', () => {
       const navItem: NavItem = { text: 'Home', href: '/' }
-      expect(isCurrentPage(navItem, '/about/', mockPosts)).toBe(false)
+      expect(isCurrentPage(navItem, '/blog/', mockPosts)).toBe(false)
     })
   })
 
