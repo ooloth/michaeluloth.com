@@ -12,7 +12,6 @@ export default async function Blog({ searchParams }: Props): Promise<ReactElemen
 
   return (
     <main className="flex-auto">
-      {/* <Heading level={1}>Blog</Heading> */}
       <h1 className="sr-only">Blog</h1>
       <PostList skipCache={skipCache} />
     </main>
