@@ -1,8 +1,20 @@
+import { Post } from '@/io/notion/schemas/post'
 import type { NavItem } from '@/ui/nav/types'
 
 /**
- * Determines if the given navigation item corresponds to the current page. Assumes all unknown paths are blog posts.
+ * Determines if the given navigation item corresponds to the current page.
  */
-export function isCurrentPage(navItem: NavItem, pathname: string): boolean {
-  return navItem.href === pathname || navItem.href === '/blog/'
+export function isCurrentPage(navItem: NavItem, pathname: string, posts: Post[]): boolean {
+  // Exact match?
+  if (navItem.href === pathname) {
+    return true
+  }
+
+  // Blog post?
+  if (navItem.href === '/blog/') {
+    return posts.some(post => pathname === `/${post.slug}/`)
+  }
+
+  // No match
+  return false
 }

@@ -60,9 +60,7 @@
 
   text-decoration-skip-ink: none;
 
-  &:hover,
-  &:focus,
-  &:active {
+  &:hover {
     @apply shadow-glow outline-none rounded-[0.75px] bg-accent text-black;
   }
 
@@ -74,14 +72,10 @@
   @apply link underline-offset-[0.2em];
   @apply decoration-transparent decoration-solid decoration-[0.15em] text-zinc-300;
 
-  /* FIXME: how to set current page attribute in next? */
-  /* the active menu item (set in Header.astro) */
   &[aria-current='page'] {
     @apply decoration-accent font-medium text-white;
 
-    &:hover,
-    &:focus,
-    &:active {
+    &:hover {
       @apply text-black;
     }
   }
@@ -93,9 +87,7 @@
 
   text-decoration-skip-ink: none;
 
-  &:hover,
-  &:focus,
-  &:active {
+  &:hover {
     @apply outline-none decoration-bright text-bright;
   }
 }
