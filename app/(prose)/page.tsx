@@ -22,7 +22,7 @@ function Summary(): ReactElement {
       <Image
         url="https://res.cloudinary.com/ooloth/image/upload/v1645057009/mu/michael-landscape.jpg"
         effect="grayscale"
-        imageStyles="object-cover object-[57%_0%] rounded-3xl! w-48 md:w-56 aspect-square"
+        imageStyles="object-cover object-[57%_0%] rounded-3xl! w-56 aspect-square"
         outerStyles="flex-none md:my-0" // don't shrink
       />
     </section>
