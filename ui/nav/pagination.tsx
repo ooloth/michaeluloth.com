@@ -13,8 +13,8 @@ type Props = Readonly<{
 export default function PaginationLinks({ prevPost, nextPost }: Props) {
   return (
     <nav className="mt-20 flex flex-col md:flex-row gap-5 ">
-      {prevPost ? <PaginationLink post={prevPost} direction="Previous" /> : <div className="basis-1/2" />}
       {nextPost ? <PaginationLink post={nextPost} direction="Next" /> : <div className="basis-1/2" />}
+      {prevPost ? <PaginationLink post={prevPost} direction="Previous" /> : <div className="basis-1/2" />}
     </nav>
   )
 }
@@ -26,15 +26,15 @@ type PaginationLinkProps = Readonly<{
 
 function PaginationLink({ post, direction }: PaginationLinkProps) {
   const href = `/${post.slug}/`
-  const emoji = direction === 'Previous' ? '👈' : '👉'
+  const emoji = direction === 'Previous' ? '👉' : '👈'
   const directionText = direction === 'Previous' ? 'Older' : 'Newer'
 
   return (
     <Card href={href}>
-      <div className={`basis-1/2 flex items-center ${direction === 'Next' ? 'justify-end' : null} py-3 px-4`}>
-        <span className={`flex gap-4 items-center ${direction === 'Next' ? 'flex-row-reverse' : null}`}>
+      <div className={`basis-1/2 flex items-center ${direction === 'Previous' ? 'justify-end' : null} py-3 px-4`}>
+        <span className={`flex gap-4 items-center ${direction === 'Previous' ? 'flex-row-reverse' : null}`}>
           <Emoji symbol={emoji} className="text-2xl" />
-          <span className={`${direction === 'Next' ? 'text-right' : null}`}>
+          <span className={`${direction === 'Previous' ? 'text-right' : null}`}>
             <span className="block capitalize text-[0.95em]">{directionText}</span>
             <span className="block leading-snug font-light text-lg text-bright">{post.title}</span>
           </span>
