@@ -77,11 +77,19 @@ export default function NotionBlock({ block }: Props): ReactElement {
       // See: https://rehype-pretty.pages.dev/#meta-strings
       const codeText = block.richText.map((item: RichTextItem) => item.content).join('\n')
 
-      return <Code code={codeText} lang={block.language} meta={block.caption} />
       // JSX and TSX are required for React and also work for vanilla JS/TS
       const lang = block.language
         ? block.language.replace('javascript', 'jsx').replace('typescript', 'tsx')
         : 'plaintext'
+
+      // Replace fancy quotes with straight quotes in meta string (if present)
+      const meta = block.caption
+        ?.replace(/\u2018/g, "'")
+        .replace(/\u2019/g, "'")
+        .replace(/\u201C/g, '"')
+        .replace(/\u201D/g, '"')
+
+      return <Code code={codeText} lang={lang} meta={meta} />
     }
 
     case 'quote':
