@@ -198,11 +198,6 @@
     }
   }
 
-  & strong,
-  & em {
-    @apply text-bright;
-  }
-
   & blockquote {
     @apply ms-4 border-l-4 pl-3 italic;
     @apply border-accent text-bright;

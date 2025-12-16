@@ -119,11 +119,6 @@ export default function NotionBlock({ block }: Props): ReactElement {
         </details>
       )
 
-    case 'child_page':
-      // Child pages are typically skipped in rendering
-      console.warn('Child page blocks are not rendered:', block.title)
-      return <></>
-
     default:
       // TypeScript exhaustiveness check
       throw new Error(`Encountered unsupported Notion block type: "${(block as never as { type: string }).type}"`)
