@@ -16,10 +16,10 @@ function resolveTag(item: RichTextItem): RichTextTag {
 function resolveClasses(item: RichTextItem): string {
   const classes: string[] = []
 
-  if (item.bold) classes.push('font-semibold text-white')
-  if (item.italic) classes.push('italic')
+  if (item.bold) classes.push('font-semibold text-200')
+  if (item.italic) classes.push('italic text-zinc-200')
   if (item.strikethrough) classes.push('line-through')
-  if (item.underline) classes.push('underline')
+  if (item.underline) classes.push('underline text-200')
 
   return classes.join(' ')
 }
