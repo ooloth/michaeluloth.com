@@ -49,11 +49,10 @@ export default function NotionBlock({ block }: Props): ReactElement {
     case 'bulleted_list': {
       // TODO: extract into a List component that handles ul, ol, todos and toggles
       // see: https://github.com/9gustin/react-notion-render/blob/main/src/components/common/List/index.tsx
-      if (block.type !== 'bulleted_list') throw new Error('Unexpected block type')
       return (
         <ul className="list-disc marker:text-accent flex flex-col gap-1 mt-2 pl-5 leading-snug">
           {block.items.map((item: { richText: RichTextItem[] }, index: number) => (
-            <li key={index}>
+            <li key={index} className="mt-1">
               <NotionRichText richTextItems={item.richText} />
             </li>
           ))}
@@ -62,7 +61,6 @@ export default function NotionBlock({ block }: Props): ReactElement {
     }
 
     case 'numbered_list': {
-      if (block.type !== 'numbered_list') throw new Error('Unexpected block type')
       return (
         <ol className="list-decimal marker:text-accent flex flex-col gap-1 mt-2 pl-5 leading-snug">
           {block.items.map((item: { richText: RichTextItem[] }, index: number) => (
@@ -77,7 +75,6 @@ export default function NotionBlock({ block }: Props): ReactElement {
     case 'code': {
       // Hijack the caption to use as meta string for rehype-pretty-code if I want to highlight specific lines, etc
       // See: https://rehype-pretty.pages.dev/#meta-strings
-      if (block.type !== 'code') throw new Error('Unexpected block type')
       const codeText = block.richText.map((item: RichTextItem) => item.content).join('\n')
 
       return <Code code={codeText} lang={block.language} meta={block.caption} />
