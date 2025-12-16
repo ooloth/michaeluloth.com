@@ -4,6 +4,7 @@
 @layer components {
   /* inline code with no language annotation (e.g. `true` instead of `true{:js}` */
   p > code,
+  span > code,
   li > code {
     color: #c8d3f5;
   }
