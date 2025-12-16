@@ -94,7 +94,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
     case 'quote':
       return (
-        <blockquote>
+        <blockquote className="my-4 border-l-4 border-accent pl-3 italic text-zinc-200">
           <NotionRichText richTextItems={block.richText} />
         </blockquote>
       )
@@ -106,6 +106,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
       return <Video url={block.url} caption={block.caption} showCaption={!!block.caption} />
 
     case 'toggle':
+      // TODO: test and improve this
       // Render as details/summary for native HTML collapse behavior
       return (
         <details className="my-4">
