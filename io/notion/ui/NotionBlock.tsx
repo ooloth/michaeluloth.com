@@ -78,6 +78,10 @@ export default function NotionBlock({ block }: Props): ReactElement {
       const codeText = block.richText.map((item: RichTextItem) => item.content).join('\n')
 
       return <Code code={codeText} lang={block.language} meta={block.caption} />
+      // JSX and TSX are required for React and also work for vanilla JS/TS
+      const lang = block.language
+        ? block.language.replace('javascript', 'jsx').replace('typescript', 'tsx')
+        : 'plaintext'
     }
 
     case 'quote':
