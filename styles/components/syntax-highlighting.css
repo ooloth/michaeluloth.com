@@ -73,11 +73,6 @@
       & code[data-line-numbers-max-digits='3'] > [data-line]::before {
         width: 3rem;
       }
-
-      /* FIXME: not targeting the button correctly */
-      & .rehype-pretty-copy {
-        @apply !top-28 !mt-52 !pt-52;
-      }
     }
 
     /* caption (if any) */
