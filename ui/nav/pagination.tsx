@@ -25,18 +25,21 @@ type PaginationLinkProps = Readonly<{
 }>
 
 function PaginationLink({ post, direction }: PaginationLinkProps) {
+  // Replace last space in title with a non-breaking space to prevent awkward wrapping
+  const title = post.title.replace(/ (?!.* )/, '\u00A0')
+
   const href = `/${post.slug}/`
   const emoji = direction === 'Previous' ? '👉' : '👈'
   const directionText = direction === 'Previous' ? 'Older' : 'Newer'
 
   return (
     <Card href={href}>
-      <div className={`basis-1/2 flex items-center ${direction === 'Previous' ? 'justify-end' : null} py-3 px-4`}>
+      <div className={`flex items-center ${direction === 'Previous' ? 'justify-end' : null} pt-2.5 pb-4 px-4 h-full`}>
         <span className={`flex gap-4 items-center ${direction === 'Previous' ? 'flex-row-reverse' : null}`}>
           <Emoji symbol={emoji} className="text-2xl" />
           <span className={`${direction === 'Previous' ? 'text-right' : null}`}>
-            <span className="block capitalize text-[0.95em]">{directionText}</span>
-            <span className="block leading-snug font-light text-lg text-bright">{post.title}</span>
+            <span className="block capitalize text-[0.98em]">{directionText}</span>
+            <span className="block leading-[1.3] font-light text-lg text-bright">{title}</span>
           </span>
         </span>
       </div>
