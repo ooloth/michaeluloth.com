@@ -1,12 +1,12 @@
 import { type ReactElement } from 'react'
 
 import { type GroupedBlock, type RichTextItem } from '@/io/notion/schemas/block'
-import NotionBlocks from '@/io/notion/ui/NotionBlocks'
 import NotionRichText from '@/io/notion/ui/NotionRichText'
 
 import { Code } from '@/ui/code'
 import Heading from '@/ui/typography/heading'
 import Image from '@/ui/image'
+import List from '@/ui/list'
 import Paragraph from '@/ui/typography/paragraph'
 import Video from '@/ui/video'
 
@@ -47,29 +47,11 @@ export default function NotionBlock({ block }: Props): ReactElement {
       )
 
     case 'bulleted_list': {
-      // TODO: extract into a List component that handles ul, ol, todos and toggles
-      // see: https://github.com/9gustin/react-notion-render/blob/main/src/components/common/List/index.tsx
-      return (
-        <ul className="list-disc marker:text-accent flex flex-col gap-1 mt-2 pl-5 leading-snug">
-          {block.items.map((item: { richText: RichTextItem[] }, index: number) => (
-            <li key={index} className="mt-1">
-              <NotionRichText richTextItems={item.richText} />
-            </li>
-          ))}
-        </ul>
-      )
+      return <List items={block.items} type="bulleted" />
     }
 
     case 'numbered_list': {
-      return (
-        <ol className="list-decimal marker:text-accent flex flex-col gap-1 mt-2 pl-5 leading-snug">
-          {block.items.map((item: { richText: RichTextItem[] }, index: number) => (
-            <li key={index}>
-              <NotionRichText richTextItems={item.richText} />
-            </li>
-          ))}
-        </ol>
-      )
+      return <List items={block.items} type="numbered" />
     }
 
     case 'code': {
@@ -104,20 +86,6 @@ export default function NotionBlock({ block }: Props): ReactElement {
 
     case 'video':
       return <Video url={block.url} caption={block.caption} showCaption={!!block.caption} />
-
-    case 'toggle':
-      // TODO: test and improve this
-      // Render as details/summary for native HTML collapse behavior
-      return (
-        <details className="my-4">
-          <summary className="cursor-pointer font-medium">
-            <NotionRichText richTextItems={block.richText} />
-          </summary>
-          <div className="ml-4 mt-2">
-            <NotionBlocks blocks={block.children} />
-          </div>
-        </details>
-      )
 
     default:
       // TypeScript exhaustiveness check

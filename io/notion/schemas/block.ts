@@ -202,40 +202,6 @@ export const NumberedListItemBlockSchema = z
   }))
 
 /**
- * Toggle block schema (recursive - contains children blocks)
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ToggleBlockSchema: z.ZodType<any> = z
-  .object({
-    type: z.literal('toggle'),
-    toggle: z.object({
-      rich_text: z.array(RichTextItemSchema),
-    }),
-    // Children are validated recursively
-    children: z.array(z.lazy(() => BlockSchema)).optional(),
-  })
-  .transform(data => ({
-    type: 'toggle' as const,
-    richText: data.toggle.rich_text,
-    children: data.children ?? [],
-  }))
-
-/**
- * Child page block schema
- */
-const ChildPageBlockSchema = z
-  .object({
-    type: z.literal('child_page'),
-    child_page: z.object({
-      title: z.string(),
-    }),
-  })
-  .transform(data => ({
-    type: 'child_page' as const,
-    title: data.child_page.title,
-  }))
-
-/**
  * Main block schema - union of all block types
  * Note: Using z.union instead of z.discriminatedUnion due to recursive toggle schema
  */
@@ -250,8 +216,6 @@ export const BlockSchema = z.union([
   VideoBlockSchema,
   BulletedListItemBlockSchema,
   NumberedListItemBlockSchema,
-  ToggleBlockSchema,
-  ChildPageBlockSchema,
 ])
 
 export type Block = z.infer<typeof BlockSchema>
