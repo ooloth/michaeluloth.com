@@ -75,7 +75,7 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `posts-list-${sortDirection}`
     if (!skipCache) {
-      const cached = await cache.get<PostListItem[]>(cacheKey, 'notion', z.array(PostListItemSchema))
+      const cached = await cache.get<PostListItem[]>(cacheKey, 'notion')
       if (cached) {
         return Ok(cached)
       }

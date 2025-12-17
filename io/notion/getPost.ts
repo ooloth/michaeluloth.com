@@ -92,7 +92,7 @@ export default async function getPost({
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `post-${slug}-blocks-${includeBlocks}-nav-${includePrevAndNext}`
     if (!skipCache) {
-      const cached = await cache.get<Post>(cacheKey, 'notion', PostSchema)
+      const cached = await cache.get<Post>(cacheKey, 'notion')
       if (cached) {
         return Ok(cached)
       }

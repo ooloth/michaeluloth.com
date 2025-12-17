@@ -117,7 +117,7 @@ export default async function getMediaItems(options: Options): Promise<Result<No
     // Check cache first (cache utility handles dev mode check)
     const cacheKey = `media-${category}`
     if (!skipCache) {
-      const cached = await cache.get<NotionMediaItem[]>(cacheKey, 'notion', z.array(NotionMediaItemSchema))
+      const cached = await cache.get<NotionMediaItem[]>(cacheKey, 'notion')
       if (cached) {
         return Ok(cached)
       }

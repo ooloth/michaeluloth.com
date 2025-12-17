@@ -121,7 +121,7 @@ export default async function fetchCloudinaryImageMetadata({
     const publicId = parsePublicIdFromCloudinaryUrl(url)
 
     // Check cache first (dev mode only)
-    const cached = await cache.get<CloudinaryImageMetadata>(publicId, 'cloudinary', CloudinaryImageMetadataSchema)
+    const cached = await cache.get<CloudinaryImageMetadata>(publicId, 'cloudinary')
     if (cached) return Ok(cached)
 
     console.log(`📥 Fetching Cloudinary image metadata from API for "${publicId}"`)

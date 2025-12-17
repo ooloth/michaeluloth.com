@@ -6,26 +6,15 @@ import { getCached, setCached } from './filesystem'
  * Allows swapping cache implementations (filesystem, Redis, memory, etc.)
  * and easier testing without module mocking.
  *
- * ## Validation Pattern
- * Always provide a Zod schema when reading from cache to ensure data integrity:
+ * ## Cache Philosophy
+ * Cache is a local dev convenience only. Data is validated when fetched from source
+ * (before caching). If cache becomes corrupted, simply clear it and refetch.
+ * No validation on cache reads - trust what was written.
  *
  * @example
  * ```typescript
- * // ✅ Good - validates cached data
- * const cached = await cache.get<PostListItem[]>(
- *   'posts-list',
- *   'notion',
- *   z.array(PostListItemSchema)
- * )
- *
- * // ⚠️ Avoid - no validation, unsafe
  * const cached = await cache.get<PostListItem[]>('posts-list', 'notion')
  * ```
- *
- * Benefits of validation:
- * - Detects corrupted cache files
- * - Handles schema evolution gracefully (cache miss on invalid data)
- * - Prevents runtime errors from malformed data
  */
 export interface CacheAdapter {
   /**
@@ -33,15 +22,14 @@ export interface CacheAdapter {
    *
    * @param key - The cache key
    * @param namespace - Optional namespace/directory for the cache
-   * @param schema - Zod schema to validate cached data (strongly recommended)
-   * @returns The cached value or null if not found/expired/invalid
+   * @returns The cached value or null if not found/expired
    *
    * @example
    * ```typescript
-   * const post = await cache.get('post-123', 'notion', PostSchema)
+   * const post = await cache.get<Post>('post-123', 'notion')
    * ```
    */
-  get<T>(key: string, namespace?: string, schema?: z.ZodSchema<T>): Promise<T | null>
+  get<T>(key: string, namespace?: string): Promise<T | null>
 
   /**
    * Set a value in the cache.

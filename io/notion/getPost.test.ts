@@ -354,8 +354,8 @@ describe('getPost', () => {
         ],
       } as unknown as Awaited<ReturnType<Client['dataSources']['query']>>)
 
-      const mockBlocks = [{ id: 'block-1', type: 'paragraph' }]
-      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks as GroupedBlock[]))
+      const mockBlocks: GroupedBlock[] = [{ type: 'paragraph', richText: [] }]
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
 
       const result = await getPost({
         slug: 'post-with-blocks',

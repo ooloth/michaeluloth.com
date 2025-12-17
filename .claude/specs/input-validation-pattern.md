@@ -76,27 +76,21 @@ const item = ProcessedItemSchema.safeParse({
 })
 ```
 
-### 2. Cache Validation
+### 2. Cache Philosophy
 
-**Always provide schema when reading from cache:**
+**Cache is a local dev convenience - trust what was written:**
 
 ```typescript
-// ✅ Good - validates cached data
-const cached = await cache.get<Post>(
-  'post-123',
-  'notion',
-  PostSchema, // ← Schema ensures data integrity
-)
-
-// ⚠️ Avoid - no validation, unsafe
+// Cache reads don't validate - data was validated when fetched from source
 const cached = await cache.get<Post>('post-123', 'notion')
 ```
 
-**Benefits:**
+**Rationale:**
 
-- Detects corrupted cache files → cache miss → re-fetch
-- Handles schema evolution gracefully
-- Prevents runtime errors from malformed data
+- Data is validated when fetched from source (before caching)
+- Cache is local dev only (trivial to clear and refetch: `rm -rf .local-cache`)
+- Avoiding validation prevents schema duplication for transformed data
+- If cache becomes corrupted, clear it and rebuild
 
 ### 3. Error Handling
 

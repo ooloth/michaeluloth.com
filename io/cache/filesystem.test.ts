@@ -15,11 +15,6 @@ describe('filesystem cache', () => {
   })
 
   describe('getCached', () => {
-    const TestSchema = z.object({
-      name: z.string(),
-      count: z.number(),
-    })
-
     it('returns null in production mode', async () => {
       vi.stubEnv('NODE_ENV', 'production')
 
@@ -64,24 +59,24 @@ describe('filesystem cache', () => {
 
       vi.mocked(readFile).mockResolvedValue(JSON.stringify(cachedData))
 
-      const result = await getCached('test-key', 'default', TestSchema)
+      const result = await getCached<{ name: string; count: number }>('test-key', 'default')
 
       expect(result).toEqual({ name: 'test', count: 42 })
     })
 
-    it('returns null when cached data fails schema validation', async () => {
+    it('returns data without validation (trusts cached data)', async () => {
       vi.stubEnv('NODE_ENV', 'development')
 
       const cachedData = {
         cachedAt: '2024-01-01T00:00:00.000Z',
-        data: { name: 'test', count: 'invalid' }, // Should be number
+        data: { name: 'test', count: 'invalid' }, // Not validated - trusted
       }
 
       vi.mocked(readFile).mockResolvedValue(JSON.stringify(cachedData))
 
-      const result = await getCached('test-key', 'default', TestSchema)
+      const result = await getCached<{ name: string; count: any }>('test-key', 'default')
 
-      expect(result).toBeNull()
+      expect(result).toEqual({ name: 'test', count: 'invalid' })
     })
 
     it('returns null when cache file has invalid structure', async () => {
@@ -94,7 +89,7 @@ describe('filesystem cache', () => {
 
       vi.mocked(readFile).mockResolvedValue(JSON.stringify(invalidCachedData))
 
-      const result = await getCached('test-key', 'default', TestSchema)
+      const result = await getCached('test-key', 'default')
 
       expect(result).toBeNull()
     })

@@ -1,7 +1,6 @@
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { z } from 'zod'
-import { formatValidationError } from '@/utils/logging/zod'
 
 /**
  * Sanitizes a cache key to be safe for use as a filename.
@@ -16,19 +15,21 @@ function sanitizeCacheKey(key: string): string {
  */
 const CacheFileSchema = z.object({
   cachedAt: z.string(),
-  data: z.unknown(), // Will be validated by the provided schema
+  data: z.unknown(),
 })
 
 /**
  * Gets cached data from the filesystem.
  * Only operates in development mode.
  *
+ * Data is trusted - it was validated when fetched from source (before caching).
+ * If cache is corrupted, clear it and refetch.
+ *
  * @param key - The cache key (will be sanitized for filesystem use)
  * @param dir - Optional subdirectory within .local-cache (default: 'default')
- * @param schema - Optional Zod schema to validate the cached data
- * @returns The cached data if found and valid, null otherwise
+ * @returns The cached data if found, null otherwise
  */
-export async function getCached<T>(key: string, dir: string = 'default', schema?: z.ZodSchema<T>): Promise<T | null> {
+export async function getCached<T>(key: string, dir: string = 'default'): Promise<T | null> {
   // Only cache in development mode
   if (process.env.NODE_ENV !== 'development') {
     return null
@@ -45,25 +46,13 @@ export async function getCached<T>(key: string, dir: string = 'default', schema?
     // Validate cache file structure
     const cacheFileResult = CacheFileSchema.safeParse(parsed)
     if (!cacheFileResult.success) {
-      console.warn(`⚠️  Invalid cache file structure for ${key}: ${formatValidationError(cacheFileResult.error)}`)
+      console.warn(`⚠️  Invalid cache file structure for ${key}. Clear cache and refetch.`)
       return null
     }
 
     const { data } = cacheFileResult.data
 
-    // Validate cached data if schema provided
-    if (schema) {
-      const dataResult = schema.safeParse(data)
-      if (!dataResult.success) {
-        console.warn(`⚠️  Invalid cached data for ${key}: ${formatValidationError(dataResult.error)}`)
-        return null
-      }
-      console.log(`💾 Cache hit: ${key}`)
-      return dataResult.data
-    }
-
     console.log(`💾 Cache hit: ${key}`)
-    // Safe: cache file structure validated above, caller responsible for type safety without schema
     return data as T
   } catch (error) {
     // Expected: ENOENT (cache miss) - stay quiet
