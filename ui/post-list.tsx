@@ -20,14 +20,11 @@ export default async function PostList({ limit = Infinity, skipCache = false }: 
           <li key={post.id} className="list-none mb-7 last:mb-0">
             <article>
               <header>
-                <time
-                  dateTime={getMachineReadableDate(post.firstPublished)}
-                  className="timestamp block mb-0.5 md:min-w-28"
-                >
+                <time dateTime={getMachineReadableDate(post.firstPublished)} className="timestamp block md:min-w-28">
                   {getHumanReadableDate(post.firstPublished)}
                 </time>
 
-                <Link href={`/${post.slug}/`} className="link-heading heading text-xl">
+                <Link href={`/${post.slug}/`} className="link-heading heading text-[1.2rem]">
                   {post.title || post.slug}
                 </Link>
               </header>
