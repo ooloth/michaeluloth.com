@@ -1,6 +1,3 @@
-// TODO: detect inline code and use <Code> to highlight it (as a span)
-// TODO: https://github.com/makenotion/notion-sdk-js/blob/main/examples/parse-text-from-any-block-type/index.ts
-
 import Link from '@/ui/link'
 import { Code } from '@/ui/code'
 import { type RichTextItem } from '@/io/notion/schemas/block'

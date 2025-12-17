@@ -1,6 +1,3 @@
-// TODO: notion changelog: https://developers.notion.com/page/changelog
-// TODO: notion mcp server: https://developers.notion.com/docs/mcp
-
 import { Client, collectPaginatedAPI } from '@notionhq/client'
 import { env } from '@/io/env/env'
 

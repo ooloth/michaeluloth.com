@@ -15,8 +15,6 @@ type Props = {
 }
 
 export default function NotionBlock({ block }: Props): ReactElement {
-  // TODO: move each markup component into a separate file
-  // see: https://github.com/9gustin/react-notion-render/tree/93bc519a4b0e920a0a9b980323c9a1456fab47d5/src/components/common
   switch (block.type) {
     case 'paragraph':
       return (

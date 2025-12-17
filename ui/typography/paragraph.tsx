@@ -1,5 +1,3 @@
-// TODO: replace mt-4 default with gap in parent container?
-
 import { type ReactNode } from 'react'
 
 type Props = Readonly<{

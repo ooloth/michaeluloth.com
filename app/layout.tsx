@@ -1,11 +1,6 @@
-// TODO: app router migration guide: https://nextjs.org/docs/app/guides/migrating/app-router-migration#migrating-_documentjs-and-_appjs
 // TODO: metadata: https://nextjs.org/docs/app/getting-started/metadata-and-og-images
 // TODO: metadata: https://nextjs.org/docs/app/api-reference/functions/generate-metadata
 // TODO: metadata files: https://nextjs.org/docs/app/api-reference/file-conventions/metadata
-// TODO: links: https://nextjs.org/docs/app/api-reference/components/link
-// TODO: read current page path: https://nextjs.org/docs/app/api-reference/functions/use-pathname
-// TODO: read url: https://nextjs.org/docs/app/api-reference/functions/use-search-params
-// TODO: data fetching: https://nextjs.org/docs/app/guides/migrating/app-router-migration#step-6-migrating-data-fetching-methods
 
 import { type Metadata } from 'next'
 import { type ReactNode } from 'react'
