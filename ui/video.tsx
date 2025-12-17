@@ -7,7 +7,7 @@ const iframeStylesDefault = 'shadow-xl rounded bg-zinc-800 w-full aspect-video'
 type Props = Readonly<{
   url: string
   showCaption?: boolean
-  caption?: string
+  caption: string | null
   videoStyles?: string
   outerStyles?: string
 }>
