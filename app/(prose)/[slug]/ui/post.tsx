@@ -15,9 +15,9 @@ export default function Post({ post, prevPost, nextPost }: Props) {
   return (
     <main className="flex_auto">
       <article>
-        <PostHeader title={post.title} datePublished={post.firstPublished} dateUpdated={post.lastEditedTime} />
+        <PostHeader title={post.title} datePublished={post.firstPublished} />
         <NotionBlocks blocks={post.blocks} />
-        <PostFooter />
+        <PostFooter /> {/* needs to be a client component */}
         <PaginationLinks prevPost={prevPost} nextPost={nextPost} />
       </article>
     </main>
