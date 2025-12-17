@@ -1,6 +1,3 @@
-// TODO: use emoji component
-// TODO: I think we want to render this on [slug]/ui/post.tsx
-
 import Card from '@/ui/card'
 import Emoji from '@/ui/emoji'
 import type { PostListItem } from '@/io/notion/schemas/post'
@@ -12,7 +9,7 @@ type Props = Readonly<{
 
 export default function PaginationLinks({ prevPost, nextPost }: Props) {
   return (
-    <nav className="mt-18 flex flex-col md:flex-row gap-5">
+    <nav className="mt-18 flex flex-col sm:flex-row gap-5">
       {nextPost ? <PaginationLink post={nextPost} direction="Next" /> : <div className="basis-1/2" />}
       {prevPost ? <PaginationLink post={prevPost} direction="Previous" /> : <div className="basis-1/2" />}
     </nav>
