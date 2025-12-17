@@ -11,7 +11,7 @@
 
   /* code blocks */
   figure[data-rehype-pretty-code-figure] {
-    @apply my-8 rounded-lg overflow-x-scroll;
+    @apply my-6 rounded-lg overflow-x-scroll;
 
     /* title (if any) */
     [data-rehype-pretty-code-title] {
