@@ -10,7 +10,7 @@ type HeaderProps = Readonly<{
 export default function PostHeader({ title, datePublished }: HeaderProps) {
   return (
     <header className="mb-6">
-      <Paragraph className="my-0 text-[0.9rem] uppercase text-zinc-400">
+      <Paragraph className="mt-0 mb-0.5 text-[0.9rem] uppercase text-zinc-400">
         {getHumanReadableDate(datePublished)}
       </Paragraph>
 
