@@ -5,7 +5,7 @@ import NotionRichText from '@/io/notion/ui/NotionRichText'
 
 import { Code } from '@/ui/code'
 import Heading from '@/ui/typography/heading'
-import Image from '@/ui/image'
+import CloudinaryImage from '@/ui/image'
 import List from '@/ui/list'
 import Paragraph from '@/ui/typography/paragraph'
 import Video from '@/ui/video'
@@ -82,7 +82,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
       )
 
     case 'image':
-      return <Image url={block.url} />
+      return <CloudinaryImage url={block.url} />
 
     case 'video':
       return <Video url={block.url} caption={block.caption} showCaption={!!block.caption} />

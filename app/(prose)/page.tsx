@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 
-import Image from '@/ui/image'
+import CloudinaryImage from '@/ui/image'
 import Paragraph from '@/ui/typography/paragraph'
 import PostList from '@/ui/post-list'
 
@@ -19,7 +19,7 @@ function Summary(): ReactElement {
         </Paragraph>
       </div>
 
-      <Image
+      <CloudinaryImage
         url="https://res.cloudinary.com/ooloth/image/upload/v1645057009/mu/michael-landscape.jpg"
         effect="grayscale"
         loading="eager"

@@ -1,6 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-// TODO: handle non-Cloudinary images?
-
 import fetchCloudinaryImageMetadata from '@/io/cloudinary/fetchCloudinaryImageMetadata'
 import { type ImageEffect } from 'cloudinary'
 
@@ -22,7 +20,14 @@ type Props = Readonly<{
  * @throws Will throw an error if the provided URL is not a Cloudinary URL.
  * @returns A JSX element containing the optimized image, optionally wrapped in a figure with a caption.
  */
-export default async function Image({ loading = 'eager', url, effect, showCaption, imageStyles, outerStyles }: Props) {
+export default async function CloudinaryImage({
+  loading = 'eager',
+  url,
+  effect,
+  showCaption,
+  imageStyles,
+  outerStyles,
+}: Props) {
   if (!url.includes('cloudinary')) {
     throw new Error(`🚨 Image URL is not a Cloudinary URL: "${url}"`)
   }
