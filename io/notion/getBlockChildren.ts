@@ -40,7 +40,7 @@ function groupListItems(blocks: Block[]): GroupedBlock[] {
 
     if (block.type === 'bulleted_list_item') {
       // Collect consecutive bulleted list items
-      const items: { richText: Block['richText'] }[] = []
+      const items = []
       while (i < blocks.length && blocks[i].type === 'bulleted_list_item') {
         items.push({ richText: (blocks[i] as Extract<Block, { type: 'bulleted_list_item' }>).richText })
         i++
@@ -52,7 +52,7 @@ function groupListItems(blocks: Block[]): GroupedBlock[] {
       grouped.push(bulletedList)
     } else if (block.type === 'numbered_list_item') {
       // Collect consecutive numbered list items
-      const items: { richText: Block['richText'] }[] = []
+      const items = []
       while (i < blocks.length && blocks[i].type === 'numbered_list_item') {
         items.push({ richText: (blocks[i] as Extract<Block, { type: 'numbered_list_item' }>).richText })
         i++
@@ -62,17 +62,6 @@ function groupListItems(blocks: Block[]): GroupedBlock[] {
         items,
       }
       grouped.push(numberedList)
-    } else {
-      // Handle recursive children for toggle blocks
-      if (block.type === 'toggle' && block.children.length > 0) {
-        grouped.push({
-          ...block,
-          children: groupListItems(block.children),
-        })
-      } else {
-        grouped.push(block as GroupedBlock)
-      }
-      i++
     }
   }
 

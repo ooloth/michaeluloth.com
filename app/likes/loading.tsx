@@ -1,5 +1,4 @@
 import { type ReactElement } from 'react'
-import Heading from '@/ui/typography/heading'
 
 function SkeletonCard({ height }: { height: 'h-72' | 'h-48' }): ReactElement {
   return (
