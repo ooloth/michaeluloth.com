@@ -19,6 +19,7 @@ function transformNotionBlockToBlock(block: unknown): Block {
   const parsed = BlockSchema.safeParse(block)
 
   if (!parsed.success) {
+    console.error('🚨 Could not parse this block:', block)
     logValidationError(parsed.error, 'block')
     throw new Error(INVALID_BLOCK_ERROR)
   }
