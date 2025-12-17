@@ -55,9 +55,9 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
 
   return (
     <section>
-      <Heading level={2}>{title}</Heading>
+      <h2 className="mt-8 text-3xl font-semibold text-bright">{title}</h2>
 
-      <ul className="flex gap-10 overflow-x-auto hide-scrollbar list-none mt-4" aria-label={`${title} list`}>
+      <ul className="flex gap-10 overflow-x-auto mt-4 hide-scrollbar list-none" aria-label={`${title} list`}>
         {items.map(item => {
           const isItunesItem = 'artist' in item
           const year = item.date.split('-')[0]
@@ -111,9 +111,9 @@ export default async function Likes({ searchParams }: PageProps): Promise<ReactE
 
   return (
     <main className="flex-auto">
-      <Heading level={1}>Likes</Heading>
+      <h1 className="sr-only">Likes</h1>
 
-      <div className="pt-8">
+      <div className="-mt-8">
         <MediaSection title="TV Shows" items={tv} height="h-72" />
         <MediaSection title="Movies" items={movies} height="h-72" />
         <MediaSection title="Books" items={books} height="h-72" />

@@ -39,8 +39,8 @@ export default function Heading({ level, children, className }: Props) {
 
   let classes = baseClasses + ' ' + typographyByLevel[level]
 
-  const classNameIncludesTopMargin = className && (className.includes('mt-') || className.includes('my-'))
-  const classNameIncludesBottomMargin = className && (className.includes('mb-') || className.includes('my-'))
+  const classNameIncludesTopMargin: boolean = !!className && (className.includes('mt-') || className.includes('my-'))
+  const classNameIncludesBottomMargin: boolean = !!className && (className.includes('mb-') || className.includes('my-'))
 
   if (!classNameIncludesTopMargin) {
     classes += ' ' + topMarginByLevel[level] // Only add default top margin if className doesn't include mt-* or my-*

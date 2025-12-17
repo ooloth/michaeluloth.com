@@ -18,7 +18,8 @@ function SkeletonCard({ height }: { height: 'h-72' | 'h-48' }): ReactElement {
 function SkeletonSection({ title, height }: { title: string; height: 'h-72' | 'h-48' }): ReactElement {
   return (
     <section>
-      <Heading level={2}>{title}</Heading>
+      <h2 className="mt-8 text-3xl font-semibold text-bright">{title}</h2>
+
       <div className="flex gap-10 overflow-x-auto hide-scrollbar mt-4">
         {Array.from({ length: 10 }).map((_, i) => (
           <SkeletonCard key={i} height={height} />
@@ -31,9 +32,9 @@ function SkeletonSection({ title, height }: { title: string; height: 'h-72' | 'h
 export default function Loading(): ReactElement {
   return (
     <main className="flex-auto">
-      <Heading level={1}>Likes</Heading>
+      <h1 className="sr-only">Likes</h1>
 
-      <div className="pt-8">
+      <div className="-mt-8">
         <SkeletonSection title="TV Shows" height="h-72" />
         <SkeletonSection title="Movies" height="h-72" />
         <SkeletonSection title="Books" height="h-72" />
