@@ -509,7 +509,7 @@ describe('RSS feed route', () => {
 
       // Validate no unescaped special characters in text content
       // (the feed library should handle CDATA wrapping)
-      const cdataContent = xml.match(/<!\[CDATA\[(.*?)\]\]>/gs)
+      const cdataContent = xml.match(/<!\[CDATA\[([\s\S]*?)\]\]>/g)
       expect(cdataContent).toBeTruthy()
     })
   })
