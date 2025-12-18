@@ -383,6 +383,43 @@ describe('renderBlocksToHtml', () => {
     })
   })
 
+  describe('inline language indicator cleanup', () => {
+    it('strips rehype-pretty-code inline language indicators', () => {
+      const blocks: GroupedBlock[] = [
+        {
+          type: 'paragraph',
+          richText: [
+            { content: 'Use ', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false },
+            { content: 'const', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: true },
+            { content: ' for variables', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false },
+          ],
+        },
+      ]
+
+      const result = renderBlocksToHtml(blocks)
+
+      // Should not contain language indicators like {:js}
+      expect(result).not.toContain('{:')
+      expect(result).toBe('<p>Use <code>const</code> for variables</p>')
+    })
+
+    it('cleans multiple language indicator variants', () => {
+      // Simulate HTML that would have language indicators
+      const blocks: GroupedBlock[] = [
+        {
+          type: 'paragraph',
+          richText: [{ content: 'test', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: true }],
+        },
+      ]
+
+      const result = renderBlocksToHtml(blocks)
+
+      // Verify clean output
+      expect(result).toBe('<p><code>test</code></p>')
+      expect(result).not.toMatch(/{:\\.?\\w+}<\/code>/)
+    })
+  })
+
   describe('edge cases', () => {
     it('handles empty blocks array', () => {
       const blocks: GroupedBlock[] = []

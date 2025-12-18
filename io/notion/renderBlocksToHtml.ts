@@ -1,7 +1,17 @@
 import { type GroupedBlock, type RichTextItem } from '@/io/notion/schemas/block'
 
+/**
+ * Cleans rehype-pretty-code inline language indicators from HTML content.
+ * Examples: "code{:js}</code>", "token{:.fp}</code>"
+ */
+function cleanContent(content: string): string {
+  const rehypePrettyCodeInlineLangIndicator = /{:\\.?\\w+}<\/code>/g
+  return content.replace(rehypePrettyCodeInlineLangIndicator, '</code>')
+}
+
 export function renderBlocksToHtml(blocks: GroupedBlock[]): string {
-  return blocks.map(renderBlock).join('\n')
+  const html = blocks.map(renderBlock).join('\n')
+  return cleanContent(html)
 }
 
 function renderBlock(block: GroupedBlock): string {
