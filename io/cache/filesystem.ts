@@ -52,6 +52,12 @@ export async function getCached<T>(key: string, dir: string = 'default'): Promis
 
     const { data } = cacheFileResult.data
 
+    // Additional check: ensure data field is actually present (not undefined)
+    if (data === undefined) {
+      console.warn(`⚠️  Invalid cache file structure for ${key}. Clear cache and refetch.`)
+      return null
+    }
+
     console.log(`💾 Cache hit: ${key}`)
     return data as T
   } catch (error) {
