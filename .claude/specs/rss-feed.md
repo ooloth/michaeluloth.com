@@ -1,9 +1,11 @@
 # RSS Feed Implementation Plan
 
 ## Goal
+
 Add an RSS feed at `/rss.xml/` with full post content rendered from Notion blocks.
 
 ## Approach
+
 Use the `feed` npm package + a dedicated HTML renderer for blocks (can't use existing React components because `Code` and `CloudinaryImage` are async Server Components, which `renderToStaticMarkup` doesn't support).
 
 ## Files to Create/Modify
@@ -11,6 +13,7 @@ Use the `feed` npm package + a dedicated HTML renderer for blocks (can't use exi
 ### 1. Create `io/notion/renderBlocksToHtml.ts` (new)
 
 Renders Notion blocks to HTML strings for RSS. Simpler than React components:
+
 - Code blocks: `<pre><code>` without syntax highlighting
 - Images: Direct `<img>` tags with Cloudinary URLs
 - Text: Handles bold, italic, code, links, strikethrough
@@ -51,24 +54,22 @@ function renderBlock(block: GroupedBlock): string {
 }
 
 function renderRichText(items: RichTextItem[]): string {
-  return items.map(item => {
-    let text = escapeHtml(item.content)
-    if (item.code) text = `<code>${text}</code>`
-    if (item.bold) text = `<strong>${text}</strong>`
-    if (item.italic) text = `<em>${text}</em>`
-    if (item.strikethrough) text = `<del>${text}</del>`
-    if (item.underline) text = `<u>${text}</u>`
-    if (item.link) text = `<a href="${item.link}">${text}</a>`
-    return text
-  }).join('')
+  return items
+    .map(item => {
+      let text = escapeHtml(item.content)
+      if (item.code) text = `<code>${text}</code>`
+      if (item.bold) text = `<strong>${text}</strong>`
+      if (item.italic) text = `<em>${text}</em>`
+      if (item.strikethrough) text = `<del>${text}</del>`
+      if (item.underline) text = `<u>${text}</u>`
+      if (item.link) text = `<a href="${item.link}">${text}</a>`
+      return text
+    })
+    .join('')
 }
 
 function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 ```
 
@@ -132,13 +133,13 @@ npm install feed
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `app/rss.xml/route.ts` | Route handler serving RSS feed |
-| `io/notion/renderBlocksToHtml.ts` | Converts Notion blocks to HTML strings |
-| `io/notion/getPosts.ts` | Fetches post list (existing) |
-| `io/notion/getPost.ts` | Fetches single post with blocks (existing) |
-| `io/notion/schemas/block.ts` | Block types (existing) |
+| File                              | Purpose                                    |
+| --------------------------------- | ------------------------------------------ |
+| `app/rss.xml/route.ts`            | Route handler serving RSS feed             |
+| `io/notion/renderBlocksToHtml.ts` | Converts Notion blocks to HTML strings     |
+| `io/notion/getPosts.ts`           | Fetches post list (existing)               |
+| `io/notion/getPost.ts`            | Fetches single post with blocks (existing) |
+| `io/notion/schemas/block.ts`      | Block types (existing)                     |
 
 ## Design Decisions
 
