@@ -29,6 +29,7 @@ describe('RSS feed route', () => {
           description: 'A test post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -68,6 +69,7 @@ describe('RSS feed route', () => {
           description: 'A test post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -115,8 +117,8 @@ describe('RSS feed route', () => {
       expect(xml).toContain(
         '<description>Software engineer helping scientists discover new medicines at Recursion.</description>',
       )
-      expect(xml).toContain('<link>https://michaeluloth.com</link>')
-      expect(xml).toContain('<language>en</language>')
+      expect(xml).toContain('<link>https://michaeluloth.com/</link>')
+      expect(xml).toContain('<language>en-ca</language>')
       expect(xml).toContain(`<copyright>All rights reserved ${new Date().getFullYear()}, Michael Uloth</copyright>`)
     })
 
@@ -129,6 +131,7 @@ describe('RSS feed route', () => {
           description: 'Post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -175,6 +178,7 @@ describe('RSS feed route', () => {
           description: null,
           firstPublished: '2024-01-15',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -279,6 +283,7 @@ describe('RSS feed route', () => {
           description: null,
           firstPublished: '2024-01-20',
           featuredImage: null,
+          feedId: null,
         },
         {
           id: 'post-1',
@@ -287,6 +292,7 @@ describe('RSS feed route', () => {
           description: null,
           firstPublished: '2024-01-15',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -341,6 +347,7 @@ describe('RSS feed route', () => {
           description: null,
           firstPublished: '2024-01-15',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -363,6 +370,7 @@ describe('RSS feed route', () => {
           description: null,
           firstPublished: '2024-01-15',
           featuredImage: null,
+          feedId: null,
         },
         {
           id: 'post-2',
@@ -371,6 +379,7 @@ describe('RSS feed route', () => {
           description: null,
           firstPublished: '2024-01-14',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -413,6 +422,7 @@ describe('RSS feed route', () => {
           description: null,
           firstPublished: '2024-01-15',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -427,6 +437,62 @@ describe('RSS feed route', () => {
       // Verify post is included without description element
       expect(xml).toContain('<![CDATA[No Description Post]]>')
       // RSS feed may or may not include empty description - that's OK
+    })
+
+    it('uses feedId as guid when present', async () => {
+      const mockPostListItems: PostListItem[] = [
+        {
+          id: 'post-1',
+          slug: 'test-post',
+          title: 'Test Post',
+          description: null,
+          firstPublished: '2024-01-15',
+          featuredImage: null,
+          feedId: 'https://old-site.com/original-url/',
+        },
+      ]
+
+      const mockBlocks: GroupedBlock[] = []
+
+      vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
+
+      const response = await GET()
+      const xml = await response.text()
+
+      // When feedId is present, it should be used for guid
+      expect(xml).toContain('<guid')
+      expect(xml).toContain('https://old-site.com/original-url/')
+
+      // Link should also use feedId
+      expect(xml).toContain('<link>https://old-site.com/original-url/</link>')
+    })
+
+    it('uses constructed permalink when feedId is absent', async () => {
+      const mockPostListItems: PostListItem[] = [
+        {
+          id: 'post-1',
+          slug: 'test-post',
+          title: 'Test Post',
+          description: null,
+          firstPublished: '2024-01-15',
+          featuredImage: null,
+          feedId: null,
+        },
+      ]
+
+      const mockBlocks: GroupedBlock[] = []
+
+      vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
+
+      const response = await GET()
+      const xml = await response.text()
+
+      // When feedId is absent, should use constructed permalink
+      expect(xml).toContain('<guid')
+      expect(xml).toContain('https://michaeluloth.com/test-post/')
+      expect(xml).toContain('<link>https://michaeluloth.com/test-post/</link>')
     })
 
     it('generates valid, well-formed RSS 2.0 XML', async () => {
@@ -513,8 +579,8 @@ describe('RSS feed route', () => {
       // Validate channel metadata
       expect(xml).toContain('<title>Michael Uloth</title>')
       expect(xml).toContain('Software engineer')
-      expect(xml).toContain('<link>https://michaeluloth.com</link>')
-      expect(xml).toContain('<language>en</language>')
+      expect(xml).toContain('<link>https://michaeluloth.com/</link>')
+      expect(xml).toContain('<language>en-ca</language>')
 
       // Validate item structure
       expect(xml).toContain('<item>')

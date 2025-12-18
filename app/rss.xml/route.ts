@@ -3,7 +3,7 @@ import getPosts from '@/io/notion/getPosts'
 import getBlockChildren from '@/io/notion/getBlockChildren'
 import { renderBlocksToHtml } from '@/io/notion/renderBlocksToHtml'
 
-const SITE_URL = 'https://michaeluloth.com'
+const SITE_URL = 'https://michaeluloth.com/'
 
 export const dynamic = 'force-static'
 
@@ -17,8 +17,8 @@ export async function GET() {
     description: 'Software engineer helping scientists discover new medicines at Recursion.',
     id: SITE_URL,
     link: SITE_URL,
-    language: 'en',
-    favicon: `${SITE_URL}/favicon.ico`,
+    language: 'en-ca',
+    favicon: `${SITE_URL}favicon.ico`,
     copyright: `All rights reserved ${new Date().getFullYear()}, Michael Uloth`,
     author: {
       name: 'Michael Uloth',
@@ -40,10 +40,13 @@ export async function GET() {
       ? `<img src="${postItem.featuredImage}" alt="${postItem.title}" />\n${renderBlocksToHtml(blocksResult.value)}`
       : renderBlocksToHtml(blocksResult.value)
 
+    // Use feedId if present (for historical feed stability), otherwise construct permalink
+    const permalink = postItem.feedId || `${SITE_URL}${postItem.slug}/`
+
     feed.addItem({
       title: postItem.title,
-      id: `${SITE_URL}/${postItem.slug}/`,
-      link: `${SITE_URL}/${postItem.slug}/`,
+      id: permalink,
+      link: permalink,
       description: postItem.description ?? undefined,
       content,
       date: new Date(postItem.firstPublished),
@@ -54,7 +57,17 @@ export async function GET() {
 
   console.log('[RSS] RSS feed generation complete')
 
-  return new Response(feed.rss2(), {
+  // Generate RSS XML and transform to match old feed format exactly
+  const rssXml = feed
+    .rss2()
+    // Replace isPermaLink with permalink attribute
+    .replace(/isPermaLink=/g, 'permalink=')
+    .replace(/permalink="false"/g, 'permalink="true"')
+    // Remove docs and generator elements
+    .replace(/\s*<docs>.*?<\/docs>\n?/g, '')
+    .replace(/\s*<generator>.*?<\/generator>\n?/g, '')
+
+  return new Response(rssXml, {
     headers: {
       'Content-Type': 'application/xml',
       'Cache-Control': 'public, max-age=3600',
