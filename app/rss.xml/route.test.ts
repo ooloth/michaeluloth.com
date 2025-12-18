@@ -1,3 +1,7 @@
+/**
+ * @vitest-environment happy-dom
+ */
+
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { GET } from './route'
 import getPosts from '@/io/notion/getPosts'
@@ -423,6 +427,116 @@ describe('RSS feed route', () => {
       // Verify post is included without description element
       expect(xml).toContain('<![CDATA[No Description Post]]>')
       // RSS feed may or may not include empty description - that's OK
+    })
+
+    it('generates valid, well-formed RSS 2.0 XML', async () => {
+      const mockPostListItems: PostListItem[] = [
+        {
+          id: 'post-1',
+          slug: 'test-post',
+          title: 'Test Post',
+          description: 'Test description',
+          firstPublished: '2024-01-15',
+          featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test.jpg',
+        },
+      ]
+
+      const mockBlocks: GroupedBlock[] = [
+        {
+          type: 'heading_1',
+          richText: [
+            {
+              content: 'Introduction',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'This is a paragraph with ',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+            {
+              content: 'bold text',
+              link: null,
+              bold: true,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ]
+
+      vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
+
+      const response = await GET()
+      const xml = await response.text()
+
+      // Validate XML declaration
+      expect(xml).toMatch(/^<\?xml version="1\.0" encoding="utf-8"\?>/)
+
+      // Validate RSS 2.0 structure
+      expect(xml).toContain('<rss')
+      expect(xml).toContain('version="2.0"')
+      expect(xml).toContain('<channel>')
+      expect(xml).toContain('</channel>')
+      expect(xml).toContain('</rss>')
+
+      // Validate well-formedness by checking key tag pairs match
+      const rssOpenCount = (xml.match(/<rss/g) || []).length
+      const rssCloseCount = (xml.match(/<\/rss>/g) || []).length
+      expect(rssOpenCount).toBe(rssCloseCount)
+
+      const channelOpenCount = (xml.match(/<channel>/g) || []).length
+      const channelCloseCount = (xml.match(/<\/channel>/g) || []).length
+      expect(channelOpenCount).toBe(channelCloseCount)
+
+      const itemOpenCount = (xml.match(/<item>/g) || []).length
+      const itemCloseCount = (xml.match(/<\/item>/g) || []).length
+      expect(itemOpenCount).toBe(itemCloseCount)
+
+      // Validate channel metadata
+      expect(xml).toContain('<title>Michael Uloth</title>')
+      expect(xml).toContain('Software engineer')
+      expect(xml).toContain('<link>https://michaeluloth.com</link>')
+      expect(xml).toContain('<language>en</language>')
+
+      // Validate item structure
+      expect(xml).toContain('<item>')
+      expect(xml).toContain('</item>')
+      expect(xml).toContain('<![CDATA[Test Post]]>')
+      expect(xml).toContain('<link>https://michaeluloth.com/test-post/</link>')
+      expect(xml).toContain('<guid')
+      expect(xml).toContain('https://michaeluloth.com/test-post/')
+      expect(xml).toContain('<pubDate>')
+
+      // Validate featured image in content
+      expect(xml).toContain('<img src="https://res.cloudinary.com/ooloth/image/upload/mu/test.jpg"')
+      expect(xml).toContain('alt="Test Post"')
+
+      // Validate rendered HTML content
+      expect(xml).toContain('<h1>Introduction</h1>')
+      expect(xml).toContain('<strong>bold text</strong>')
+
+      // Validate no unescaped special characters in text content
+      // (the feed library should handle CDATA wrapping)
+      const cdataContent = xml.match(/<!\[CDATA\[(.*?)\]\]>/gs)
+      expect(cdataContent).toBeTruthy()
     })
   })
 })
