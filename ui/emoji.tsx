@@ -23,12 +23,21 @@ export type EmojiSymbol = keyof typeof emojiLabel
 export type EmojiProps = {
   symbol: EmojiSymbol
   className?: string
+  decorative?: boolean
 }
 
-export default function Emoji({ symbol, className }: EmojiProps) {
+export default function Emoji({ symbol, className, decorative = false }: EmojiProps) {
   const ariaLabel = emojiLabel[symbol]
 
   invariant(ariaLabel, `Emoji must have aria-label`, { symbol })
+
+  if (decorative) {
+    return (
+      <span aria-hidden="true" className={`flex-none ${className ?? ''}`}>
+        {symbol}
+      </span>
+    )
+  }
 
   return (
     <span role="img" aria-label={ariaLabel} className={`flex-none ${className ?? ''}`}>

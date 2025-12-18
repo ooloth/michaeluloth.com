@@ -33,9 +33,11 @@ function PaginationLink({ post, direction }: PaginationLinkProps) {
     <Card href={href}>
       <div className={`flex items-center ${direction === 'Previous' ? 'justify-end' : null} pt-2.5 pb-4 px-4 h-full`}>
         <span className={`flex gap-4 items-center ${direction === 'Previous' ? 'flex-row-reverse' : null}`}>
-          <Emoji symbol={emoji} className="text-2xl" />
+          <Emoji symbol={emoji} className="text-2xl" decorative />
           <span className={`${direction === 'Previous' ? 'text-right' : null}`}>
-            <span className="block capitalize text-[0.98em]">{directionText}</span>
+            <span className="block capitalize text-[0.98em]" aria-hidden="true">
+              {directionText}
+            </span>
             <span className="block leading-[1.3] font-light text-lg text-bright">{title}</span>
           </span>
         </span>
