@@ -22,7 +22,7 @@ import { type GroupedBlock, type RichTextItem } from '@/io/notion/schemas/block'
  * @returns HTML string with all language indicators removed
  */
 function stripRehypePrettyCodeLanguageIndicators(html: string): string {
-  const rehypePrettyCodeInlineLangIndicator = /{:\\.?\\w+}<\/code>/g
+  const rehypePrettyCodeInlineLangIndicator = /{:\.?\w+}<\/code>/g
   return html.replace(rehypePrettyCodeInlineLangIndicator, '</code>')
 }
 

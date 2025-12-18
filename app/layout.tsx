@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: 'Software engineer helping scientists discover new medicines at Recursion.',
   alternates: {
     types: {
-      'application/rss+xml': '/rss.xml/',
+      'application/rss+xml': '/rss.xml',
     },
   },
 }
