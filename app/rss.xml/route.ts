@@ -1,6 +1,6 @@
 import { Feed } from 'feed'
 import getPosts from '@/io/notion/getPosts'
-import getPost from '@/io/notion/getPost'
+import getBlockChildren from '@/io/notion/getBlockChildren'
 import { renderBlocksToHtml } from '@/io/notion/renderBlocksToHtml'
 
 const SITE_URL = 'https://michaeluloth.com'
@@ -26,26 +26,27 @@ export async function GET() {
     },
   })
 
-  // Fetch full content for each post
+  // Fetch blocks for each post (we already have metadata from getPosts)
   for (const postItem of posts) {
-    console.log(`[RSS] Fetching content for: ${postItem.slug}`)
-    const post = (await getPost({ slug: postItem.slug, includeBlocks: true })).unwrap()
-    if (!post) {
-      console.log(`[RSS] Skipping null post: ${postItem.slug}`)
+    console.log(`[RSS] Fetching blocks for: ${postItem.slug}`)
+    const blocksResult = await getBlockChildren(postItem.id)
+
+    if (!blocksResult.ok) {
+      console.error(`[RSS] Failed to fetch blocks for ${postItem.slug}:`, blocksResult.error)
       continue
     }
 
-    const content = post.featuredImage
-      ? `<img src="${post.featuredImage}" alt="${post.title}" />\n${renderBlocksToHtml(post.blocks)}`
-      : renderBlocksToHtml(post.blocks)
+    const content = postItem.featuredImage
+      ? `<img src="${postItem.featuredImage}" alt="${postItem.title}" />\n${renderBlocksToHtml(blocksResult.value)}`
+      : renderBlocksToHtml(blocksResult.value)
 
     feed.addItem({
-      title: post.title,
-      id: `${SITE_URL}/${post.slug}/`,
-      link: `${SITE_URL}/${post.slug}/`,
-      description: post.description ?? undefined,
+      title: postItem.title,
+      id: `${SITE_URL}/${postItem.slug}/`,
+      link: `${SITE_URL}/${postItem.slug}/`,
+      description: postItem.description ?? undefined,
       content,
-      date: new Date(post.firstPublished),
+      date: new Date(postItem.firstPublished),
       author: [{ name: 'Michael Uloth', link: SITE_URL }],
     })
     console.log(`[RSS] Added post: ${postItem.slug}`)

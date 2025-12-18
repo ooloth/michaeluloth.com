@@ -1,14 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { GET } from './route'
 import getPosts from '@/io/notion/getPosts'
-import getPost from '@/io/notion/getPost'
+import getBlockChildren from '@/io/notion/getBlockChildren'
 import type { PostListItem } from '@/io/notion/schemas/post'
-import type { Post } from '@/io/notion/schemas/post'
-import { Ok } from '@/utils/errors/result'
+import type { GroupedBlock } from '@/io/notion/schemas/block'
+import { Ok, Err } from '@/utils/errors/result'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
-vi.mock('@/io/notion/getPost')
+vi.mock('@/io/notion/getBlockChildren')
 
 describe('RSS feed route', () => {
   beforeEach(() => {
@@ -28,35 +28,25 @@ describe('RSS feed route', () => {
         },
       ]
 
-      const mockPost: Post = {
-        id: 'post-1',
-        slug: 'test-post',
-        title: 'Test Post',
-        description: 'A test post description',
-        firstPublished: '2024-01-15',
-        featuredImage: null,
-        blocks: [
-          {
-            type: 'paragraph',
-            richText: [
-              {
-                content: 'This is test content.',
-                link: null,
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-            ],
-          },
-        ],
-        prevPost: null,
-        nextPost: null,
-      }
+      const mockBlocks: GroupedBlock[] = [
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'This is test content.',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ]
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
 
       const response = await GET()
 
@@ -77,35 +67,25 @@ describe('RSS feed route', () => {
         },
       ]
 
-      const mockPost: Post = {
-        id: 'post-1',
-        slug: 'test-post',
-        title: 'Test Post',
-        description: 'A test post description',
-        firstPublished: '2024-01-15',
-        featuredImage: null,
-        blocks: [
-          {
-            type: 'paragraph',
-            richText: [
-              {
-                content: 'Post content here.',
-                link: null,
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-            ],
-          },
-        ],
-        prevPost: null,
-        nextPost: null,
-      }
+      const mockBlocks: GroupedBlock[] = [
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'Post content here.',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ]
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
 
       const response = await GET()
       const xml = await response.text()
@@ -148,35 +128,25 @@ describe('RSS feed route', () => {
         },
       ]
 
-      const mockPost: Post = {
-        id: 'post-1',
-        slug: 'my-first-post',
-        title: 'My First Post',
-        description: 'Post description',
-        firstPublished: '2024-01-15',
-        featuredImage: null,
-        blocks: [
-          {
-            type: 'paragraph',
-            richText: [
-              {
-                content: 'This is the post content.',
-                link: null,
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-            ],
-          },
-        ],
-        prevPost: null,
-        nextPost: null,
-      }
+      const mockBlocks: GroupedBlock[] = [
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'This is the post content.',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ]
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
 
       const response = await GET()
       const xml = await response.text()
@@ -204,58 +174,48 @@ describe('RSS feed route', () => {
         },
       ]
 
-      const mockPost: Post = {
-        id: 'post-1',
-        slug: 'test-post',
-        title: 'Test Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        featuredImage: null,
-        blocks: [
-          {
-            type: 'heading_1',
-            richText: [
-              {
-                content: 'Introduction',
-                link: null,
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-            ],
-          },
-          {
-            type: 'paragraph',
-            richText: [
-              {
-                content: 'This is a paragraph with ',
-                link: null,
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-              {
-                content: 'bold text',
-                link: null,
-                bold: true,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-            ],
-          },
-        ],
-        prevPost: null,
-        nextPost: null,
-      }
+      const mockBlocks: GroupedBlock[] = [
+        {
+          type: 'heading_1',
+          richText: [
+            {
+              content: 'Introduction',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'This is a paragraph with ',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+            {
+              content: 'bold text',
+              link: null,
+              bold: true,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ]
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
 
       const response = await GET()
       const xml = await response.text()
@@ -264,6 +224,46 @@ describe('RSS feed route', () => {
       // The feed library wraps content in CDATA
       expect(xml).toContain('<h1>Introduction</h1>')
       expect(xml).toContain('<p>This is a paragraph with <strong>bold text</strong></p>')
+    })
+
+    it('includes featured images when present', async () => {
+      const mockPostListItems: PostListItem[] = [
+        {
+          id: 'post-1',
+          slug: 'test-post',
+          title: 'Test Post',
+          description: null,
+          firstPublished: '2024-01-15',
+          featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test.jpg',
+        },
+      ]
+
+      const mockBlocks: GroupedBlock[] = [
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'Post content',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ]
+
+      vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
+
+      const response = await GET()
+      const xml = await response.text()
+
+      // Verify featured image is included in content
+      expect(xml).toContain('<img src="https://res.cloudinary.com/ooloth/image/upload/mu/test.jpg"')
+      expect(xml).toContain('alt="Test Post"')
     })
 
     it('handles multiple posts in correct order', async () => {
@@ -286,64 +286,25 @@ describe('RSS feed route', () => {
         },
       ]
 
-      const mockNewerPost: Post = {
-        id: 'post-2',
-        slug: 'newer-post',
-        title: 'Newer Post',
-        description: null,
-        firstPublished: '2024-01-20',
-        featuredImage: null,
-        blocks: [
-          {
-            type: 'paragraph',
-            richText: [
-              {
-                content: 'Newer content',
-                link: null,
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-            ],
-          },
-        ],
-        prevPost: null,
-        nextPost: null,
-      }
-
-      const mockOlderPost: Post = {
-        id: 'post-1',
-        slug: 'older-post',
-        title: 'Older Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        featuredImage: null,
-        blocks: [
-          {
-            type: 'paragraph',
-            richText: [
-              {
-                content: 'Older content',
-                link: null,
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-            ],
-          },
-        ],
-        prevPost: null,
-        nextPost: null,
-      }
+      const mockBlocks: GroupedBlock[] = [
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'Content',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ]
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getPost)
-        .mockResolvedValueOnce(Ok(mockNewerPost))
-        .mockResolvedValueOnce(Ok(mockOlderPost))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
 
       const response = await GET()
       const xml = await response.text()
@@ -367,7 +328,7 @@ describe('RSS feed route', () => {
       expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending' })
     })
 
-    it('fetches full post content with blocks', async () => {
+    it('fetches blocks for each post', async () => {
       const mockPostListItems: PostListItem[] = [
         {
           id: 'post-1',
@@ -379,27 +340,17 @@ describe('RSS feed route', () => {
         },
       ]
 
-      const mockPost: Post = {
-        id: 'post-1',
-        slug: 'test-post',
-        title: 'Test Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        featuredImage: null,
-        blocks: [],
-        prevPost: null,
-        nextPost: null,
-      }
+      const mockBlocks: GroupedBlock[] = []
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
 
       await GET()
 
-      expect(getPost).toHaveBeenCalledWith({ slug: 'test-post', includeBlocks: true })
+      expect(getBlockChildren).toHaveBeenCalledWith('post-1')
     })
 
-    it('skips posts that return null from getPost', async () => {
+    it('skips posts that fail to fetch blocks', async () => {
       const mockPostListItems: PostListItem[] = [
         {
           id: 'post-1',
@@ -411,52 +362,42 @@ describe('RSS feed route', () => {
         },
         {
           id: 'post-2',
-          slug: 'missing-post',
-          title: 'Missing Post',
+          slug: 'broken-post',
+          title: 'Broken Post',
           description: null,
           firstPublished: '2024-01-14',
           featuredImage: null,
         },
       ]
 
-      const mockValidPost: Post = {
-        id: 'post-1',
-        slug: 'valid-post',
-        title: 'Valid Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        featuredImage: null,
-        blocks: [
-          {
-            type: 'paragraph',
-            richText: [
-              {
-                content: 'Valid content',
-                link: null,
-                bold: false,
-                italic: false,
-                strikethrough: false,
-                underline: false,
-                code: false,
-              },
-            ],
-          },
-        ],
-        prevPost: null,
-        nextPost: null,
-      }
+      const mockBlocks: GroupedBlock[] = [
+        {
+          type: 'paragraph',
+          richText: [
+            {
+              content: 'Valid content',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
+        },
+      ]
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getPost)
-        .mockResolvedValueOnce(Ok(mockValidPost))
-        .mockResolvedValueOnce(Ok(null))
+      vi.mocked(getBlockChildren)
+        .mockResolvedValueOnce(Ok(mockBlocks))
+        .mockResolvedValueOnce(Err(new Error('Block fetch failed')))
 
       const response = await GET()
       const xml = await response.text()
 
       // Verify only valid post is included
       expect(xml).toContain('<![CDATA[Valid Post]]>')
-      expect(xml).not.toContain('<![CDATA[Missing Post]]>')
+      expect(xml).not.toContain('<![CDATA[Broken Post]]>')
     })
 
     it('handles posts without description', async () => {
@@ -471,20 +412,10 @@ describe('RSS feed route', () => {
         },
       ]
 
-      const mockPost: Post = {
-        id: 'post-1',
-        slug: 'no-description',
-        title: 'No Description Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        featuredImage: null,
-        blocks: [],
-        prevPost: null,
-        nextPost: null,
-      }
+      const mockBlocks: GroupedBlock[] = []
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
 
       const response = await GET()
       const xml = await response.text()
