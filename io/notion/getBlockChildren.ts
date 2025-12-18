@@ -62,6 +62,10 @@ function groupListItems(blocks: Block[]): GroupedBlock[] {
         items,
       }
       grouped.push(numberedList)
+    } else {
+      // For non-list blocks, add them directly
+      grouped.push(block)
+      i++
     }
   }
 
