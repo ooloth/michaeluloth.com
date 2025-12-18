@@ -50,7 +50,7 @@ export async function GET() {
       description: postItem.description ?? undefined,
       content,
       date: new Date(postItem.firstPublished),
-      author: [{ name: 'Michael Uloth', link: SITE_URL }],
+      // Note: author tag added via post-processing below (RSS 2.0 spec requires email in author tag)
     })
     console.log(`[RSS] Added post: ${postItem.slug}`)
   }
@@ -63,6 +63,8 @@ export async function GET() {
     // Replace isPermaLink with permalink attribute
     .replace(/isPermaLink=/g, 'permalink=')
     .replace(/permalink="false"/g, 'permalink="true"')
+    // Add author tag to each item (after content:encoded)
+    .replace(/(<\/content:encoded>)/g, '$1\n      <author>Michael Uloth</author>')
     // Remove docs and generator elements
     .replace(/\s*<docs>.*?<\/docs>\n?/g, '')
     .replace(/\s*<generator>.*?<\/generator>\n?/g, '')
