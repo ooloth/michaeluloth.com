@@ -120,7 +120,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
-          'Feed ID': createUrlProperty(null),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -131,7 +131,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
-          'Feed ID': createUrlProperty(null),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -142,7 +142,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
-          'Feed ID': createUrlProperty(null),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -153,7 +153,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty(null),
         'Featured image': createFilesProperty([]),
-          'Feed ID': createUrlProperty(null),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -164,7 +164,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('01/15/2024'),
         'Featured image': createFilesProperty([]),
-          'Feed ID': createUrlProperty(null),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -176,7 +176,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty(['not-a-url']),
-          'Feed ID': createUrlProperty(null),
+        'Feed ID': createUrlProperty(null),
       },
     },
   ])('throws on posts with $case', ({ properties, expectedError }) => {
@@ -272,7 +272,7 @@ describe('getPosts', () => {
             Description: createRichTextProperty('A test'),
             'First published': createDateProperty('2024-01-15'),
             'Featured image': createFilesProperty([]),
-          'Feed ID': createUrlProperty(null),
+            'Feed ID': createUrlProperty(null),
           },
         },
       ])
@@ -303,6 +303,7 @@ describe('getPosts', () => {
           description: null,
           firstPublished: '2024-01-01',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -324,7 +325,15 @@ describe('getPosts', () => {
       const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache([
-        { id: 'old', slug: 'old', title: 'Old', description: null, firstPublished: '2020-01-01', featuredImage: null },
+        {
+          id: 'old',
+          slug: 'old',
+          title: 'Old',
+          description: null,
+          firstPublished: '2020-01-01',
+          featuredImage: null,
+          feedId: null,
+        },
       ])
 
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
@@ -336,7 +345,7 @@ describe('getPosts', () => {
             Description: createRichTextProperty(null),
             'First published': createDateProperty('2024-03-15'),
             'Featured image': createFilesProperty([]),
-          'Feed ID': createUrlProperty(null),
+            'Feed ID': createUrlProperty(null),
           },
         },
       ])
@@ -427,7 +436,7 @@ describe('getPosts', () => {
             Description: createRichTextProperty(null),
             'First published': createDateProperty('2024-01-15'),
             'Featured image': createFilesProperty([]),
-          'Feed ID': createUrlProperty(null),
+            'Feed ID': createUrlProperty(null),
           },
         },
       ])
