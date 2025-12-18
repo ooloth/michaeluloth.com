@@ -456,7 +456,21 @@ describe('getPost', () => {
     })
 
     it('uses correct cache keys for different options', async () => {
-      const mockCache = createMockCache()
+      // Return cached post to avoid Notion API calls (we're only testing cache keys)
+      const cachedPost: Post = {
+        id: '123',
+        slug: 'test',
+        title: 'Test',
+        description: null,
+        firstPublished: '2024-01-01',
+        featuredImage: null,
+        feedId: null,
+        lastEditedTime: '2024-01-01T00:00:00.000Z',
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+      const mockCache = createMockCache(cachedPost)
       const mockClient = createMockNotionClient()
 
       await getPost({ slug: 'test', cache: mockCache, notionClient: mockClient })
