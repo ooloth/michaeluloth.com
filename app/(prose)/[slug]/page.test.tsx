@@ -176,9 +176,13 @@ describe('DynamicRoute page', () => {
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Test Post')
       expect(screen.getByText('Test content')).toBeInTheDocument()
 
-      // Verify navigation links (the link text is the post title, not the direction)
-      expect(screen.getByRole('link', { name: /previous post/i })).toHaveAttribute('href', '/previous-post/')
-      expect(screen.getByRole('link', { name: /next post/i })).toHaveAttribute('href', '/next-post/')
+      // Verify navigation links (accessible name is just the post title with non-breaking space)
+      const links = screen.getAllByRole('link')
+      const previousLink = links.find(link => link.getAttribute('href') === '/previous-post/')
+      const nextLink = links.find(link => link.getAttribute('href') === '/next-post/')
+
+      expect(previousLink).toHaveAccessibleName('Previous\u00A0Post')
+      expect(nextLink).toHaveAccessibleName('Next\u00A0Post')
     })
 
     it('passes skipCache=true when nocache query param is present', async () => {
