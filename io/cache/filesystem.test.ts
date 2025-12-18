@@ -1,6 +1,5 @@
 import { getCached, setCached } from './filesystem'
 import { readFile, writeFile, mkdir } from 'fs/promises'
-import { z } from 'zod'
 
 vi.mock('fs/promises', () => ({
   readFile: vi.fn(),
@@ -74,7 +73,7 @@ describe('filesystem cache', () => {
 
       vi.mocked(readFile).mockResolvedValue(JSON.stringify(cachedData))
 
-      const result = await getCached<{ name: string; count: any }>('test-key', 'default')
+      const result = await getCached<{ name: string; count: unknown }>('test-key', 'default')
 
       expect(result).toEqual({ name: 'test', count: 'invalid' })
     })

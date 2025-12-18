@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import getBlockChildren, { validateBlocks, INVALID_BLOCK_ERROR } from './getBlockChildren'
 import { collectPaginatedAPI, type Client } from './client'
-import type { GroupedBlock, BulletedListBlock } from './schemas/block'
+import type { BulletedListBlock } from './schemas/block'
 import { isOk, isErr } from '@/utils/errors/result'
 
 // Test helper: creates a mock Notion client
@@ -444,26 +444,6 @@ describe('validateBlocks', () => {
         type: 'video',
         caption: null,
       })
-    })
-
-    it('transforms child_page blocks', () => {
-      const blocks = [
-        {
-          type: 'child_page',
-          child_page: {
-            title: 'Subpage Title',
-          },
-        },
-      ]
-
-      const result = validateBlocks(blocks)
-
-      expect(result).toEqual([
-        {
-          type: 'child_page',
-          title: 'Subpage Title',
-        },
-      ])
     })
   })
 

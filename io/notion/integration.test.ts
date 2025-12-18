@@ -83,6 +83,7 @@ describe('Notion API Integration Tests', () => {
             Description: { type: 'rich_text', rich_text: [{ plain_text: 'First description' }] },
             'First published': { type: 'date', date: { start: '2024-01-01' } },
             'Featured image': { type: 'files', files: [] },
+            'Feed ID': { type: 'url', url: null },
           },
         },
         {
@@ -94,6 +95,7 @@ describe('Notion API Integration Tests', () => {
             Description: { type: 'rich_text', rich_text: [{ plain_text: 'Current description' }] },
             'First published': { type: 'date', date: { start: '2024-01-15' } },
             'Featured image': { type: 'files', files: [] },
+            'Feed ID': { type: 'url', url: null },
           },
         },
         {
@@ -105,6 +107,7 @@ describe('Notion API Integration Tests', () => {
             Description: { type: 'rich_text', rich_text: [{ plain_text: 'Next description' }] },
             'First published': { type: 'date', date: { start: '2024-02-01' } },
             'Featured image': { type: 'files', files: [] },
+            'Feed ID': { type: 'url', url: null },
           },
         },
       ]
@@ -190,6 +193,7 @@ describe('Notion API Integration Tests', () => {
           Description: { type: 'rich_text', rich_text: [{ plain_text: 'Description' }] },
           'First published': { type: 'date', date: { start: '2024-01-15' } },
           'Featured image': { type: 'files', files: [] },
+          'Feed ID': { type: 'url', url: null },
         },
       }
 
@@ -227,6 +231,7 @@ describe('Notion API Integration Tests', () => {
           Description: { type: 'rich_text', rich_text: [{ plain_text: 'Description' }] },
           'First published': { type: 'date', date: { start: '2024-01-15' } },
           'Featured image': { type: 'files', files: [] },
+          'Feed ID': { type: 'url', url: null },
         },
       }
 
@@ -264,6 +269,7 @@ describe('Notion API Integration Tests', () => {
             Description: { type: 'rich_text', rich_text: [{ plain_text: 'Description 2' }] },
             'First published': { type: 'date', date: { start: '2024-01-15' } },
             'Featured image': { type: 'files', files: [] },
+            'Feed ID': { type: 'url', url: null },
           },
         },
         {
@@ -275,6 +281,7 @@ describe('Notion API Integration Tests', () => {
             Description: { type: 'rich_text', rich_text: [{ plain_text: 'Description 1' }] },
             'First published': { type: 'date', date: { start: '2024-01-01' } },
             'Featured image': { type: 'files', files: [] },
+            'Feed ID': { type: 'url', url: null },
           },
         },
       ]
@@ -351,6 +358,7 @@ describe('Notion API Integration Tests', () => {
           Description: { type: 'rich_text', rich_text: [] },
           'First published': { type: 'date', date: { start: '2024-01-15' } },
           'Featured image': { type: 'files', files: [] },
+          'Feed ID': { type: 'url', url: null },
         },
       }
 

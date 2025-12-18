@@ -10,6 +10,11 @@ import '@/styles/globals.css'
 export const metadata: Metadata = {
   title: 'Michael Uloth',
   description: 'Software engineer helping scientists discover new medicines at Recursion.',
+  alternates: {
+    types: {
+      'application/rss+xml': '/rss.xml',
+    },
+  },
 }
 
 type Props = Readonly<{

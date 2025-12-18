@@ -26,7 +26,7 @@ export type CloudinaryImageMetadata = {
  * Schema for CloudinaryImageMetadata
  * Validates the cached metadata structure
  */
-const CloudinaryImageMetadataSchema = z.object({
+export const CloudinaryImageMetadataSchema = z.object({
   alt: z.string(),
   caption: z.string(),
   height: z.number(),

@@ -6,6 +6,7 @@ import {
   TitlePropertySchema,
   DatePropertySchema,
   FeaturedImagePropertySchema,
+  UrlPropertySchema,
 } from './properties'
 
 /**
@@ -19,6 +20,7 @@ export const PostPropertiesSchema = createPropertiesSchema({
   Description: RichTextPropertySchema,
   'First published': DatePropertySchema,
   'Featured image': FeaturedImagePropertySchema,
+  'Feed ID': UrlPropertySchema,
 })
 
 // Post list item (used by getPosts and for prev/next navigation)
@@ -29,6 +31,7 @@ export const PostListItemSchema = z.object({
   description: z.string().nullish(),
   featuredImage: z.url().nullish(),
   firstPublished: z.string().regex(/^\d{4}-\d{2}-\d{2}/), // ISO 8601 date or datetime
+  feedId: z.string().nullish(),
 })
 
 // Infer TypeScript type from Zod schema (single source of truth)

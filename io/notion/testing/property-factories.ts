@@ -52,3 +52,10 @@ export function createNumberProperty(num: number | null) {
     number: num,
   }
 }
+
+export function createUrlProperty(url: string | null) {
+  return {
+    type: 'url' as const,
+    url,
+  }
+}

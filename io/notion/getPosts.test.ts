@@ -9,6 +9,7 @@ import {
   createTitleProperty,
   createDateProperty,
   createFilesProperty,
+  createUrlProperty,
 } from './testing/property-factories'
 import { isOk, isErr } from '@/utils/errors/result'
 import { type CacheAdapter } from '@/io/cache/adapter'
@@ -52,6 +53,7 @@ describe('transformNotionPagesToPostListItems', () => {
           Description: createRichTextProperty('A great post'),
           'First published': createDateProperty('2024-01-15'),
           'Featured image': createFilesProperty(['https://res.cloudinary.com/ooloth/image/upload/mu/test-image.jpg']),
+          'Feed ID': createUrlProperty(null),
         },
       },
     ]
@@ -66,6 +68,7 @@ describe('transformNotionPagesToPostListItems', () => {
         description: 'A great post',
         firstPublished: '2024-01-15',
         featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test-image.jpg',
+        feedId: null,
       },
     ])
   })
@@ -80,6 +83,7 @@ describe('transformNotionPagesToPostListItems', () => {
           Description: createRichTextProperty(null),
           'First published': createDateProperty('2024-02-20'),
           'Featured image': createFilesProperty([]),
+          'Feed ID': createUrlProperty(null),
         },
       },
     ]
@@ -94,6 +98,7 @@ describe('transformNotionPagesToPostListItems', () => {
         description: null,
         firstPublished: '2024-02-20',
         featuredImage: null,
+        feedId: null,
       },
     ])
   })
@@ -115,6 +120,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -125,6 +131,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -135,6 +142,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -145,6 +153,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty(null),
         'Featured image': createFilesProperty([]),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -155,6 +164,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('01/15/2024'),
         'Featured image': createFilesProperty([]),
+        'Feed ID': createUrlProperty(null),
       },
     },
     {
@@ -166,6 +176,7 @@ describe('transformNotionPagesToPostListItems', () => {
         Description: createRichTextProperty(null),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty(['not-a-url']),
+        'Feed ID': createUrlProperty(null),
       },
     },
   ])('throws on posts with $case', ({ properties, expectedError }) => {
@@ -189,6 +200,7 @@ describe('transformNotionPagesToPostListItems', () => {
           Description: createRichTextProperty(null),
           'First published': createDateProperty('2024-01-01'),
           'Featured image': createFilesProperty([]),
+          'Feed ID': createUrlProperty(null),
         },
       },
       {
@@ -199,6 +211,7 @@ describe('transformNotionPagesToPostListItems', () => {
           Description: createRichTextProperty(null),
           'First published': createDateProperty('2024-02-02'),
           'Featured image': createFilesProperty([]),
+          'Feed ID': createUrlProperty(null),
         },
       },
     ]
@@ -220,6 +233,7 @@ describe('transformNotionPagesToPostListItems', () => {
           Description: createRichTextProperty(null),
           'First published': createDateProperty('2024-01-01'),
           'Featured image': createFilesProperty([]),
+          'Feed ID': createUrlProperty(null),
         },
       },
       {
@@ -230,6 +244,7 @@ describe('transformNotionPagesToPostListItems', () => {
           Description: createRichTextProperty(null),
           'First published': createDateProperty('2024-02-02'),
           'Featured image': createFilesProperty([]),
+          'Feed ID': createUrlProperty(null),
         },
       },
     ]
@@ -257,6 +272,7 @@ describe('getPosts', () => {
             Description: createRichTextProperty('A test'),
             'First published': createDateProperty('2024-01-15'),
             'Featured image': createFilesProperty([]),
+            'Feed ID': createUrlProperty(null),
           },
         },
       ])
@@ -287,6 +303,7 @@ describe('getPosts', () => {
           description: null,
           firstPublished: '2024-01-01',
           featuredImage: null,
+          feedId: null,
         },
       ]
 
@@ -308,7 +325,15 @@ describe('getPosts', () => {
       const mockClient = createMockNotionClient()
 
       const mockCache = createMockCache([
-        { id: 'old', slug: 'old', title: 'Old', description: null, firstPublished: '2020-01-01', featuredImage: null },
+        {
+          id: 'old',
+          slug: 'old',
+          title: 'Old',
+          description: null,
+          firstPublished: '2020-01-01',
+          featuredImage: null,
+          feedId: null,
+        },
       ])
 
       vi.mocked(collectPaginatedAPI).mockResolvedValue([
@@ -320,6 +345,7 @@ describe('getPosts', () => {
             Description: createRichTextProperty(null),
             'First published': createDateProperty('2024-03-15'),
             'Featured image': createFilesProperty([]),
+            'Feed ID': createUrlProperty(null),
           },
         },
       ])
@@ -362,7 +388,7 @@ describe('getPosts', () => {
 
       await getPosts({ sortDirection: 'descending', cache: mockCache, notionClient: mockClient })
 
-      expect(mockCache.get).toHaveBeenCalledWith('posts-list-descending', 'notion', expect.any(Object))
+      expect(mockCache.get).toHaveBeenCalledWith('posts-list-descending', 'notion')
       expect(mockCache.set).toHaveBeenCalledWith('posts-list-descending', expect.any(Array), 'notion')
     })
 
@@ -410,6 +436,7 @@ describe('getPosts', () => {
             Description: createRichTextProperty(null),
             'First published': createDateProperty('2024-01-15'),
             'Featured image': createFilesProperty([]),
+            'Feed ID': createUrlProperty(null),
           },
         },
       ])

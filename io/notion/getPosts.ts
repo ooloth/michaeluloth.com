@@ -5,7 +5,6 @@ import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
-import { z } from 'zod'
 
 type Options = {
   cache?: CacheAdapter
@@ -48,6 +47,7 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
       description: properties.Description,
       firstPublished: properties['First published'],
       featuredImage: properties['Featured image'],
+      feedId: properties['Feed ID'],
     })
 
     if (!parsed.success) {

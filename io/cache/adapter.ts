@@ -1,4 +1,3 @@
-import { type z } from 'zod'
 import { getCached, setCached } from './filesystem'
 
 /**
