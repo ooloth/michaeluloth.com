@@ -1,17 +1,34 @@
 import { type GroupedBlock, type RichTextItem } from '@/io/notion/schemas/block'
 
 /**
- * Cleans rehype-pretty-code inline language indicators from HTML content.
- * Examples: "code{:js}</code>", "token{:.fp}</code>"
+ * Strips rehype-pretty-code inline language indicators from HTML content.
+ *
+ * When using rehype-pretty-code for syntax highlighting in the main site,
+ * inline code elements get language indicators appended like `{:js}` or `{:.fp}`.
+ * These indicators are useful for styling but should not appear in RSS feeds
+ * where they would be rendered literally.
+ *
+ * @example
+ * // Removes language identifier
+ * stripRehypePrettyCodeLanguageIndicators('<code>const{:js}</code>')
+ * // => '<code>const</code>'
+ *
+ * @example
+ * // Removes class identifier
+ * stripRehypePrettyCodeLanguageIndicators('<code>function{:.keyword}</code>')
+ * // => '<code>function</code>'
+ *
+ * @param html - HTML string potentially containing rehype-pretty-code indicators
+ * @returns HTML string with all language indicators removed
  */
-function cleanContent(content: string): string {
+function stripRehypePrettyCodeLanguageIndicators(html: string): string {
   const rehypePrettyCodeInlineLangIndicator = /{:\\.?\\w+}<\/code>/g
-  return content.replace(rehypePrettyCodeInlineLangIndicator, '</code>')
+  return html.replace(rehypePrettyCodeInlineLangIndicator, '</code>')
 }
 
 export function renderBlocksToHtml(blocks: GroupedBlock[]): string {
   const html = blocks.map(renderBlock).join('\n')
-  return cleanContent(html)
+  return stripRehypePrettyCodeLanguageIndicators(html)
 }
 
 function renderBlock(block: GroupedBlock): string {
