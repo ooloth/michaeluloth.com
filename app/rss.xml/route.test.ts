@@ -60,51 +60,6 @@ describe('RSS feed route', () => {
       expect(response.headers.get('Cache-Control')).toBe('public, max-age=3600')
     })
 
-    it('generates valid RSS 2.0 XML structure', async () => {
-      const mockPostListItems: PostListItem[] = [
-        {
-          id: 'post-1',
-          slug: 'test-post',
-          title: 'Test Post',
-          description: 'A test post description',
-          firstPublished: '2024-01-15',
-          featuredImage: null,
-          feedId: null,
-        },
-      ]
-
-      const mockBlocks: GroupedBlock[] = [
-        {
-          type: 'paragraph',
-          richText: [
-            {
-              content: 'Post content here.',
-              link: null,
-              bold: false,
-              italic: false,
-              strikethrough: false,
-              underline: false,
-              code: false,
-            },
-          ],
-        },
-      ]
-
-      vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
-
-      const response = await GET()
-      const xml = await response.text()
-
-      // Verify RSS 2.0 structure
-      expect(xml).toContain('<?xml version="1.0" encoding="utf-8"?>')
-      expect(xml).toContain('<rss')
-      expect(xml).toContain('version="2.0"')
-      expect(xml).toContain('<channel>')
-      expect(xml).toContain('</channel>')
-      expect(xml).toContain('</rss>')
-    })
-
     it('includes correct feed metadata', async () => {
       const mockPostListItems: PostListItem[] = []
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
@@ -120,53 +75,6 @@ describe('RSS feed route', () => {
       expect(xml).toContain('<link>https://michaeluloth.com/</link>')
       expect(xml).toContain('<language>en-ca</language>')
       expect(xml).toContain(`<copyright>All rights reserved ${new Date().getFullYear()}, Michael Uloth</copyright>`)
-    })
-
-    it('includes post items with correct structure', async () => {
-      const mockPostListItems: PostListItem[] = [
-        {
-          id: 'post-1',
-          slug: 'my-first-post',
-          title: 'My First Post',
-          description: 'Post description',
-          firstPublished: '2024-01-15',
-          featuredImage: null,
-          feedId: null,
-        },
-      ]
-
-      const mockBlocks: GroupedBlock[] = [
-        {
-          type: 'paragraph',
-          richText: [
-            {
-              content: 'This is the post content.',
-              link: null,
-              bold: false,
-              italic: false,
-              strikethrough: false,
-              underline: false,
-              code: false,
-            },
-          ],
-        },
-      ]
-
-      vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
-
-      const response = await GET()
-      const xml = await response.text()
-
-      // Verify item structure
-      expect(xml).toContain('<item>')
-      expect(xml).toContain('<![CDATA[My First Post]]>')
-      expect(xml).toContain('<link>https://michaeluloth.com/my-first-post/</link>')
-      expect(xml).toContain('<![CDATA[Post description]]>')
-      expect(xml).toContain('<guid')
-      expect(xml).toContain('https://michaeluloth.com/my-first-post/')
-      expect(xml).toContain('<pubDate>')
-      expect(xml).toContain('</item>')
     })
 
     it('includes rendered HTML content in items', async () => {
@@ -495,7 +403,7 @@ describe('RSS feed route', () => {
       expect(xml).toContain('<link>https://michaeluloth.com/test-post/</link>')
     })
 
-    it('generates valid, well-formed RSS 2.0 XML', async () => {
+    it('generates complete valid RSS feed with all features', async () => {
       const mockPostListItems: PostListItem[] = [
         {
           id: 'post-1',

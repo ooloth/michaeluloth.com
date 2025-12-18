@@ -20,10 +20,6 @@ export async function GET() {
     language: 'en-ca',
     favicon: `${SITE_URL}favicon.ico`,
     copyright: `All rights reserved ${new Date().getFullYear()}, Michael Uloth`,
-    author: {
-      name: 'Michael Uloth',
-      link: SITE_URL,
-    },
   })
 
   // Fetch blocks for each post (we already have metadata from getPosts)
