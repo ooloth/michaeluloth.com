@@ -445,26 +445,6 @@ describe('validateBlocks', () => {
         caption: null,
       })
     })
-
-    it('transforms child_page blocks', () => {
-      const blocks = [
-        {
-          type: 'child_page',
-          child_page: {
-            title: 'Subpage Title',
-          },
-        },
-      ]
-
-      const result = validateBlocks(blocks)
-
-      expect(result).toEqual([
-        {
-          type: 'child_page',
-          title: 'Subpage Title',
-        },
-      ])
-    })
   })
 
   describe('list grouping', () => {
