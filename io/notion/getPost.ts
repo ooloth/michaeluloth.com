@@ -2,7 +2,7 @@ import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 import notion, { type Client } from './client'
 import getBlockChildren from '@/io/notion/getBlockChildren'
 import getPosts from '@/io/notion/getPosts'
-import { PostListItemSchema, PostPropertiesSchema, PostSchema, type Post } from './schemas/post'
+import { PostListItemSchema, PostPropertiesSchema, type Post } from './schemas/post'
 import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
@@ -50,6 +50,7 @@ export function transformNotionPageToPost(page: unknown): Post {
     description: properties.Description,
     firstPublished: properties['First published'],
     featuredImage: properties['Featured image'],
+    feedId: properties['Feed ID'],
   })
 
   if (!parsed.success) {
