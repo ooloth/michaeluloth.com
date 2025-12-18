@@ -60,22 +60,20 @@ function renderBlock(block: GroupedBlock): string {
 }
 
 function renderRichText(items: RichTextItem[]): string {
-  return items.map(item => {
-    let text = escapeHtml(item.content)
-    if (item.code) text = `<code>${text}</code>`
-    if (item.bold) text = `<strong>${text}</strong>`
-    if (item.italic) text = `<em>${text}</em>`
-    if (item.strikethrough) text = `<del>${text}</del>`
-    if (item.underline) text = `<u>${text}</u>`
-    if (item.link) text = `<a href="${item.link}">${text}</a>`
-    return text
-  }).join('')
+  return items
+    .map(item => {
+      let text = escapeHtml(item.content)
+      if (item.code) text = `<code>${text}</code>`
+      if (item.bold) text = `<strong>${text}</strong>`
+      if (item.italic) text = `<em>${text}</em>`
+      if (item.strikethrough) text = `<del>${text}</del>`
+      if (item.underline) text = `<u>${text}</u>`
+      if (item.link) text = `<a href="${item.link}">${text}</a>`
+      return text
+    })
+    .join('')
 }
 
 function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
