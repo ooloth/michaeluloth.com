@@ -80,7 +80,17 @@ describe('renderBlocksToHtml', () => {
       const blocks: GroupedBlock[] = [
         {
           type: 'code',
-          richText: [{ content: 'const x = 5;', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false }],
+          richText: [
+            {
+              content: 'const x = 5;',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
           language: 'javascript',
           caption: null,
         },
@@ -112,10 +122,7 @@ describe('renderBlocksToHtml', () => {
       const blocks: GroupedBlock[] = [
         {
           type: 'numbered_list',
-          items: [
-            { richText: createRichText('Step 1') },
-            { richText: createRichText('Step 2') },
-          ],
+          items: [{ richText: createRichText('Step 1') }, { richText: createRichText('Step 2') }],
         },
       ]
 
@@ -162,7 +169,9 @@ describe('renderBlocksToHtml', () => {
 
       const result = renderBlocksToHtml(blocks)
 
-      expect(result).toBe('<p><a href="https://youtube.com/watch?v=abc">[Video: https://youtube.com/watch?v=abc]</a></p>')
+      expect(result).toBe(
+        '<p><a href="https://youtube.com/watch?v=abc">[Video: https://youtube.com/watch?v=abc]</a></p>',
+      )
     })
   })
 
@@ -308,7 +317,17 @@ describe('renderBlocksToHtml', () => {
       const blocks: GroupedBlock[] = [
         {
           type: 'code',
-          richText: [{ content: 'if (x < 5 && y > 3) { alert("hi"); }', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false }],
+          richText: [
+            {
+              content: 'if (x < 5 && y > 3) { alert("hi"); }',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
           language: 'javascript',
           caption: null,
         },
@@ -354,14 +373,21 @@ describe('renderBlocksToHtml', () => {
         },
         {
           type: 'bulleted_list',
-          items: [
-            { richText: createRichText('Point 1') },
-            { richText: createRichText('Point 2') },
-          ],
+          items: [{ richText: createRichText('Point 1') }, { richText: createRichText('Point 2') }],
         },
         {
           type: 'code',
-          richText: [{ content: 'console.log("hello")', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false }],
+          richText: [
+            {
+              content: 'console.log("hello")',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+          ],
           language: 'javascript',
           caption: null,
         },
@@ -375,10 +401,10 @@ describe('renderBlocksToHtml', () => {
 
       expect(result).toBe(
         '<h1>Introduction</h1>\n' +
-        '<p>This is an introduction.</p>\n' +
-        '<ul><li>Point 1</li><li>Point 2</li></ul>\n' +
-        '<pre><code>console.log(&quot;hello&quot;)</code></pre>\n' +
-        '<blockquote>A memorable quote</blockquote>'
+          '<p>This is an introduction.</p>\n' +
+          '<ul><li>Point 1</li><li>Point 2</li></ul>\n' +
+          '<pre><code>console.log(&quot;hello&quot;)</code></pre>\n' +
+          '<blockquote>A memorable quote</blockquote>',
       )
     })
   })
@@ -389,9 +415,33 @@ describe('renderBlocksToHtml', () => {
         {
           type: 'paragraph',
           richText: [
-            { content: 'Use ', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false },
-            { content: 'const', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: true },
-            { content: ' for variables', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false },
+            {
+              content: 'Use ',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+            {
+              content: 'const',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: true,
+            },
+            {
+              content: ' for variables',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
           ],
         },
       ]
@@ -426,7 +476,17 @@ describe('renderBlocksToHtml', () => {
       const blocks: GroupedBlock[] = [
         {
           type: 'paragraph',
-          richText: [{ content: 'test', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: true }],
+          richText: [
+            {
+              content: 'test',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: true,
+            },
+          ],
         },
       ]
 
@@ -478,9 +538,33 @@ describe('renderBlocksToHtml', () => {
         {
           type: 'code',
           richText: [
-            { content: 'function test() {', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false },
-            { content: '  return true;', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false },
-            { content: '}', link: null, bold: false, italic: false, strikethrough: false, underline: false, code: false },
+            {
+              content: 'function test() {',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+            {
+              content: '  return true;',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
+            {
+              content: '}',
+              link: null,
+              bold: false,
+              italic: false,
+              strikethrough: false,
+              underline: false,
+              code: false,
+            },
           ],
           language: 'javascript',
           caption: null,
