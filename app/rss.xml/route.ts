@@ -5,6 +5,8 @@ import { renderBlocksToHtml } from '@/io/notion/renderBlocksToHtml'
 
 const SITE_URL = 'https://michaeluloth.com'
 
+export const dynamic = 'force-static'
+
 export async function GET() {
   const posts = (await getPosts({ sortDirection: 'descending' })).unwrap()
 
