@@ -403,6 +403,24 @@ describe('renderBlocksToHtml', () => {
       expect(result).toBe('<p>Use <code>const</code> for variables</p>')
     })
 
+    it('validates the regex pattern matches all rehype-pretty-code indicator formats', () => {
+      // Test the regex pattern directly with known rehype-pretty-code indicator formats
+      const rehypePrettyCodePattern = /{:\.?\w+}<\/code>/g
+
+      // Format: {:language}</code>
+      expect('{:js}</code>').toMatch(rehypePrettyCodePattern)
+      expect('{:ts}</code>').toMatch(rehypePrettyCodePattern)
+      expect('{:python}</code>').toMatch(rehypePrettyCodePattern)
+
+      // Format: {:.className}</code>
+      expect('{:.fp}</code>').toMatch(rehypePrettyCodePattern)
+      expect('{:.keyword}</code>').toMatch(rehypePrettyCodePattern)
+
+      // Should NOT match normal code endings
+      expect('</code>').not.toMatch(rehypePrettyCodePattern)
+      expect('test</code>').not.toMatch(rehypePrettyCodePattern)
+    })
+
     it('cleans multiple language indicator variants', () => {
       // Simulate HTML that would have language indicators
       const blocks: GroupedBlock[] = [
