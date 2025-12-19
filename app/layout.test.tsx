@@ -8,9 +8,7 @@ import { metadata } from './layout'
 describe('RootLayout metadata', () => {
   it('includes basic site information', () => {
     expect(metadata.title).toBe('Michael Uloth')
-    expect(metadata.description).toBe(
-      'Software engineer helping scientists discover new medicines at Recursion.',
-    )
+    expect(metadata.description).toBe('Software engineer helping scientists discover new medicines at Recursion.')
   })
 
   it('includes RSS feed link', () => {
