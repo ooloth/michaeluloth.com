@@ -25,16 +25,11 @@ export async function GET() {
   // Fetch blocks for each post (we already have metadata from getPosts)
   for (const postItem of posts) {
     console.log(`[RSS] Fetching blocks for: ${postItem.slug}`)
-    const blocksResult = await getBlockChildren(postItem.id)
-
-    if (!blocksResult.ok) {
-      console.error(`[RSS] Failed to fetch blocks for ${postItem.slug}:`, blocksResult.error)
-      continue
-    }
+    const blocks = (await getBlockChildren(postItem.id)).unwrap()
 
     const content = postItem.featuredImage
-      ? `<img src="${postItem.featuredImage}" alt="${postItem.title}" />\n${renderBlocksToHtml(blocksResult.value)}`
-      : renderBlocksToHtml(blocksResult.value)
+      ? `<img src="${postItem.featuredImage}" alt="${postItem.title}" />\n${renderBlocksToHtml(blocks)}`
+      : renderBlocksToHtml(blocks)
 
     // Use feedId if present (for historical feed stability), otherwise construct permalink
     const permalink = postItem.feedId || `${SITE_URL}${postItem.slug}/`
