@@ -269,7 +269,7 @@ describe('RSS feed route', () => {
       expect(getBlockChildren).toHaveBeenCalledWith('post-1')
     })
 
-    it('skips posts that fail to fetch blocks', async () => {
+    it('throws when block fetch fails', async () => {
       const mockPostListItems: PostListItem[] = [
         {
           id: 'post-1',
@@ -313,12 +313,8 @@ describe('RSS feed route', () => {
         .mockResolvedValueOnce(Ok(mockBlocks))
         .mockResolvedValueOnce(Err(new Error('Block fetch failed')))
 
-      const response = await GET()
-      const xml = await response.text()
-
-      // Verify only valid post is included
-      expect(xml).toContain('<![CDATA[Valid Post]]>')
-      expect(xml).not.toContain('<![CDATA[Broken Post]]>')
+      // Should throw when block fetch fails, preventing incomplete RSS feed
+      await expect(GET()).rejects.toThrow('Block fetch failed')
     })
 
     it('handles posts without description', async () => {
