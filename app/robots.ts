@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next'
-
-const SITE_URL = 'https://michaeluloth.com/'
+import { SITE_URL } from '@/utils/constants'
 
 export const dynamic = 'force-static'
 
