@@ -21,7 +21,7 @@ describe('sitemap', () => {
 
     const urls = await sitemap()
 
-    const homePage = urls.find((u) => u.url === 'https://michaeluloth.com')
+    const homePage = urls.find((u) => u.url === 'https://michaeluloth.com/')
     expect(homePage).toBeDefined()
     expect(homePage?.priority).toBe(1)
 
@@ -61,12 +61,12 @@ describe('sitemap', () => {
 
     const urls = await sitemap()
 
-    const post1 = urls.find((u) => u.url === 'https://michaeluloth.com/test-post')
+    const post1 = urls.find((u) => u.url === 'https://michaeluloth.com/test-post/')
     expect(post1).toBeDefined()
     expect(post1?.lastModified).toEqual(new Date('2024-01-15'))
     expect(post1?.priority).toBe(0.7)
 
-    const post2 = urls.find((u) => u.url === 'https://michaeluloth.com/another-post')
+    const post2 = urls.find((u) => u.url === 'https://michaeluloth.com/another-post/')
     expect(post2).toBeDefined()
     expect(post2?.lastModified).toEqual(new Date('2024-02-20'))
     expect(post2?.priority).toBe(0.7)
@@ -111,11 +111,11 @@ describe('sitemap', () => {
 
     // Verify all URLs are present
     const urlStrings = urls.map((u) => u.url)
-    expect(urlStrings).toContain('https://michaeluloth.com')
+    expect(urlStrings).toContain('https://michaeluloth.com/')
     expect(urlStrings).toContain('https://michaeluloth.com/blog')
     expect(urlStrings).toContain('https://michaeluloth.com/likes')
-    expect(urlStrings).toContain('https://michaeluloth.com/first-post')
-    expect(urlStrings).toContain('https://michaeluloth.com/second-post')
+    expect(urlStrings).toContain('https://michaeluloth.com/first-post/')
+    expect(urlStrings).toContain('https://michaeluloth.com/second-post/')
   })
 
   it('handles empty blog posts list', async () => {
@@ -125,6 +125,6 @@ describe('sitemap', () => {
 
     // Only 3 static pages
     expect(urls).toHaveLength(3)
-    expect(urls.every((u) => u.url.startsWith('https://michaeluloth.com'))).toBe(true)
+    expect(urls.every((u) => u.url.startsWith('https://michaeluloth.com/'))).toBe(true)
   })
 })
