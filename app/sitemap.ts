@@ -10,11 +10,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, priority: 1 },
-    { url: `${SITE_URL}blog`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}likes`, priority: 0.5 },
+    { url: `${SITE_URL}blog/`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${SITE_URL}likes/`, priority: 0.5 },
   ]
 
-  const blogPosts: MetadataRoute.Sitemap = posts.map((post) => ({
+  const blogPosts: MetadataRoute.Sitemap = posts.map(post => ({
     url: `${SITE_URL}${post.slug}/`,
     lastModified: new Date(post.firstPublished),
     priority: 0.7,

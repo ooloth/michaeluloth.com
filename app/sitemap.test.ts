@@ -25,12 +25,12 @@ describe('sitemap', () => {
     expect(homePage).toBeDefined()
     expect(homePage?.priority).toBe(1)
 
-    const blogPage = urls.find((u) => u.url === 'https://michaeluloth.com/blog')
+    const blogPage = urls.find((u) => u.url === 'https://michaeluloth.com/blog/')
     expect(blogPage).toBeDefined()
     expect(blogPage?.priority).toBe(0.8)
     expect(blogPage?.changeFrequency).toBe('weekly')
 
-    const likesPage = urls.find((u) => u.url === 'https://michaeluloth.com/likes')
+    const likesPage = urls.find((u) => u.url === 'https://michaeluloth.com/likes/')
     expect(likesPage).toBeDefined()
     expect(likesPage?.priority).toBe(0.5)
   })
@@ -112,8 +112,8 @@ describe('sitemap', () => {
     // Verify all URLs are present
     const urlStrings = urls.map((u) => u.url)
     expect(urlStrings).toContain('https://michaeluloth.com/')
-    expect(urlStrings).toContain('https://michaeluloth.com/blog')
-    expect(urlStrings).toContain('https://michaeluloth.com/likes')
+    expect(urlStrings).toContain('https://michaeluloth.com/blog/')
+    expect(urlStrings).toContain('https://michaeluloth.com/likes/')
     expect(urlStrings).toContain('https://michaeluloth.com/first-post/')
     expect(urlStrings).toContain('https://michaeluloth.com/second-post/')
   })
