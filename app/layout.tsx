@@ -15,15 +15,6 @@ export const metadata: Metadata = {
       'application/rss+xml': '/rss.xml',
     },
   },
-  icons: {
-    other: [
-      {
-        rel: 'sitemap',
-        type: 'application/xml',
-        url: '/sitemap.xml',
-      },
-    ],
-  },
 }
 
 type Props = Readonly<{

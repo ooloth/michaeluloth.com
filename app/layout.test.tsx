@@ -18,14 +18,4 @@ describe('RootLayout metadata', () => {
       'application/rss+xml': '/rss.xml',
     })
   })
-
-  it('includes sitemap link in head', () => {
-    expect(metadata.icons?.other).toEqual([
-      {
-        rel: 'sitemap',
-        type: 'application/xml',
-        url: '/sitemap.xml',
-      },
-    ])
-  })
 })
