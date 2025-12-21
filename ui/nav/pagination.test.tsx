@@ -36,8 +36,6 @@ describe('PaginationLinks', () => {
     title: 'Test Post',
     description: 'A test post',
     firstPublished: '2024-01-01',
-    lastEdited: '2024-01-02',
-    tags: [],
   }
 
   describe('aria-label', () => {

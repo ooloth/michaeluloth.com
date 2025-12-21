@@ -7,7 +7,10 @@ type CardProps = Readonly<{
 
 export default function Card({ href, children }: CardProps) {
   return (
-    <a href={href} className="basis-1/2 shadow-2xl border border-zinc-700 hover:border-zinc-300 focus-visible:border-zinc-300 focus-visible:outline-none rounded-xl">
+    <a
+      href={href}
+      className="basis-1/2 shadow-2xl border border-zinc-700 hover:border-zinc-300 focus-visible:border-zinc-300 focus-visible:outline-none rounded-xl"
+    >
       {children}
     </a>
   )
