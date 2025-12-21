@@ -3,7 +3,7 @@
  */
 
 import { render, screen } from '@testing-library/react'
-import { fetchItunesMedia } from './page'
+import { fetchItunesMedia, metadata } from './page'
 import Likes from './page'
 import getMediaItems, { type NotionMediaItem } from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
@@ -14,6 +14,15 @@ import { Ok, Err, isOk, isErr } from '@/utils/errors/result'
 vi.mock('@/io/notion/getMediaItems')
 vi.mock('@/io/itunes/fetchItunesItems')
 vi.mock('@/io/tmdb/fetchTmdbList')
+
+describe('Likes page metadata', () => {
+  it('exports metadata with simplified title using template', () => {
+    expect(metadata).toEqual({
+      title: 'Likes',
+      description: 'My favorite TV shows, movies, books, albums, and podcasts',
+    })
+  })
+})
 
 describe('fetchItunesMedia', () => {
   beforeEach(() => {

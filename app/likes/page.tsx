@@ -8,7 +8,7 @@ import { env } from '@/io/env/env'
 import { type Result } from '@/utils/errors/result'
 
 export const metadata: Metadata = {
-  title: 'Likes - Michael Uloth',
+  title: 'Likes',
   description: 'My favorite TV shows, movies, books, albums, and podcasts',
 }
 
