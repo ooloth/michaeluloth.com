@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   creator: SITE_AUTHOR,
   openGraph: {
     type: 'website',
+    url: SITE_URL,
     locale: 'en_CA',
     siteName: SITE_NAME,
     images: [DEFAULT_OG_IMAGE],

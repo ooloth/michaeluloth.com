@@ -2,10 +2,16 @@ import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 
 import PostList from '@/ui/post-list'
+import { DEFAULT_OG_IMAGE } from '@/utils/metadata'
 
 export const metadata: Metadata = {
   title: 'Blog',
   description: 'Technical writing about web development, TypeScript, React, and software engineering.',
+  openGraph: {
+    type: 'website',
+    url: 'https://michaeluloth.com/blog/',
+    images: [DEFAULT_OG_IMAGE],
+  },
 }
 
 export default async function Blog(): Promise<ReactElement> {

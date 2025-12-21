@@ -6,10 +6,16 @@ import getMediaItems from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
 import { env } from '@/io/env/env'
 import { type Result } from '@/utils/errors/result'
+import { DEFAULT_OG_IMAGE } from '@/utils/metadata'
 
 export const metadata: Metadata = {
   title: 'Likes',
   description: 'My favorite TV shows, movies, books, albums, and podcasts',
+  openGraph: {
+    type: 'website',
+    url: 'https://michaeluloth.com/likes/',
+    images: [DEFAULT_OG_IMAGE],
+  },
 }
 
 const TMDB_TV_LIST_ID = env.TMDB_TV_LIST_ID
