@@ -13,7 +13,7 @@ type Props = Readonly<{
 
 export default function Post({ post, prevPost, nextPost }: Props) {
   return (
-    <main className="flex_auto">
+    <main className="flex-auto">
       <article>
         <PostHeader title={post.title} datePublished={post.firstPublished} />
         <NotionBlocks blocks={post.blocks} />
