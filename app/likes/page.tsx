@@ -6,7 +6,7 @@ import getMediaItems from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
 import { env } from '@/io/env/env'
 import { type Result } from '@/utils/errors/result'
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/utils/metadata'
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/utils/metadata'
 
 export const metadata: Metadata = {
   title: 'Likes',
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    creator: '@ooloth',
+    creator: TWITTER_HANDLE,
     title: 'Likes',
     description: 'My favorite TV shows, movies, books, albums, and podcasts',
     images: [DEFAULT_OG_IMAGE],

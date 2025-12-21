@@ -36,4 +36,30 @@ describe('transformCloudinaryForOG', () => {
     const result = transformCloudinaryForOG(input)
     expect(result).toBe(input)
   })
+
+  it('handles empty strings', () => {
+    const input = ''
+    const result = transformCloudinaryForOG(input)
+    expect(result).toBe('')
+  })
+
+  it('handles Cloudinary URLs without /upload/ segment', () => {
+    const input = 'https://res.cloudinary.com/ooloth/image/sample.jpg'
+    const result = transformCloudinaryForOG(input)
+    expect(result).toBe(input)
+  })
+
+  it('handles URLs with encoded characters', () => {
+    const input = 'https://res.cloudinary.com/ooloth/image/upload/v123/mu/photo%20with%20spaces.jpg'
+    const result = transformCloudinaryForOG(input)
+    expect(result).toBe(
+      'https://res.cloudinary.com/ooloth/image/upload/c_fill,w_1200,h_630/v123/mu/photo%20with%20spaces.jpg',
+    )
+  })
+
+  it('handles Cloudinary URLs with query parameters', () => {
+    const input = 'https://res.cloudinary.com/ooloth/image/upload/v123/mu/photo.jpg?_a=123'
+    const result = transformCloudinaryForOG(input)
+    expect(result).toBe('https://res.cloudinary.com/ooloth/image/upload/c_fill,w_1200,h_630/v123/mu/photo.jpg?_a=123')
+  })
 })

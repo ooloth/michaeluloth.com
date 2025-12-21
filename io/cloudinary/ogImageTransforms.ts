@@ -1,4 +1,11 @@
 /**
+ * OpenGraph image dimensions as recommended by social platforms.
+ * @see https://ogp.me/#structured
+ */
+export const OG_IMAGE_WIDTH = 1200
+export const OG_IMAGE_HEIGHT = 630
+
+/**
  * Transforms a Cloudinary URL to specific dimensions for OpenGraph images.
  * Adds c_fill,w_1200,h_630 transformation to match OG image requirements.
  *
@@ -16,5 +23,6 @@ export function transformCloudinaryForOG(url: string): string {
   }
 
   // Insert OG transformation parameters after /upload/
-  return url.replace('/upload/', '/upload/c_fill,w_1200,h_630/')
+  const transform = `c_fill,w_${OG_IMAGE_WIDTH},h_${OG_IMAGE_HEIGHT}`
+  return url.replace('/upload/', `/upload/${transform}/`)
 }

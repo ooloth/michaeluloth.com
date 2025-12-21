@@ -14,6 +14,7 @@ import { load } from 'cheerio'
 import sharp from 'sharp'
 import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
+import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/io/cloudinary/ogImageTransforms'
 
 /**
  * Finds the first blog post in the build output for validation.
@@ -130,11 +131,12 @@ function validateOgTags(html: string, pageName: string, expectedUrl: string): vo
       })
     }
 
-    // If Cloudinary, verify it has the OG transformation parameters (1200x630)
-    if (isCloudinaryImage && !ogImage.includes('w_1200,h_630')) {
+    // If Cloudinary, verify it has the OG transformation parameters
+    const expectedDimensions = `w_${OG_IMAGE_WIDTH},h_${OG_IMAGE_HEIGHT}`
+    if (isCloudinaryImage && !ogImage.includes(expectedDimensions)) {
       errors.push({
         page: pageName,
-        error: `Cloudinary og:image must include correct dimensions (w_1200,h_630). Got: ${ogImage}`,
+        error: `Cloudinary og:image must include correct dimensions (${expectedDimensions}). Got: ${ogImage}`,
       })
     }
   }
@@ -231,6 +233,15 @@ async function validateOgImage(html: string, pageName: string): Promise<void> {
   }
 
   try {
+    // Validate imageUrl is a non-empty string
+    if (typeof imageUrl !== 'string' || !imageUrl.trim()) {
+      errors.push({
+        page: pageName,
+        error: `og:image URL is invalid: ${imageUrl}`,
+      })
+      return
+    }
+
     let buffer: ArrayBuffer
 
     // Check if it's a local image (michaeluloth.com domain)
@@ -250,25 +261,43 @@ async function validateOgImage(html: string, pageName: string): Promise<void> {
         return
       }
     } else {
-      // External image - fetch from URL
-      const response = await fetch(imageUrl)
-      if (!response.ok) {
-        errors.push({
-          page: pageName,
-          error: `og:image not accessible: ${imageUrl} (${response.status})`,
-        })
+      // External image - fetch from URL with timeout
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+
+      try {
+        const response = await fetch(imageUrl, { signal: controller.signal })
+        clearTimeout(timeout)
+
+        if (!response.ok) {
+          errors.push({
+            page: pageName,
+            error: `og:image not accessible: ${imageUrl} (${response.status})`,
+          })
+          return
+        }
+        buffer = await response.arrayBuffer()
+      } catch (fetchError) {
+        clearTimeout(timeout)
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          errors.push({
+            page: pageName,
+            error: `og:image fetch timed out: ${imageUrl}`,
+          })
+        } else {
+          throw fetchError // Re-throw other errors to be caught by outer catch
+        }
         return
       }
-      buffer = await response.arrayBuffer()
     }
 
     // Validate dimensions
     const metadata = await sharp(Buffer.from(buffer)).metadata()
 
-    if (metadata.width !== 1200 || metadata.height !== 630) {
+    if (metadata.width !== OG_IMAGE_WIDTH || metadata.height !== OG_IMAGE_HEIGHT) {
       errors.push({
         page: pageName,
-        error: `og:image has wrong dimensions: ${metadata.width}x${metadata.height} (expected 1200x630)`,
+        error: `og:image has wrong dimensions: ${metadata.width}x${metadata.height} (expected ${OG_IMAGE_WIDTH}x${OG_IMAGE_HEIGHT})`,
       })
     }
   } catch (error) {
