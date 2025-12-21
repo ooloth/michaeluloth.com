@@ -11,7 +11,7 @@
     "cache:clear:notion": "trash .local-cache/notion",
     "dev": "next dev",
     "format": "prettier --write .",
-    "generate:og-image": "tsx scripts/generate-og-image.ts",
+    "generate:og-image": "tsx metadata/generate-og-image.ts",
     "lint": "eslint",
     "start": "next start",
     "test": "vitest",

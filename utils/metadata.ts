@@ -19,7 +19,7 @@ export const SITE_AUTHOR = 'Michael Uloth'
 
 /**
  * Default OpenGraph image (1200x630px).
- * Generated via scripts/generate-og-image.ts from:
+ * Generated via metadata/generate-og-image.ts from:
  * - Photo: Cloudinary (michael-landscape.jpg, color)
  * - Text: "Michael Uloth" in Inter Bold
  * - Background: zinc-900 (#18181b)

@@ -5,7 +5,7 @@
  * - "Michael Uloth" in Inter font
  * - Accent color (#ff98a4) for visual interest
  *
- * Run: npx tsx scripts/generate-og-image.ts
+ * Run: npx tsx metadata/generate-og-image.ts
  * Output: public/og-image.png
  */
 
@@ -20,7 +20,7 @@ const ZINC_900 = '#18181b'
 const ACCENT = '#ff98a4'
 
 async function fetchFont() {
-  const fontPath = join(process.cwd(), 'scripts', 'fonts', 'Inter-Bold.ttf')
+  const fontPath = join(process.cwd(), 'metadata', 'fonts', 'Inter-Bold.ttf')
   return await readFile(fontPath)
 }
 
