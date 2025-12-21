@@ -2,7 +2,7 @@ import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 
 import PostList from '@/ui/post-list'
-import { DEFAULT_OG_IMAGE } from '@/utils/metadata'
+import { DEFAULT_OG_IMAGE, SITE_NAME } from '@/utils/metadata'
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: 'https://michaeluloth.com/blog/',
+    siteName: SITE_NAME,
+    locale: 'en_CA',
     images: [DEFAULT_OG_IMAGE],
   },
 }
