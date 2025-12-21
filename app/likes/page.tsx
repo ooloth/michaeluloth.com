@@ -27,9 +27,8 @@ export async function fetchItunesMedia(
   category: MediaCategory,
   medium: iTunesMedium,
   entity: iTunesEntity,
-  skipCache: boolean,
 ): Promise<Result<iTunesItem[], Error>> {
-  const itemsResult = await getMediaItems({ category, skipCache })
+  const itemsResult = await getMediaItems({ category })
   if (!itemsResult.ok) {
     return itemsResult
   }
@@ -91,21 +90,14 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
   )
 }
 
-type PageProps = {
-  searchParams: Promise<{ nocache?: string }>
-}
-
-export default async function Likes({ searchParams }: PageProps): Promise<ReactElement> {
-  const params = await searchParams
-  const skipCache = params.nocache === 'true'
-
+export default async function Likes(): Promise<ReactElement> {
   // Fetch all categories in parallel
   const [tv, movies, books, albums, podcasts] = await Promise.all([
     fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then(r => r.unwrap()),
     fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then(r => r.unwrap()),
-    fetchItunesMedia('books', 'ebook', 'ebook', skipCache).then(r => r.unwrap()),
-    fetchItunesMedia('albums', 'music', 'album', skipCache).then(r => r.unwrap()),
-    fetchItunesMedia('podcasts', 'podcast', 'podcast', skipCache).then(r => r.unwrap()),
+    fetchItunesMedia('books', 'ebook', 'ebook').then(r => r.unwrap()),
+    fetchItunesMedia('albums', 'music', 'album').then(r => r.unwrap()),
+    fetchItunesMedia('podcasts', 'podcast', 'podcast').then(r => r.unwrap()),
   ])
 
   return (

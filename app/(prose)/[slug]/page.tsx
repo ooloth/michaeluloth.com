@@ -14,7 +14,6 @@ type Params = {
 
 type Props = Readonly<{
   params: Promise<Params>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }>
 
 /**
@@ -77,12 +76,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function DynamicRoute({ params, searchParams }: Props) {
+export default async function DynamicRoute({ params }: Props) {
   const slug = (await params).slug
-  const search = await searchParams
-  const skipCache = search.nocache === 'true'
 
-  const post = (await getPost({ slug, includeBlocks: true, includePrevAndNext: true, skipCache })).unwrap()
+  const post = (await getPost({ slug, includeBlocks: true, includePrevAndNext: true })).unwrap()
 
   if (!post) {
     notFound()
