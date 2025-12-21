@@ -18,7 +18,13 @@ export const SITE_DESCRIPTION =
 export const SITE_AUTHOR = 'Michael Uloth'
 
 /**
- * Default OpenGraph image path (relative to public directory).
- * Used when a page doesn't have a specific OG image.
+ * Default OpenGraph image (1200x630px).
+ * Generated via scripts/generate-og-image.ts from:
+ * - Photo: Cloudinary (michael-landscape.jpg, color)
+ * - Text: "Michael Uloth" in Inter Bold
+ * - Background: zinc-900 (#18181b)
+ * - Accent: pink underline (#ff98a4)
+ *
+ * Regenerate: npm run generate:og-image
  */
 export const DEFAULT_OG_IMAGE = '/og-image.png'
