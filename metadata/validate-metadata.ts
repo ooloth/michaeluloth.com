@@ -17,10 +17,10 @@ import { join } from 'path'
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/io/cloudinary/ogImageTransforms'
 
 /**
- * Finds the first blog post in the build output for validation.
+ * Finds all blog posts in the build output for validation.
  * Looks for directories in out/ that contain index.html and aren't special pages.
  */
-async function findFirstBlogPost(): Promise<string | null> {
+async function findAllBlogPosts(): Promise<string[]> {
   try {
     const outDir = join(process.cwd(), 'out')
     const entries = await readdir(outDir, { withFileTypes: true })
@@ -31,6 +31,8 @@ async function findFirstBlogPost(): Promise<string | null> {
     // Exclude known non-blog directories and Next.js special pages
     const excludeDirs = new Set(['blog', 'likes', '_next', 'api', '404', '_not-found'])
 
+    const posts: string[] = []
+
     for (const dir of directories) {
       if (excludeDirs.has(dir.name)) continue
 
@@ -38,22 +40,22 @@ async function findFirstBlogPost(): Promise<string | null> {
       try {
         const indexPath = join(outDir, dir.name, 'index.html')
         await readFile(indexPath)
-        return `${dir.name}/index.html`
+        posts.push(`${dir.name}/index.html`)
       } catch {
         // Not a static page, skip
         continue
       }
     }
 
-    return null
+    return posts
   } catch (error) {
-    console.warn('Could not find blog post for validation:', error)
-    return null
+    console.warn('Could not find blog posts for validation:', error)
+    return []
   }
 }
 
-// Pages to validate (minimal scope)
-// Note: Blog post will be added dynamically in main function
+// Pages to validate (static pages)
+// Note: All blog posts will be added dynamically in main function
 const STATIC_PAGES = [
   { file: 'index.html', name: 'Homepage' },
   { file: 'blog/index.html', name: 'Blog' },
@@ -242,6 +244,13 @@ async function validateOgImage(html: string, pageName: string): Promise<void> {
       return
     }
 
+    // For Cloudinary images, we already validated the URL has correct transformation
+    // parameters (w_1200,h_630) in validateOgTags. Cloudinary transformations are
+    // deterministic, so we can trust the dimensions without fetching.
+    if (imageUrl.startsWith('https://res.cloudinary.com/')) {
+      return
+    }
+
     let buffer: ArrayBuffer
 
     // Check if it's a local image (michaeluloth.com domain)
@@ -353,14 +362,16 @@ async function validateMetadata() {
     // Build pages list dynamically
     const pages = [...STATIC_PAGES]
 
-    // Find and add a blog post for validation
-    const blogPostFile = await findFirstBlogPost()
-    if (blogPostFile) {
-      const postSlug = blogPostFile.replace('/index.html', '')
-      pages.push({ file: blogPostFile, name: `Post Example (${postSlug})` })
-      console.log(`Found blog post for validation: ${postSlug}`)
+    // Find and add all blog posts for validation
+    const blogPostFiles = await findAllBlogPosts()
+    if (blogPostFiles.length > 0) {
+      for (const file of blogPostFiles) {
+        const postSlug = file.replace('/index.html', '')
+        pages.push({ file, name: `Article: ${postSlug}` })
+      }
+      console.log(`Found ${blogPostFiles.length} blog post(s) for validation`)
     } else {
-      console.warn('⚠️  No blog post found for validation - skipping article metadata checks')
+      console.warn('⚠️  No blog posts found for validation - skipping article metadata checks')
     }
 
     // Validate all pages
