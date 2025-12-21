@@ -7,6 +7,28 @@ import { describe, it, expect } from 'vitest'
 import PaginationLinks, { replaceLastSpaceWithNonBreaking } from './pagination'
 import type { PostListItem } from '@/io/notion/schemas/post'
 
+describe('replaceLastSpaceWithNonBreaking', () => {
+  it('replaces only the last space with non-breaking space', () => {
+    expect(replaceLastSpaceWithNonBreaking('A Long Post Title')).toBe('A Long Post\u00A0Title')
+  })
+
+  it('handles single word (no spaces)', () => {
+    expect(replaceLastSpaceWithNonBreaking('Hello')).toBe('Hello')
+  })
+
+  it('handles two words', () => {
+    expect(replaceLastSpaceWithNonBreaking('Hello World')).toBe('Hello\u00A0World')
+  })
+
+  it('handles multiple spaces (only last is replaced)', () => {
+    expect(replaceLastSpaceWithNonBreaking('A B C D')).toBe('A B C\u00A0D')
+  })
+
+  it('handles empty string', () => {
+    expect(replaceLastSpaceWithNonBreaking('')).toBe('')
+  })
+})
+
 describe('PaginationLinks', () => {
   const mockPost: PostListItem = {
     id: '123',
@@ -108,9 +130,9 @@ describe('PaginationLinks', () => {
 
       render(<PaginationLinks prevPost={prevPost} nextPost={null} />)
 
-      // Verify the non-breaking space transformation happens
-      const link = screen.getByRole('link', { name: replaceLastSpaceWithNonBreaking(prevPost.title) })
-      expect(link).toHaveAccessibleName('A Long Post\u00A0Title')
+      // Verify the transformation happens (hardcoded expected value)
+      const link = screen.getByRole('link', { name: 'A Long Post\u00A0Title' })
+      expect(link).toBeInTheDocument()
     })
   })
 })
