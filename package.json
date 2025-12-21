@@ -16,6 +16,7 @@
     "start": "next start",
     "test": "vitest",
     "test:ci": "vitest run",
+    "test:metadata": "tsx metadata/validate-metadata.ts",
     "test:ui": "vitest --ui",
     "typecheck": "tsc"
   },
@@ -43,6 +44,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/ui": "^4.0.15",
+    "cheerio": "^1.1.2",
     "eslint": "^9",
     "eslint-config-next": "16.0.1",
     "eslint-config-prettier": "^10.1.8",
