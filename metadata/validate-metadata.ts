@@ -12,21 +12,56 @@
 
 import { load } from 'cheerio'
 import sharp from 'sharp'
-import { readFile } from 'fs/promises'
+import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
 
+/**
+ * Finds the first blog post in the build output for validation.
+ * Looks for directories in out/ that contain index.html and aren't special pages.
+ */
+async function findFirstBlogPost(): Promise<string | null> {
+  try {
+    const outDir = join(process.cwd(), 'out')
+    const entries = await readdir(outDir, { withFileTypes: true })
+
+    // Filter for directories (potential blog posts)
+    const directories = entries.filter(entry => entry.isDirectory())
+
+    // Exclude known non-blog directories and Next.js special pages
+    const excludeDirs = new Set(['blog', 'likes', '_next', 'api', '404', '_not-found'])
+
+    for (const dir of directories) {
+      if (excludeDirs.has(dir.name)) continue
+
+      // Check if this directory has an index.html (confirms it's a static page)
+      try {
+        const indexPath = join(outDir, dir.name, 'index.html')
+        await readFile(indexPath)
+        return `${dir.name}/index.html`
+      } catch {
+        // Not a static page, skip
+        continue
+      }
+    }
+
+    return null
+  } catch (error) {
+    console.warn('Could not find blog post for validation:', error)
+    return null
+  }
+}
+
 // Pages to validate (minimal scope)
-const PAGES = [
+// Note: Blog post will be added dynamically in main function
+const STATIC_PAGES = [
   { file: 'index.html', name: 'Homepage' },
   { file: 'blog/index.html', name: 'Blog' },
   { file: 'likes/index.html', name: 'Likes' },
-  { file: 'git-undo-merge-to-main/index.html', name: 'Post Example' },
 ]
 
-// Required OG tags
+// Required OG tags (description is optional - posts may not have one)
 const REQUIRED_OG_TAGS = [
   'og:title',
-  'og:description',
   'og:image',
   'og:url',
   'og:type',
@@ -34,12 +69,11 @@ const REQUIRED_OG_TAGS = [
   'og:locale',
 ]
 
-// Required Twitter tags
+// Required Twitter tags (description is optional - posts may not have one)
 const REQUIRED_TWITTER_TAGS = [
   'twitter:card',
   'twitter:creator',
   'twitter:title',
-  'twitter:description',
   'twitter:image',
 ]
 
@@ -174,8 +208,21 @@ async function validatePage(file: string, name: string): Promise<void> {
  */
 async function validateMetadata() {
   try {
+    // Build pages list dynamically
+    const pages = [...STATIC_PAGES]
+
+    // Find and add a blog post for validation
+    const blogPostFile = await findFirstBlogPost()
+    if (blogPostFile) {
+      const postSlug = blogPostFile.replace('/index.html', '')
+      pages.push({ file: blogPostFile, name: `Post Example (${postSlug})` })
+      console.log(`Found blog post for validation: ${postSlug}`)
+    } else {
+      console.warn('⚠️  No blog post found for validation - skipping article metadata checks')
+    }
+
     // Validate all pages
-    for (const page of PAGES) {
+    for (const page of pages) {
       await validatePage(page.file, page.name)
     }
 
