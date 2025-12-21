@@ -69,6 +69,13 @@ const REQUIRED_OG_TAGS = [
   'og:locale',
 ]
 
+// Required article-specific OG tags (only for pages where og:type is "article")
+const REQUIRED_ARTICLE_TAGS = [
+  'article:published_time',
+  'article:modified_time',
+  'article:author',
+]
+
 // Required Twitter tags (description is optional - posts may not have one)
 const REQUIRED_TWITTER_TAGS = [
   'twitter:card',
@@ -99,6 +106,21 @@ function validateOgTags(html: string, pageName: string): void {
       errors.push({ page: pageName, error: `Missing required tag: ${tag}` })
     } else if (!content || content.trim() === '') {
       errors.push({ page: pageName, error: `Empty content for tag: ${tag}` })
+    }
+  }
+
+  // Check article-specific tags if og:type is "article"
+  const ogType = $('meta[property="og:type"]').attr('content')
+  if (ogType === 'article') {
+    for (const tag of REQUIRED_ARTICLE_TAGS) {
+      const element = $(`meta[property="${tag}"]`)
+      const content = element.attr('content')
+
+      if (!element.length) {
+        errors.push({ page: pageName, error: `Missing required article tag: ${tag}` })
+      } else if (!content || content.trim() === '') {
+        errors.push({ page: pageName, error: `Empty content for article tag: ${tag}` })
+      }
     }
   }
 }
