@@ -1,8 +1,9 @@
 /**
- * Validates OpenGraph metadata and images for key pages.
+ * Validates OpenGraph and Twitter Card metadata for key pages.
  *
  * Reads static HTML files from build output (out/ directory) and validates:
  * - Required OG tags are present with non-empty values
+ * - Required Twitter tags are present with non-empty values
  * - og:image URL is accessible
  * - og:image dimensions are correct (1200x630)
  *
@@ -23,7 +24,24 @@ const PAGES = [
 ]
 
 // Required OG tags
-const REQUIRED_OG_TAGS = ['og:title', 'og:description', 'og:image', 'og:url', 'og:type']
+const REQUIRED_OG_TAGS = [
+  'og:title',
+  'og:description',
+  'og:image',
+  'og:url',
+  'og:type',
+  'og:site_name',
+  'og:locale',
+]
+
+// Required Twitter tags
+const REQUIRED_TWITTER_TAGS = [
+  'twitter:card',
+  'twitter:creator',
+  'twitter:title',
+  'twitter:description',
+  'twitter:image',
+]
 
 interface ValidationError {
   page: string
@@ -41,6 +59,25 @@ function validateOgTags(html: string, pageName: string): void {
   // Check required OG tags
   for (const tag of REQUIRED_OG_TAGS) {
     const element = $(`meta[property="${tag}"]`)
+    const content = element.attr('content')
+
+    if (!element.length) {
+      errors.push({ page: pageName, error: `Missing required tag: ${tag}` })
+    } else if (!content || content.trim() === '') {
+      errors.push({ page: pageName, error: `Empty content for tag: ${tag}` })
+    }
+  }
+}
+
+/**
+ * Validates Twitter Card meta tags in HTML
+ */
+function validateTwitterTags(html: string, pageName: string): void {
+  const $ = load(html)
+
+  // Check required Twitter tags
+  for (const tag of REQUIRED_TWITTER_TAGS) {
+    const element = $(`meta[name="${tag}"]`)
     const content = element.attr('content')
 
     if (!element.length) {
@@ -122,6 +159,7 @@ async function validatePage(file: string, name: string): Promise<void> {
     const html = await readFile(filePath, 'utf-8')
 
     validateOgTags(html, name)
+    validateTwitterTags(html, name)
     await validateOgImage(html, name)
   } catch (error) {
     errors.push({
