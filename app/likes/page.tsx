@@ -6,7 +6,7 @@ import getMediaItems from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
 import { env } from '@/io/env/env'
 import { type Result } from '@/utils/errors/result'
-import { DEFAULT_OG_IMAGE } from '@/utils/metadata'
+import { DEFAULT_OG_IMAGE, SITE_NAME } from '@/utils/metadata'
 
 export const metadata: Metadata = {
   title: 'Likes',
@@ -14,6 +14,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: 'https://michaeluloth.com/likes/',
+    siteName: SITE_NAME,
+    locale: 'en_CA',
     images: [DEFAULT_OG_IMAGE],
   },
 }
