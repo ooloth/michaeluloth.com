@@ -1,6 +1,12 @@
+import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 
 import PostList from '@/ui/post-list'
+
+export const metadata: Metadata = {
+  title: 'Blog',
+  description: 'Technical writing about web development, TypeScript, React, and software engineering.',
+}
 
 type Props = Readonly<{
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>

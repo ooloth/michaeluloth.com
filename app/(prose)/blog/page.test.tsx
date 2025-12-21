@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import Blog from './page'
+import Blog, { metadata } from './page'
 import getPosts from '@/io/notion/getPosts'
 import type { PostListItem } from '@/io/notion/schemas/post'
 import { Ok } from '@/utils/errors/result'
@@ -24,6 +24,15 @@ vi.mock('@/ui/post-list', () => ({
     return <div data-testid="post-list" data-limit={limit} data-skip-cache={skipCache} />
   },
 }))
+
+describe('Blog page metadata', () => {
+  it('exports metadata with title and description', () => {
+    expect(metadata).toEqual({
+      title: 'Blog',
+      description: 'Technical writing about web development, TypeScript, React, and software engineering.',
+    })
+  })
+})
 
 describe('Blog page', () => {
   beforeEach(() => {
