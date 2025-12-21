@@ -63,18 +63,38 @@ async function validateOgImage(html: string, pageName: string): Promise<void> {
   }
 
   try {
-    // Fetch image
-    const response = await fetch(imageUrl)
-    if (!response.ok) {
-      errors.push({
-        page: pageName,
-        error: `og:image not accessible: ${imageUrl} (${response.status})`,
-      })
-      return
+    let buffer: ArrayBuffer
+
+    // Check if it's a local image (michaeluloth.com domain)
+    if (imageUrl.startsWith('https://michaeluloth.com/')) {
+      // Extract path and read from local out/ directory
+      const imagePath = imageUrl.replace('https://michaeluloth.com/', '')
+      const localPath = join(process.cwd(), 'out', imagePath)
+
+      try {
+        const fileBuffer = await readFile(localPath)
+        buffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength)
+      } catch (error) {
+        errors.push({
+          page: pageName,
+          error: `og:image file not found: ${imagePath} (expected at ${localPath})`,
+        })
+        return
+      }
+    } else {
+      // External image - fetch from URL
+      const response = await fetch(imageUrl)
+      if (!response.ok) {
+        errors.push({
+          page: pageName,
+          error: `og:image not accessible: ${imageUrl} (${response.status})`,
+        })
+        return
+      }
+      buffer = await response.arrayBuffer()
     }
 
     // Validate dimensions
-    const buffer = await response.arrayBuffer()
     const metadata = await sharp(Buffer.from(buffer)).metadata()
 
     if (metadata.width !== 1200 || metadata.height !== 630) {
