@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
 import { SITE_URL, SITE_AUTHOR, DEFAULT_OG_IMAGE } from '@/utils/metadata'
+import { transformCloudinaryForOG } from '@/io/cloudinary/cloudinary'
 import type { Post as PostType } from '@/io/notion/schemas/post'
 
 import Post from './ui/post'
@@ -22,7 +23,8 @@ type Props = Readonly<{
  */
 function generateJsonLd(post: PostType, slug: string) {
   const url = `${SITE_URL}${slug}/`
-  const image = post.featuredImage ?? DEFAULT_OG_IMAGE
+  const rawImage = post.featuredImage ?? DEFAULT_OG_IMAGE
+  const image = transformCloudinaryForOG(rawImage)
 
   return {
     '@context': 'https://schema.org',
@@ -49,7 +51,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const url = `${SITE_URL}${slug}/`
-  const image = post.featuredImage ?? DEFAULT_OG_IMAGE
+  const rawImage = post.featuredImage ?? DEFAULT_OG_IMAGE
+  const ogImage = transformCloudinaryForOG(rawImage)
 
   return {
     title: post.title,
@@ -65,13 +68,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: post.firstPublished,
       modifiedTime: post.lastEditedTime,
       authors: [SITE_AUTHOR],
-      images: [image],
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.description ?? undefined,
-      images: [image],
+      images: [ogImage],
     },
   }
 }
