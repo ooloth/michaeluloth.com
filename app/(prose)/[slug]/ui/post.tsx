@@ -21,6 +21,7 @@ export default function Post({ post, prevPost, nextPost }: Props) {
           <PostFooter /> {/* needs to be a client component */}
         </article>
       </main>
+      {/* Pagination is site navigation, not post content, so it lives outside <article> */}
       <PaginationLinks prevPost={prevPost} nextPost={nextPost} />
     </>
   )

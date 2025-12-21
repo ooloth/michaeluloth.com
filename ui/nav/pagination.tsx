@@ -14,7 +14,8 @@ const NON_BREAKING_SPACE = '\u00A0'
  * This prevents awkward line wrapping where the last word appears alone on a new line.
  *
  * @example
- * replaceLastSpaceWithNonBreaking("Hello World") // "Hello\u00A0World"
+ * replaceLastSpaceWithNonBreaking("Hello World")
+ * // Returns "Hello World" (with non-breaking space before "World")
  */
 export function replaceLastSpaceWithNonBreaking(text: string): string {
   return text.replace(/ (?!.* )/, NON_BREAKING_SPACE)
