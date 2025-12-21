@@ -41,7 +41,7 @@ function RecentWriting(): ReactElement {
 
 export default async function Home(): Promise<ReactElement> {
   return (
-    <main className="flex-auto">
+    <main id="main" className="flex-auto">
       <Summary />
       <RecentWriting />
     </main>
