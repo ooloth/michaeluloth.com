@@ -17,7 +17,7 @@ export default function Error({ error, reset }: Props): ReactElement {
         {error.digest && <p className="mt-2 text-sm text-zinc-500">Error ID: {error.digest}</p>}
         <button
           onClick={reset}
-          className="mt-4 px-4 py-2 bg-accent text-black rounded hover:bg-accent/90 transition-colors"
+          className="mt-4 px-4 py-2 bg-accent text-black rounded hover:bg-accent/90 focus-visible:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 transition-colors"
         >
           Try again
         </button>
