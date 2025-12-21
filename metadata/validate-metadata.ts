@@ -109,8 +109,33 @@ function validateOgTags(html: string, pageName: string): void {
     }
   }
 
-  // Check article-specific tags if og:type is "article"
+  // Validate og:url is a valid URL
+  const ogUrl = $('meta[property="og:url"]').attr('content')
+  if (ogUrl) {
+    try {
+      new URL(ogUrl)
+    } catch {
+      errors.push({ page: pageName, error: `og:url is not a valid URL: ${ogUrl}` })
+    }
+  }
+
+  // Validate og:image is a valid URL
+  const ogImage = $('meta[property="og:image"]').attr('content')
+  if (ogImage) {
+    try {
+      new URL(ogImage)
+    } catch {
+      errors.push({ page: pageName, error: `og:image is not a valid URL: ${ogImage}` })
+    }
+  }
+
+  // Validate og:type has valid value
   const ogType = $('meta[property="og:type"]').attr('content')
+  if (ogType && !['website', 'article'].includes(ogType)) {
+    errors.push({ page: pageName, error: `og:type has invalid value: ${ogType} (expected "website" or "article")` })
+  }
+
+  // Check article-specific tags if og:type is "article"
   if (ogType === 'article') {
     for (const tag of REQUIRED_ARTICLE_TAGS) {
       const element = $(`meta[property="${tag}"]`)
@@ -121,6 +146,17 @@ function validateOgTags(html: string, pageName: string): void {
       } else if (!content || content.trim() === '') {
         errors.push({ page: pageName, error: `Empty content for article tag: ${tag}` })
       }
+    }
+
+    // Validate article dates are valid ISO 8601
+    const publishedTime = $('meta[property="article:published_time"]').attr('content')
+    if (publishedTime && isNaN(Date.parse(publishedTime))) {
+      errors.push({ page: pageName, error: `article:published_time is not a valid date: ${publishedTime}` })
+    }
+
+    const modifiedTime = $('meta[property="article:modified_time"]').attr('content')
+    if (modifiedTime && isNaN(Date.parse(modifiedTime))) {
+      errors.push({ page: pageName, error: `article:modified_time is not a valid date: ${modifiedTime}` })
     }
   }
 }
@@ -140,6 +176,25 @@ function validateTwitterTags(html: string, pageName: string): void {
       errors.push({ page: pageName, error: `Missing required tag: ${tag}` })
     } else if (!content || content.trim() === '') {
       errors.push({ page: pageName, error: `Empty content for tag: ${tag}` })
+    }
+  }
+
+  // Validate twitter:card has valid value
+  const twitterCard = $('meta[name="twitter:card"]').attr('content')
+  if (twitterCard && twitterCard !== 'summary_large_image') {
+    errors.push({
+      page: pageName,
+      error: `twitter:card has invalid value: ${twitterCard} (expected "summary_large_image")`,
+    })
+  }
+
+  // Validate twitter:image is a valid URL
+  const twitterImage = $('meta[name="twitter:image"]').attr('content')
+  if (twitterImage) {
+    try {
+      new URL(twitterImage)
+    } catch {
+      errors.push({ page: pageName, error: `twitter:image is not a valid URL: ${twitterImage}` })
     }
   }
 }
