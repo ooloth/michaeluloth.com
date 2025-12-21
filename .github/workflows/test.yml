@@ -54,3 +54,25 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run test:ci
+
+  metadata:
+    name: Metadata
+    runs-on: ubuntu-latest
+    env:
+      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+      NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+      TMDB_TV_LIST_ID: ${{ secrets.TMDB_TV_LIST_ID }}
+      TMDB_MOVIE_LIST_ID: ${{ secrets.TMDB_MOVIE_LIST_ID }}
+      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:metadata
