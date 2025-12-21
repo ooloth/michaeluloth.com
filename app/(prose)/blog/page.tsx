@@ -2,7 +2,7 @@ import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 
 import PostList from '@/ui/post-list'
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL } from '@/utils/metadata'
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/utils/metadata'
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    creator: '@ooloth',
+    creator: TWITTER_HANDLE,
     title: 'Blog',
     description: 'Technical writing about web development, TypeScript, React, and software engineering.',
     images: [DEFAULT_OG_IMAGE],

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
-import { SITE_URL, SITE_NAME, SITE_AUTHOR, DEFAULT_OG_IMAGE } from '@/utils/metadata'
+import { SITE_URL, SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/utils/metadata'
 import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import type { Post as PostType } from '@/io/notion/schemas/post'
 
@@ -18,11 +18,33 @@ type Props = Readonly<{
 }>
 
 /**
+ * Constructs the full URL for a blog post.
+ */
+function getPostUrl(slug: string): string {
+  return `${SITE_URL}${slug}/`
+}
+
+type JsonLdArticle = {
+  '@context': string
+  '@type': string
+  headline: string
+  description?: string
+  datePublished: string
+  dateModified: string
+  author: {
+    '@type': string
+    name: string
+  }
+  image: string
+  url: string
+}
+
+/**
  * Generates JSON-LD structured data for a blog post.
  * @see https://schema.org/Article
  */
-function generateJsonLd(post: PostType, slug: string) {
-  const url = `${SITE_URL}${slug}/`
+function generateJsonLd(post: PostType, slug: string): JsonLdArticle {
+  const url = getPostUrl(slug)
   const rawImage = post.featuredImage ?? DEFAULT_OG_IMAGE
   const image = transformCloudinaryForOG(rawImage)
 
@@ -50,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return {}
   }
 
-  const url = `${SITE_URL}${slug}/`
+  const url = getPostUrl(slug)
   const rawImage = post.featuredImage ?? DEFAULT_OG_IMAGE
   const ogImage = transformCloudinaryForOG(rawImage)
 
@@ -74,7 +96,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      creator: '@ooloth',
+      creator: TWITTER_HANDLE,
       title: post.title,
       description: post.description ?? undefined,
       images: [ogImage],
@@ -95,7 +117,13 @@ export default async function DynamicRoute({ params }: Props) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          // Escape < to prevent XSS if content contains </script>
+          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
       <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
     </>
   )
