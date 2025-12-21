@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-  SITE_NAME,
-  SITE_DESCRIPTION,
-  SITE_AUTHOR,
-  DEFAULT_OG_IMAGE,
-  SITE_URL,
-} from './metadata'
+import { SITE_NAME, SITE_DESCRIPTION, SITE_AUTHOR, DEFAULT_OG_IMAGE, SITE_URL } from './metadata'
 
 describe('metadata constants', () => {
   it('exports site name', () => {
@@ -13,9 +7,7 @@ describe('metadata constants', () => {
   })
 
   it('exports site description', () => {
-    expect(SITE_DESCRIPTION).toBe(
-      'Software engineer helping scientists discover new medicines at Recursion.',
-    )
+    expect(SITE_DESCRIPTION).toBe('Software engineer helping scientists discover new medicines at Recursion.')
   })
 
   it('exports site author', () => {

@@ -394,10 +394,9 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Err(error))
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({})
 
       // The .unwrap() call should throw, causing build to fail
-      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('Failed to fetch post from Notion')
+      await expect(DynamicRoute({ params })).rejects.toThrow('Failed to fetch post from Notion')
     })
 
     it('throws when getPost rejects', async () => {
@@ -433,7 +432,7 @@ describe('generateMetadata', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const metadata = await generateMetadata({ params, searchParams: Promise.resolve({}) })
+      const metadata = await generateMetadata({ params })
 
       expect(metadata).toEqual({
         title: 'Test Post Title',
@@ -480,7 +479,7 @@ describe('generateMetadata', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'no-image-post' })
-      const metadata = await generateMetadata({ params, searchParams: Promise.resolve({}) })
+      const metadata = await generateMetadata({ params })
 
       expect(metadata.openGraph?.images).toEqual(['/og-image.png'])
       expect(metadata.twitter?.images).toEqual(['/og-image.png'])
@@ -503,7 +502,7 @@ describe('generateMetadata', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'no-description-post' })
-      const metadata = await generateMetadata({ params, searchParams: Promise.resolve({}) })
+      const metadata = await generateMetadata({ params })
 
       expect(metadata.description).toBeUndefined()
       expect(metadata.openGraph?.description).toBeUndefined()
@@ -527,7 +526,7 @@ describe('generateMetadata', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'my-test-post' })
-      await generateMetadata({ params, searchParams: Promise.resolve({}) })
+      await generateMetadata({ params })
 
       expect(getPost).toHaveBeenCalledWith({ slug: 'my-test-post' })
     })
@@ -538,7 +537,7 @@ describe('generateMetadata', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(null))
 
       const params = Promise.resolve({ slug: 'nonexistent-post' })
-      const metadata = await generateMetadata({ params, searchParams: Promise.resolve({}) })
+      const metadata = await generateMetadata({ params })
 
       expect(metadata).toEqual({})
     })
@@ -551,9 +550,7 @@ describe('generateMetadata', () => {
 
       const params = Promise.resolve({ slug: 'test-post' })
 
-      await expect(generateMetadata({ params, searchParams: Promise.resolve({}) })).rejects.toThrow(
-        'Failed to fetch post metadata',
-      )
+      await expect(generateMetadata({ params })).rejects.toThrow('Failed to fetch post metadata')
     })
 
     it('throws when getPost rejects', async () => {
@@ -562,7 +559,7 @@ describe('generateMetadata', () => {
 
       const params = Promise.resolve({ slug: 'test-post' })
 
-      await expect(generateMetadata({ params, searchParams: Promise.resolve({}) })).rejects.toThrow('Network error')
+      await expect(generateMetadata({ params })).rejects.toThrow('Network error')
     })
   })
 })

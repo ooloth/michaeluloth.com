@@ -60,29 +60,13 @@ const STATIC_PAGES = [
 ]
 
 // Required OG tags (description is optional - posts may not have one)
-const REQUIRED_OG_TAGS = [
-  'og:title',
-  'og:image',
-  'og:url',
-  'og:type',
-  'og:site_name',
-  'og:locale',
-]
+const REQUIRED_OG_TAGS = ['og:title', 'og:image', 'og:url', 'og:type', 'og:site_name', 'og:locale']
 
 // Required article-specific OG tags (only for pages where og:type is "article")
-const REQUIRED_ARTICLE_TAGS = [
-  'article:published_time',
-  'article:modified_time',
-  'article:author',
-]
+const REQUIRED_ARTICLE_TAGS = ['article:published_time', 'article:modified_time', 'article:author']
 
 // Required Twitter tags (description is optional - posts may not have one)
-const REQUIRED_TWITTER_TAGS = [
-  'twitter:card',
-  'twitter:creator',
-  'twitter:title',
-  'twitter:image',
-]
+const REQUIRED_TWITTER_TAGS = ['twitter:card', 'twitter:creator', 'twitter:title', 'twitter:image']
 
 interface ValidationError {
   page: string

@@ -18,9 +18,7 @@ describe('RootLayout metadata', () => {
   })
 
   it('includes description', () => {
-    expect(metadata.description).toBe(
-      'Software engineer helping scientists discover new medicines at Recursion.',
-    )
+    expect(metadata.description).toBe('Software engineer helping scientists discover new medicines at Recursion.')
   })
 
   it('includes authors and creator', () => {

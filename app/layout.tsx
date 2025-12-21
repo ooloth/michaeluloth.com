@@ -2,13 +2,7 @@ import { type Metadata } from 'next'
 import { type ReactNode } from 'react'
 
 import '@/styles/globals.css'
-import {
-  SITE_URL,
-  SITE_NAME,
-  SITE_DESCRIPTION,
-  SITE_AUTHOR,
-  DEFAULT_OG_IMAGE,
-} from '@/utils/metadata'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_AUTHOR, DEFAULT_OG_IMAGE } from '@/utils/metadata'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

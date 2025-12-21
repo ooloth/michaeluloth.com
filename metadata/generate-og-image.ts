@@ -15,7 +15,8 @@ import { readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 
 // Use Cloudinary face detection (g_face) to center the crop on your face
-const PHOTO_URL = 'https://res.cloudinary.com/ooloth/image/upload/c_fill,w_640,h_640,g_face/v1645057009/mu/michael-landscape.jpg'
+const PHOTO_URL =
+  'https://res.cloudinary.com/ooloth/image/upload/c_fill,w_640,h_640,g_face/v1645057009/mu/michael-landscape.jpg'
 const ZINC_900 = '#18181b'
 const ACCENT = '#ff98a4'
 

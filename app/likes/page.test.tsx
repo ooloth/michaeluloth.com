@@ -153,7 +153,7 @@ describe('fetchItunesMedia', () => {
       const mediaError = new Error('Failed to fetch media items from Notion')
       vi.mocked(getMediaItems).mockResolvedValue(Err(mediaError))
 
-      const result = await fetchItunesMedia('books', 'ebook', 'ebook', false)
+      const result = await fetchItunesMedia('books', 'ebook', 'ebook')
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -171,7 +171,7 @@ describe('fetchItunesMedia', () => {
       vi.mocked(getMediaItems).mockResolvedValue(Ok(mockMediaItems))
       vi.mocked(fetchItunesItems).mockResolvedValue(Err(itunesError))
 
-      const result = await fetchItunesMedia('books', 'ebook', 'ebook', false)
+      const result = await fetchItunesMedia('books', 'ebook', 'ebook')
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -191,7 +191,7 @@ describe('fetchItunesMedia', () => {
       vi.mocked(getMediaItems).mockResolvedValue(Ok(mockMediaItems))
       vi.mocked(fetchItunesItems).mockResolvedValue(Ok([] as iTunesItem[]))
 
-      await fetchItunesMedia('books', 'ebook', 'ebook', false)
+      await fetchItunesMedia('books', 'ebook', 'ebook')
 
       expect(fetchItunesItems).toHaveBeenCalledWith(
         [
@@ -339,10 +339,8 @@ describe('Likes page', () => {
       vi.mocked(getMediaItems).mockResolvedValue(Ok([]))
       vi.mocked(fetchItunesItems).mockResolvedValue(Ok([]))
 
-      const searchParams = Promise.resolve({})
-
       // Promise.all with .unwrap() should throw on first failure
-      await expect(Likes({ searchParams })).rejects.toThrow('TMDB TV API error')
+      await expect(Likes()).rejects.toThrow('TMDB TV API error')
     })
 
     it('throws when TMDB movies fetch fails', async () => {

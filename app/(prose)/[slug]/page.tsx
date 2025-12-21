@@ -95,10 +95,7 @@ export default async function DynamicRoute({ params }: Props) {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
     </>
   )
