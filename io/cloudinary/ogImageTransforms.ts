@@ -16,8 +16,5 @@ export function transformCloudinaryForOG(url: string): string {
   }
 
   // Insert OG transformation parameters after /upload/
-  return url.replace(
-    '/upload/',
-    '/upload/c_fill,w_1200,h_630/',
-  )
+  return url.replace('/upload/', '/upload/c_fill,w_1200,h_630/')
 }

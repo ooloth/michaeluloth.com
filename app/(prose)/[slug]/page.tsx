@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
 import { SITE_URL, SITE_AUTHOR, DEFAULT_OG_IMAGE } from '@/utils/metadata'
-import { transformCloudinaryForOG } from '@/io/cloudinary/cloudinary'
+import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import type { Post as PostType } from '@/io/notion/schemas/post'
 
 import Post from './ui/post'
