@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
 import { SITE_URL, SITE_AUTHOR, DEFAULT_OG_IMAGE } from '@/utils/metadata'
+import type { Post as PostType } from '@/io/notion/schemas/post'
 
 import Post from './ui/post'
 
@@ -15,6 +16,30 @@ type Props = Readonly<{
   params: Promise<Params>
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }>
+
+/**
+ * Generates JSON-LD structured data for a blog post.
+ * @see https://schema.org/Article
+ */
+function generateJsonLd(post: PostType, slug: string) {
+  const url = `${SITE_URL}${slug}/`
+  const image = post.featuredImage ?? DEFAULT_OG_IMAGE
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description ?? undefined,
+    datePublished: post.firstPublished,
+    dateModified: post.lastEditedTime,
+    author: {
+      '@type': 'Person',
+      name: SITE_AUTHOR,
+    },
+    image,
+    url,
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = (await params).slug
@@ -63,7 +88,17 @@ export default async function DynamicRoute({ params, searchParams }: Props) {
     notFound()
   }
 
-  return <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
+  const jsonLd = generateJsonLd(post, slug)
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
+    </>
+  )
 }
 
 /**
