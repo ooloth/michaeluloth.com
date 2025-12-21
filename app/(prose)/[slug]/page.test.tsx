@@ -451,7 +451,7 @@ describe('generateMetadata', () => {
       const params = Promise.resolve({ slug: 'no-description-post' })
       const metadata = await generateMetadata({ params, searchParams: Promise.resolve({}) })
 
-      expect(metadata.description).toBeNull()
+      expect(metadata.description).toBeUndefined()
       expect(metadata.openGraph?.description).toBeUndefined()
       expect(metadata.twitter?.description).toBeUndefined()
     })
