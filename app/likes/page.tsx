@@ -77,7 +77,12 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
 
           return (
             <li key={item.id} className="flex-none w-48">
-              <a href={item.link} target="_blank" rel="noopener noreferrer" className="block">
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 rounded-lg"
+              >
                 <figure>
                   <div className={`relative ${height} overflow-hidden`}>
                     <Image

@@ -7,9 +7,23 @@ type Props = Readonly<{
   nextPost: PostListItem | null
 }>
 
+const NON_BREAKING_SPACE = '\u00A0'
+
+/**
+ * Replaces the last space in a string with a non-breaking space.
+ * This prevents awkward line wrapping where the last word appears alone on a new line.
+ *
+ * @example
+ * replaceLastSpaceWithNonBreaking("Hello World")
+ * // Returns "Hello World" (with non-breaking space before "World")
+ */
+export function replaceLastSpaceWithNonBreaking(text: string): string {
+  return text.replace(/ (?!.* )/, NON_BREAKING_SPACE)
+}
+
 export default function PaginationLinks({ prevPost, nextPost }: Props) {
   return (
-    <nav className="mt-18 flex flex-col sm:flex-row gap-5">
+    <nav aria-label="Post navigation" className="mt-18 flex flex-col sm:flex-row gap-5">
       {nextPost ? <PaginationLink post={nextPost} direction="Next" /> : <div className="basis-1/2" />}
       {prevPost ? <PaginationLink post={prevPost} direction="Previous" /> : <div className="basis-1/2" />}
     </nav>
@@ -22,8 +36,8 @@ type PaginationLinkProps = Readonly<{
 }>
 
 function PaginationLink({ post, direction }: PaginationLinkProps) {
-  // Replace last space in title with a non-breaking space to prevent awkward wrapping
-  const title = post.title.replace(/ (?!.* )/, '\u00A0')
+  // IMPORTANT: Title is transformed - affects accessible name used in tests
+  const displayTitle = replaceLastSpaceWithNonBreaking(post.title)
 
   const href = `/${post.slug}/`
   const emoji = direction === 'Previous' ? '👉' : '👈'
@@ -38,7 +52,7 @@ function PaginationLink({ post, direction }: PaginationLinkProps) {
             <span className="block capitalize text-[0.98em]" aria-hidden="true">
               {directionText}
             </span>
-            <span className="block leading-[1.3] font-light text-lg text-bright">{title}</span>
+            <span className="block leading-[1.3] font-light text-lg text-bright">{displayTitle}</span>
           </span>
         </span>
       </div>

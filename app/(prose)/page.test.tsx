@@ -97,9 +97,10 @@ describe('Home page', () => {
       const jsx = await Home()
       render(jsx)
 
-      // Verify main element has correct class
+      // Verify main element has correct class and id for skip link
       const main = screen.getByRole('main')
       expect(main).toHaveClass('flex-auto')
+      expect(main).toHaveAttribute('id', 'main')
 
       // Verify both sections are present
       expect(screen.getByRole('heading', { level: 1, name: /hey, i'm michael/i })).toBeInTheDocument()

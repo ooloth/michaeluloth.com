@@ -77,9 +77,10 @@ describe('Blog page', () => {
       const jsx = await Blog()
       render(jsx)
 
-      // Verify main element exists with correct class
+      // Verify main element exists with correct class and id for skip link
       const main = screen.getByRole('main')
       expect(main).toHaveClass('flex-auto')
+      expect(main).toHaveAttribute('id', 'main')
 
       // Verify heading exists (sr-only)
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Blog')
