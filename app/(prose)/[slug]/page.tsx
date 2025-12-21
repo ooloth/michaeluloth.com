@@ -63,6 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       type: 'article',
       url,
+      siteName: SITE_AUTHOR,
+      locale: 'en_CA',
       title: post.title,
       description: post.description ?? undefined,
       publishedTime: post.firstPublished,
@@ -72,6 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
+      creator: '@ooloth',
       title: post.title,
       description: post.description ?? undefined,
       images: [ogImage],
