@@ -139,8 +139,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       const scriptTag = document.querySelector('script[type="application/ld+json"]')
@@ -180,8 +179,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'no-image' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       const scriptTag = document.querySelector('script[type="application/ld+json"]')
@@ -207,8 +205,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'no-desc' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       const scriptTag = document.querySelector('script[type="application/ld+json"]')
@@ -234,8 +231,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'my-awesome-post' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       const scriptTag = document.querySelector('script[type="application/ld+json"]')
@@ -285,15 +281,13 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
         slug: 'test-post',
         includeBlocks: true,
         includePrevAndNext: true,
-        skipCache: false,
       })
 
       // Verify post content is rendered
@@ -307,64 +301,6 @@ describe('DynamicRoute page', () => {
 
       expect(previousLink).toHaveAccessibleName('Previous\u00A0Post')
       expect(nextLink).toHaveAccessibleName('Next\u00A0Post')
-    })
-
-    it('passes skipCache=true when nocache query param is present', async () => {
-      const mockPost = {
-        id: '123',
-        slug: 'test-post',
-        title: 'Test Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        lastEditedTime: '2024-01-15T00:00:00.000Z',
-        featuredImage: null,
-        blocks: [],
-        prevPost: null,
-        nextPost: null,
-      }
-
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
-
-      const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({ nocache: 'true' })
-      const jsx = await DynamicRoute({ params, searchParams })
-      render(jsx)
-
-      expect(getPost).toHaveBeenCalledWith({
-        slug: 'test-post',
-        includeBlocks: true,
-        includePrevAndNext: true,
-        skipCache: true,
-      })
-    })
-
-    it('passes skipCache=false when nocache is not "true"', async () => {
-      const mockPost = {
-        id: '123',
-        slug: 'test-post',
-        title: 'Test Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        lastEditedTime: '2024-01-15T00:00:00.000Z',
-        featuredImage: null,
-        blocks: [],
-        prevPost: null,
-        nextPost: null,
-      }
-
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
-
-      const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({ nocache: 'false' })
-      const jsx = await DynamicRoute({ params, searchParams })
-      render(jsx)
-
-      expect(getPost).toHaveBeenCalledWith({
-        slug: 'test-post',
-        includeBlocks: true,
-        includePrevAndNext: true,
-        skipCache: false,
-      })
     })
 
     it('calls getPost with correct options', async () => {
@@ -384,15 +320,13 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'my-post' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
         slug: 'my-post',
         includeBlocks: true,
         includePrevAndNext: true,
-        skipCache: false,
       })
 
       // Verify post title is rendered
@@ -416,8 +350,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'standalone-post' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Standalone Post')
@@ -439,9 +372,7 @@ describe('DynamicRoute page', () => {
       })
 
       const params = Promise.resolve({ slug: 'nonexistent-post' })
-      const searchParams = Promise.resolve({})
-
-      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('NEXT_NOT_FOUND')
+      await expect(DynamicRoute({ params })).rejects.toThrow('NEXT_NOT_FOUND')
       expect(notFound).toHaveBeenCalled()
     })
 
@@ -452,9 +383,7 @@ describe('DynamicRoute page', () => {
       })
 
       const params = Promise.resolve({ slug: 'missing-post' })
-      const searchParams = Promise.resolve({})
-
-      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('NEXT_NOT_FOUND')
+      await expect(DynamicRoute({ params })).rejects.toThrow('NEXT_NOT_FOUND')
       expect(notFound).toHaveBeenCalled()
     })
   })
@@ -476,9 +405,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockRejectedValue(error)
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({})
-
-      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('Network error')
+      await expect(DynamicRoute({ params })).rejects.toThrow('Network error')
     })
   })
 })
@@ -517,6 +444,8 @@ describe('generateMetadata', () => {
         openGraph: {
           type: 'article',
           url: 'https://michaeluloth.com/test-post/',
+          siteName: 'Michael Uloth',
+          locale: 'en_CA',
           title: 'Test Post Title',
           description: 'Test post description',
           publishedTime: '2024-01-15',
@@ -526,6 +455,7 @@ describe('generateMetadata', () => {
         },
         twitter: {
           card: 'summary_large_image',
+          creator: '@ooloth',
           title: 'Test Post Title',
           description: 'Test post description',
           images: ['https://example.com/image.jpg'],

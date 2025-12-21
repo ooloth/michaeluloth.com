@@ -15,13 +15,13 @@ vi.mock('@/io/notion/getPosts')
 // Mock PostList to avoid async server component complexity in tests
 // The actual PostList behavior is tested in ui/post-list.test.tsx
 vi.mock('@/ui/post-list', () => ({
-  default: ({ limit, skipCache }: { limit?: number; skipCache?: boolean }) => {
+  default: ({ limit }: { limit?: number }) => {
     // Call getPosts to verify it's called with correct params
     // This ensures the mock is called during render which we verify in tests
-    void getPosts({ sortDirection: 'descending', skipCache: skipCache ?? false })
+    void getPosts({ sortDirection: 'descending' })
 
     // Return a simple placeholder
-    return <div data-testid="post-list" data-limit={limit} data-skip-cache={skipCache} />
+    return <div data-testid="post-list" data-limit={limit} />
   },
 }))
 
@@ -30,6 +30,13 @@ describe('Blog page metadata', () => {
     expect(metadata).toEqual({
       title: 'Blog',
       description: 'Technical writing about web development, TypeScript, React, and software engineering.',
+      openGraph: {
+        type: 'website',
+        url: 'https://michaeluloth.com/blog/',
+        siteName: 'Michael Uloth',
+        locale: 'en_CA',
+        images: ['/og-image.png'],
+      },
     })
   })
 })
@@ -44,11 +51,10 @@ describe('Blog page', () => {
       const mockPosts: PostListItem[] = []
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
-      const searchParams = Promise.resolve({})
-      const jsx = await Blog({ searchParams })
+      const jsx = await Blog()
       render(jsx)
 
-      expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending', skipCache: false })
+      expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending' })
 
       // Verify page structure
       expect(screen.getByRole('main')).toBeInTheDocument()
@@ -58,44 +64,10 @@ describe('Blog page', () => {
       expect(screen.getByTestId('post-list')).toBeInTheDocument()
     })
 
-    it('passes skipCache=true when nocache query param is present', async () => {
-      const mockPosts = [
-        {
-          id: '1',
-          slug: 'test-post',
-          title: 'Test Post',
-          description: null,
-          firstPublished: '2024-01-15',
-          featuredImage: null,
-        },
-      ]
-
-      vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
-
-      const searchParams = Promise.resolve({ nocache: 'true' })
-      const jsx = await Blog({ searchParams })
-      render(jsx)
-
-      expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending', skipCache: true })
-    })
-
-    it('passes skipCache=false when nocache is not "true"', async () => {
-      const mockPosts: PostListItem[] = []
-
-      vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
-
-      const searchParams = Promise.resolve({ nocache: 'false' })
-      const jsx = await Blog({ searchParams })
-      render(jsx)
-
-      expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending', skipCache: false })
-    })
-
     it('renders correct page structure', async () => {
       vi.mocked(getPosts).mockResolvedValue(Ok([]))
 
-      const searchParams = Promise.resolve({})
-      const jsx = await Blog({ searchParams })
+      const jsx = await Blog()
       render(jsx)
 
       // Verify main element exists with correct class

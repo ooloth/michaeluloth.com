@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
-import { SITE_URL, SITE_AUTHOR, DEFAULT_OG_IMAGE } from '@/utils/metadata'
+import { SITE_URL, SITE_NAME, SITE_AUTHOR, DEFAULT_OG_IMAGE } from '@/utils/metadata'
 import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import type { Post as PostType } from '@/io/notion/schemas/post'
 
@@ -63,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       type: 'article',
       url,
-      siteName: SITE_AUTHOR,
+      siteName: SITE_NAME,
       locale: 'en_CA',
       title: post.title,
       description: post.description ?? undefined,
