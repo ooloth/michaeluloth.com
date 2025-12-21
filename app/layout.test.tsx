@@ -33,6 +33,7 @@ describe('RootLayout metadata', () => {
       type: 'website',
       locale: 'en_CA',
       siteName: 'Michael Uloth',
+      url: 'https://michaeluloth.com/',
       images: ['/og-image.png'],
     })
   })
