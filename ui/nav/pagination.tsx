@@ -9,7 +9,7 @@ type Props = Readonly<{
 
 export default function PaginationLinks({ prevPost, nextPost }: Props) {
   return (
-    <nav className="mt-18 flex flex-col sm:flex-row gap-5">
+    <nav aria-label="Post navigation" className="mt-18 flex flex-col sm:flex-row gap-5">
       {nextPost ? <PaginationLink post={nextPost} direction="Next" /> : <div className="basis-1/2" />}
       {prevPost ? <PaginationLink post={prevPost} direction="Previous" /> : <div className="basis-1/2" />}
     </nav>
