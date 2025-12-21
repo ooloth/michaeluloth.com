@@ -37,6 +37,13 @@ describe('Blog page metadata', () => {
         locale: 'en_CA',
         images: ['/og-image.png'],
       },
+      twitter: {
+        card: 'summary_large_image',
+        creator: '@ooloth',
+        title: 'Blog',
+        description: 'Technical writing about web development, TypeScript, React, and software engineering.',
+        images: ['/og-image.png'],
+      },
     })
   })
 })

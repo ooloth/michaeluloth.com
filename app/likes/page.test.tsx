@@ -27,6 +27,13 @@ describe('Likes page metadata', () => {
         locale: 'en_CA',
         images: ['/og-image.png'],
       },
+      twitter: {
+        card: 'summary_large_image',
+        creator: '@ooloth',
+        title: 'Likes',
+        description: 'My favorite TV shows, movies, books, albums, and podcasts',
+        images: ['/og-image.png'],
+      },
     })
   })
 })

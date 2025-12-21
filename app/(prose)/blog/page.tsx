@@ -14,6 +14,13 @@ export const metadata: Metadata = {
     locale: 'en_CA',
     images: [DEFAULT_OG_IMAGE],
   },
+  twitter: {
+    card: 'summary_large_image',
+    creator: '@ooloth',
+    title: 'Blog',
+    description: 'Technical writing about web development, TypeScript, React, and software engineering.',
+    images: [DEFAULT_OG_IMAGE],
+  },
 }
 
 export default async function Blog(): Promise<ReactElement> {

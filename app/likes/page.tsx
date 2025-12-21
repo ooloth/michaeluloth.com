@@ -18,6 +18,13 @@ export const metadata: Metadata = {
     locale: 'en_CA',
     images: [DEFAULT_OG_IMAGE],
   },
+  twitter: {
+    card: 'summary_large_image',
+    creator: '@ooloth',
+    title: 'Likes',
+    description: 'My favorite TV shows, movies, books, albums, and podcasts',
+    images: [DEFAULT_OG_IMAGE],
+  },
 }
 
 const TMDB_TV_LIST_ID = env.TMDB_TV_LIST_ID
