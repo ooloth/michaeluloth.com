@@ -94,7 +94,7 @@ const errors: ValidationError[] = []
 /**
  * Validates OG meta tags in HTML
  */
-function validateOgTags(html: string, pageName: string): void {
+function validateOgTags(html: string, pageName: string, expectedUrl: string): void {
   const $ = load(html)
 
   // Check required OG tags
@@ -109,7 +109,7 @@ function validateOgTags(html: string, pageName: string): void {
     }
   }
 
-  // Validate og:url is a valid URL
+  // Validate og:url matches expected canonical URL exactly
   const ogUrl = $('meta[property="og:url"]').attr('content')
   if (ogUrl) {
     try {
@@ -117,15 +117,41 @@ function validateOgTags(html: string, pageName: string): void {
     } catch {
       errors.push({ page: pageName, error: `og:url is not a valid URL: ${ogUrl}` })
     }
+
+    if (ogUrl !== expectedUrl) {
+      errors.push({
+        page: pageName,
+        error: `og:url does not match expected canonical URL. Expected: ${expectedUrl}, Got: ${ogUrl}`,
+      })
+    }
   }
 
-  // Validate og:image is a valid URL
+  // Validate og:image is a valid URL and matches expected patterns
   const ogImage = $('meta[property="og:image"]').attr('content')
   if (ogImage) {
     try {
       new URL(ogImage)
     } catch {
       errors.push({ page: pageName, error: `og:image is not a valid URL: ${ogImage}` })
+    }
+
+    // Check that image is either the default OG image or a Cloudinary URL
+    const isDefaultImage = ogImage === 'https://michaeluloth.com/og-image.png'
+    const isCloudinaryImage = ogImage.startsWith('https://res.cloudinary.com/')
+
+    if (!isDefaultImage && !isCloudinaryImage) {
+      errors.push({
+        page: pageName,
+        error: `og:image must be either the default OG image or a Cloudinary URL. Got: ${ogImage}`,
+      })
+    }
+
+    // If Cloudinary, verify it has the OG transformation parameters (1200x630)
+    if (isCloudinaryImage && !ogImage.includes('w_1200,h_630')) {
+      errors.push({
+        page: pageName,
+        error: `Cloudinary og:image must include correct dimensions (w_1200,h_630). Got: ${ogImage}`,
+      })
     }
   }
 
@@ -188,13 +214,23 @@ function validateTwitterTags(html: string, pageName: string): void {
     })
   }
 
-  // Validate twitter:image is a valid URL
+  // Validate twitter:image is a valid URL and matches og:image
   const twitterImage = $('meta[name="twitter:image"]').attr('content')
+  const ogImage = $('meta[property="og:image"]').attr('content')
+
   if (twitterImage) {
     try {
       new URL(twitterImage)
     } catch {
       errors.push({ page: pageName, error: `twitter:image is not a valid URL: ${twitterImage}` })
+    }
+
+    // Twitter image should match OpenGraph image
+    if (ogImage && twitterImage !== ogImage) {
+      errors.push({
+        page: pageName,
+        error: `twitter:image must match og:image. Expected: ${ogImage}, Got: ${twitterImage}`,
+      })
     }
   }
 }
@@ -260,16 +296,32 @@ async function validateOgImage(html: string, pageName: string): Promise<void> {
 }
 
 /**
+ * Infers the expected canonical URL for a page based on its file path
+ */
+function getExpectedUrl(file: string): string {
+  const SITE_URL = 'https://michaeluloth.com/'
+
+  if (file === 'index.html') {
+    return SITE_URL
+  }
+
+  // Remove /index.html and ensure trailing slash
+  const path = file.replace('/index.html', '/')
+  return `${SITE_URL}${path}`
+}
+
+/**
  * Validates a single page
  */
 async function validatePage(file: string, name: string): Promise<void> {
   const filePath = join(process.cwd(), 'out', file)
+  const expectedUrl = getExpectedUrl(file)
   console.log(`Validating ${name}: ${file}`)
 
   try {
     const html = await readFile(filePath, 'utf-8')
 
-    validateOgTags(html, name)
+    validateOgTags(html, name, expectedUrl)
     validateTwitterTags(html, name)
     await validateOgImage(html, name)
   } catch (error) {
