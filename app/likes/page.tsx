@@ -6,10 +6,25 @@ import getMediaItems from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
 import { env } from '@/io/env/env'
 import { type Result } from '@/utils/errors/result'
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/utils/metadata'
 
 export const metadata: Metadata = {
-  title: 'Likes - Michael Uloth',
+  title: 'Likes',
   description: 'My favorite TV shows, movies, books, albums, and podcasts',
+  openGraph: {
+    type: 'website',
+    url: `${SITE_URL}likes/`,
+    siteName: SITE_NAME,
+    locale: 'en_CA',
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    creator: TWITTER_HANDLE,
+    title: 'Likes',
+    description: 'My favorite TV shows, movies, books, albums, and podcasts',
+    images: [DEFAULT_OG_IMAGE],
+  },
 }
 
 const TMDB_TV_LIST_ID = env.TMDB_TV_LIST_ID
@@ -27,9 +42,8 @@ export async function fetchItunesMedia(
   category: MediaCategory,
   medium: iTunesMedium,
   entity: iTunesEntity,
-  skipCache: boolean,
 ): Promise<Result<iTunesItem[], Error>> {
-  const itemsResult = await getMediaItems({ category, skipCache })
+  const itemsResult = await getMediaItems({ category })
   if (!itemsResult.ok) {
     return itemsResult
   }
@@ -91,21 +105,14 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
   )
 }
 
-type PageProps = {
-  searchParams: Promise<{ nocache?: string }>
-}
-
-export default async function Likes({ searchParams }: PageProps): Promise<ReactElement> {
-  const params = await searchParams
-  const skipCache = params.nocache === 'true'
-
+export default async function Likes(): Promise<ReactElement> {
   // Fetch all categories in parallel
   const [tv, movies, books, albums, podcasts] = await Promise.all([
     fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then(r => r.unwrap()),
     fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then(r => r.unwrap()),
-    fetchItunesMedia('books', 'ebook', 'ebook', skipCache).then(r => r.unwrap()),
-    fetchItunesMedia('albums', 'music', 'album', skipCache).then(r => r.unwrap()),
-    fetchItunesMedia('podcasts', 'podcast', 'podcast', skipCache).then(r => r.unwrap()),
+    fetchItunesMedia('books', 'ebook', 'ebook').then(r => r.unwrap()),
+    fetchItunesMedia('albums', 'music', 'album').then(r => r.unwrap()),
+    fetchItunesMedia('podcasts', 'podcast', 'podcast').then(r => r.unwrap()),
   ])
 
   return (

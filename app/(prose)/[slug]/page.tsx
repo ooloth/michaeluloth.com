@@ -1,7 +1,11 @@
+import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
+import { SITE_URL, SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/utils/metadata'
+import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
+import type { Post as PostType } from '@/io/notion/schemas/post'
 
 import Post from './ui/post'
 
@@ -11,82 +15,119 @@ type Params = {
 
 type Props = Readonly<{
   params: Promise<Params>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }>
 
-export default async function DynamicRoute({ params, searchParams }: Props) {
-  const slug = (await params).slug
-  const search = await searchParams
-  const skipCache = search.nocache === 'true'
+/**
+ * Constructs the full URL for a blog post.
+ */
+function getPostUrl(slug: string): string {
+  return `${SITE_URL}${slug}/`
+}
 
-  // TODO: use fetch instead? https://nextjs.org/docs/app/api-reference/functions/fetch
-  const post = (await getPost({ slug, includeBlocks: true, includePrevAndNext: true, skipCache })).unwrap()
+type JsonLdArticle = {
+  '@context': string
+  '@type': string
+  headline: string
+  description?: string
+  datePublished: string
+  dateModified: string
+  author: {
+    '@type': string
+    name: string
+  }
+  image: string
+  url: string
+}
+
+/**
+ * Generates JSON-LD structured data for a blog post.
+ * @see https://schema.org/Article
+ */
+function generateJsonLd(post: PostType, slug: string): JsonLdArticle {
+  const url = getPostUrl(slug)
+  const rawImage = post.featuredImage ?? DEFAULT_OG_IMAGE
+  const image = transformCloudinaryForOG(rawImage)
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description ?? undefined,
+    datePublished: post.firstPublished,
+    dateModified: post.lastEditedTime,
+    author: {
+      '@type': 'Person',
+      name: SITE_AUTHOR,
+    },
+    image,
+    url,
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const slug = (await params).slug
+  const post = (await getPost({ slug })).unwrap()
+
+  if (!post) {
+    return {}
+  }
+
+  const url = getPostUrl(slug)
+  const rawImage = post.featuredImage ?? DEFAULT_OG_IMAGE
+  const ogImage = transformCloudinaryForOG(rawImage)
+
+  return {
+    title: post.title,
+    description: post.description ?? undefined,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      type: 'article',
+      url,
+      siteName: SITE_NAME,
+      locale: 'en_CA',
+      title: post.title,
+      description: post.description ?? undefined,
+      publishedTime: post.firstPublished,
+      modifiedTime: post.lastEditedTime,
+      authors: [SITE_AUTHOR],
+      images: [ogImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      creator: TWITTER_HANDLE,
+      title: post.title,
+      description: post.description ?? undefined,
+      images: [ogImage],
+    },
+  }
+}
+
+export default async function DynamicRoute({ params }: Props) {
+  const slug = (await params).slug
+
+  const post = (await getPost({ slug, includeBlocks: true, includePrevAndNext: true })).unwrap()
 
   if (!post) {
     notFound()
   }
 
-  // TODO: metadata: https://nextjs.org/docs/app/api-reference/functions/generate-metadata
-  // const type = getPropertyValue(post.properties, 'Type')
-  // const title = getPropertyValue(post.properties, 'Title')
-  // const description = getPropertyValue(post.properties, 'Description')
-  // const featuredImage = getPropertyValue(post.properties, 'Featured image')
-  // const date = getPropertyValue(post.properties, 'First published')
-  // <ArticleSeo title={title} slug={slug} description={description} featuredImage={featuredImage} date={date} />
+  const jsonLd = generateJsonLd(post, slug)
 
-  return <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          // Escape < to prevent XSS if content contains </script>
+          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
+      <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
+    </>
+  )
 }
-
-// const ArticleSeo = ({ title, slug, description, featuredImage, date }) => {
-//   const url = `https://michaeluloth.com/${slug}`
-//   const formattedDate = new Date(date).toISOString()
-//
-//   const image = featuredImage
-//     ? featuredImage.includes('cloudinary')
-//       ? {
-//           url: transformCloudinaryImage(featuredImage, 1280),
-//           alt: title,
-//         }
-//       : {
-//           url: `https://michaeluloth.com${featuredImage}`,
-//           alt: title,
-//         }
-//     : {
-//         alt: 'Michael Uloth smiling into the camera',
-//         url: transformCloudinaryImage('https://res.cloudinary.com/ooloth/image/upload/mu/michael-landscape.jpg', 1280),
-//       }
-//
-//   return (
-//     <>
-//       <NextSeo
-//         title={title}
-//         description={description}
-//         canonical={url}
-//         openGraph={{
-//           type: 'article',
-//           article: {
-//             publishedTime: formattedDate,
-//           },
-//           url,
-//           title,
-//           description,
-//           images: [image],
-//         }}
-//       />
-//       <ArticleJsonLd
-//         authorName="Michael Uloth"
-//         dateModified={date}
-//         datePublished={date}
-//         description={description}
-//         images={[image.url]}
-//         publisherLogo="/static/favicons/android-chrome-192x192.png"
-//         publisherName="Michael Uloth"
-//         title={title}
-//         url={url}
-//       />
-//     </>
-//   )
-// }
 
 /**
  * Generates the list of static params (slugs) for all blog posts.

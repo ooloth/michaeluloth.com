@@ -3,7 +3,7 @@
  */
 
 import { render, screen } from '@testing-library/react'
-import { generateStaticParams } from './page'
+import { generateStaticParams, generateMetadata } from './page'
 import DynamicRoute from './page'
 import getPosts from '@/io/notion/getPosts'
 import getPost from '@/io/notion/getPost'
@@ -121,6 +121,126 @@ describe('DynamicRoute page', () => {
     vi.clearAllMocks()
   })
 
+  describe('JSON-LD structured data', () => {
+    it('renders JSON-LD script with Article schema', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'test-post',
+        title: 'Test Post',
+        description: 'Test description',
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-20T10:00:00.000Z',
+        featuredImage: 'https://example.com/image.jpg',
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'test-post' })
+      const jsx = await DynamicRoute({ params })
+      render(jsx)
+
+      const scriptTag = document.querySelector('script[type="application/ld+json"]')
+      expect(scriptTag).toBeInTheDocument()
+
+      const jsonLd = JSON.parse(scriptTag?.textContent ?? '{}')
+      expect(jsonLd).toEqual({
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: 'Test Post',
+        description: 'Test description',
+        datePublished: '2024-01-15',
+        dateModified: '2024-01-20T10:00:00.000Z',
+        author: {
+          '@type': 'Person',
+          name: 'Michael Uloth',
+        },
+        image: 'https://example.com/image.jpg',
+        url: 'https://michaeluloth.com/test-post/',
+      })
+    })
+
+    it('uses default OG image when post has no featured image', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'no-image',
+        title: 'Post Without Image',
+        description: 'No image',
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'no-image' })
+      const jsx = await DynamicRoute({ params })
+      render(jsx)
+
+      const scriptTag = document.querySelector('script[type="application/ld+json"]')
+      const jsonLd = JSON.parse(scriptTag?.textContent ?? '{}')
+
+      expect(jsonLd.image).toBe('/og-image.png')
+    })
+
+    it('omits description when null', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'no-desc',
+        title: 'Post Without Description',
+        description: null,
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'no-desc' })
+      const jsx = await DynamicRoute({ params })
+      render(jsx)
+
+      const scriptTag = document.querySelector('script[type="application/ld+json"]')
+      const jsonLd = JSON.parse(scriptTag?.textContent ?? '{}')
+
+      expect(jsonLd.description).toBeUndefined()
+    })
+
+    it('includes correct URL structure', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'my-awesome-post',
+        title: 'My Awesome Post',
+        description: null,
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'my-awesome-post' })
+      const jsx = await DynamicRoute({ params })
+      render(jsx)
+
+      const scriptTag = document.querySelector('script[type="application/ld+json"]')
+      const jsonLd = JSON.parse(scriptTag?.textContent ?? '{}')
+
+      expect(jsonLd.url).toBe('https://michaeluloth.com/my-awesome-post/')
+    })
+  })
+
   describe('success cases', () => {
     it('fetches and renders post with blocks and navigation', async () => {
       const mockPost = {
@@ -161,15 +281,13 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
         slug: 'test-post',
         includeBlocks: true,
         includePrevAndNext: true,
-        skipCache: false,
       })
 
       // Verify post content is rendered
@@ -183,64 +301,6 @@ describe('DynamicRoute page', () => {
 
       expect(previousLink).toHaveAccessibleName('Previous\u00A0Post')
       expect(nextLink).toHaveAccessibleName('Next\u00A0Post')
-    })
-
-    it('passes skipCache=true when nocache query param is present', async () => {
-      const mockPost = {
-        id: '123',
-        slug: 'test-post',
-        title: 'Test Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        lastEditedTime: '2024-01-15T00:00:00.000Z',
-        featuredImage: null,
-        blocks: [],
-        prevPost: null,
-        nextPost: null,
-      }
-
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
-
-      const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({ nocache: 'true' })
-      const jsx = await DynamicRoute({ params, searchParams })
-      render(jsx)
-
-      expect(getPost).toHaveBeenCalledWith({
-        slug: 'test-post',
-        includeBlocks: true,
-        includePrevAndNext: true,
-        skipCache: true,
-      })
-    })
-
-    it('passes skipCache=false when nocache is not "true"', async () => {
-      const mockPost = {
-        id: '123',
-        slug: 'test-post',
-        title: 'Test Post',
-        description: null,
-        firstPublished: '2024-01-15',
-        lastEditedTime: '2024-01-15T00:00:00.000Z',
-        featuredImage: null,
-        blocks: [],
-        prevPost: null,
-        nextPost: null,
-      }
-
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
-
-      const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({ nocache: 'false' })
-      const jsx = await DynamicRoute({ params, searchParams })
-      render(jsx)
-
-      expect(getPost).toHaveBeenCalledWith({
-        slug: 'test-post',
-        includeBlocks: true,
-        includePrevAndNext: true,
-        skipCache: false,
-      })
     })
 
     it('calls getPost with correct options', async () => {
@@ -260,15 +320,13 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'my-post' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
         slug: 'my-post',
         includeBlocks: true,
         includePrevAndNext: true,
-        skipCache: false,
       })
 
       // Verify post title is rendered
@@ -292,8 +350,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'standalone-post' })
-      const searchParams = Promise.resolve({})
-      const jsx = await DynamicRoute({ params, searchParams })
+      const jsx = await DynamicRoute({ params })
       render(jsx)
 
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Standalone Post')
@@ -315,9 +372,7 @@ describe('DynamicRoute page', () => {
       })
 
       const params = Promise.resolve({ slug: 'nonexistent-post' })
-      const searchParams = Promise.resolve({})
-
-      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('NEXT_NOT_FOUND')
+      await expect(DynamicRoute({ params })).rejects.toThrow('NEXT_NOT_FOUND')
       expect(notFound).toHaveBeenCalled()
     })
 
@@ -328,9 +383,7 @@ describe('DynamicRoute page', () => {
       })
 
       const params = Promise.resolve({ slug: 'missing-post' })
-      const searchParams = Promise.resolve({})
-
-      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('NEXT_NOT_FOUND')
+      await expect(DynamicRoute({ params })).rejects.toThrow('NEXT_NOT_FOUND')
       expect(notFound).toHaveBeenCalled()
     })
   })
@@ -341,10 +394,9 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Err(error))
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({})
 
       // The .unwrap() call should throw, causing build to fail
-      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('Failed to fetch post from Notion')
+      await expect(DynamicRoute({ params })).rejects.toThrow('Failed to fetch post from Notion')
     })
 
     it('throws when getPost rejects', async () => {
@@ -352,9 +404,162 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockRejectedValue(error)
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const searchParams = Promise.resolve({})
+      await expect(DynamicRoute({ params })).rejects.toThrow('Network error')
+    })
+  })
+})
 
-      await expect(DynamicRoute({ params, searchParams })).rejects.toThrow('Network error')
+describe('generateMetadata', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('success cases', () => {
+    it('generates metadata with post data when post has featured image', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'test-post',
+        title: 'Test Post Title',
+        description: 'Test post description',
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-20T10:00:00.000Z',
+        featuredImage: 'https://example.com/image.jpg',
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'test-post' })
+      const metadata = await generateMetadata({ params })
+
+      expect(metadata).toEqual({
+        title: 'Test Post Title',
+        description: 'Test post description',
+        alternates: {
+          canonical: 'https://michaeluloth.com/test-post/',
+        },
+        openGraph: {
+          type: 'article',
+          url: 'https://michaeluloth.com/test-post/',
+          siteName: 'Michael Uloth',
+          locale: 'en_CA',
+          title: 'Test Post Title',
+          description: 'Test post description',
+          publishedTime: '2024-01-15',
+          modifiedTime: '2024-01-20T10:00:00.000Z',
+          authors: ['Michael Uloth'],
+          images: ['https://example.com/image.jpg'],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          creator: '@ooloth',
+          title: 'Test Post Title',
+          description: 'Test post description',
+          images: ['https://example.com/image.jpg'],
+        },
+      })
+    })
+
+    it('uses default OG image when post has no featured image', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'no-image-post',
+        title: 'Post Without Image',
+        description: 'No featured image',
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'no-image-post' })
+      const metadata = await generateMetadata({ params })
+
+      expect(metadata.openGraph?.images).toEqual(['/og-image.png'])
+      expect(metadata.twitter?.images).toEqual(['/og-image.png'])
+    })
+
+    it('handles null description by converting to undefined', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'no-description-post',
+        title: 'Post Without Description',
+        description: null,
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'no-description-post' })
+      const metadata = await generateMetadata({ params })
+
+      expect(metadata.description).toBeUndefined()
+      expect(metadata.openGraph?.description).toBeUndefined()
+      expect(metadata.twitter?.description).toBeUndefined()
+    })
+
+    it('calls getPost with correct slug', async () => {
+      const mockPost = {
+        id: '123',
+        slug: 'my-test-post',
+        title: 'My Test Post',
+        description: null,
+        firstPublished: '2024-01-15',
+        lastEditedTime: '2024-01-15T00:00:00.000Z',
+        featuredImage: null,
+        blocks: [],
+        prevPost: null,
+        nextPost: null,
+      }
+
+      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
+
+      const params = Promise.resolve({ slug: 'my-test-post' })
+      await generateMetadata({ params })
+
+      expect(getPost).toHaveBeenCalledWith({ slug: 'my-test-post' })
+    })
+  })
+
+  describe('notFound behavior', () => {
+    it('returns empty object when post is null', async () => {
+      vi.mocked(getPost).mockResolvedValue(Ok(null))
+
+      const params = Promise.resolve({ slug: 'nonexistent-post' })
+      const metadata = await generateMetadata({ params })
+
+      expect(metadata).toEqual({})
+    })
+  })
+
+  describe('error cases', () => {
+    it('throws when getPost returns Err', async () => {
+      const error = new Error('Failed to fetch post metadata')
+      vi.mocked(getPost).mockResolvedValue(Err(error))
+
+      const params = Promise.resolve({ slug: 'test-post' })
+
+      await expect(generateMetadata({ params })).rejects.toThrow('Failed to fetch post metadata')
+    })
+
+    it('throws when getPost rejects', async () => {
+      const error = new Error('Network error')
+      vi.mocked(getPost).mockRejectedValue(error)
+
+      const params = Promise.resolve({ slug: 'test-post' })
+
+      await expect(generateMetadata({ params })).rejects.toThrow('Network error')
     })
   })
 })

@@ -30,31 +30,20 @@ function Summary(): ReactElement {
   )
 }
 
-type RecentWritingProps = Readonly<{
-  skipCache: boolean
-}>
-
-function RecentWriting({ skipCache }: RecentWritingProps): ReactElement {
+function RecentWriting(): ReactElement {
   return (
     <section>
       <h2 className="mt-16 mb-4 leading-tight text-[1.75rem] font-semibold text-bright">Recent Writing</h2>
-      <PostList limit={5} skipCache={skipCache} />
+      <PostList limit={5} />
     </section>
   )
 }
 
-type Props = Readonly<{
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}>
-
-export default async function Home({ searchParams }: Props): Promise<ReactElement> {
-  const params = await searchParams
-  const skipCache = params.nocache === 'true'
-
+export default async function Home(): Promise<ReactElement> {
   return (
     <main className="flex-auto">
       <Summary />
-      <RecentWriting skipCache={skipCache} />
+      <RecentWriting />
     </main>
   )
 }

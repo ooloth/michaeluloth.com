@@ -1,15 +1,29 @@
-// TODO: metadata: https://nextjs.org/docs/app/getting-started/metadata-and-og-images
-// TODO: metadata: https://nextjs.org/docs/app/api-reference/functions/generate-metadata
-// TODO: metadata files: https://nextjs.org/docs/app/api-reference/file-conventions/metadata
-
 import { type Metadata } from 'next'
 import { type ReactNode } from 'react'
 
 import '@/styles/globals.css'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/utils/metadata'
 
 export const metadata: Metadata = {
-  title: 'Michael Uloth',
-  description: 'Software engineer helping scientists discover new medicines at Recursion.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  authors: [{ name: SITE_AUTHOR }],
+  creator: SITE_AUTHOR,
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    locale: 'en_CA',
+    siteName: SITE_NAME,
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    creator: TWITTER_HANDLE,
+  },
   alternates: {
     types: {
       'application/rss+xml': '/rss.xml',
