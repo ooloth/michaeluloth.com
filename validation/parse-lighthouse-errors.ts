@@ -2,11 +2,34 @@
 /**
  * Parse Lighthouse CI results and show detailed failure information.
  *
- * Automatically runs after Lighthouse CI failures (via npm run lighthouse).
- * Reads .lighthouseci/*.json reports and formats failures with greppable attributes.
+ * WHY THIS EXISTS:
+ * The native `lhci assert` command only shows category-level failures (e.g., "SEO score: 0.92"),
+ * not which specific audits failed (e.g., "Document has meta description") or which elements
+ * caused the failure. This makes debugging difficult, especially in CI logs where you can't
+ * open the HTML reports.
  *
- * IMPORTANT: This runs automatically when Lighthouse fails - you rarely need to run it manually.
- * If you do: npm run lighthouse (which calls this script on failure)
+ * WHAT IT ADDS:
+ * - Specific audit names and descriptions for each failure
+ * - Greppable attributes extracted from failing elements (e.g., 'GREP FOR: href="/rss.xml"')
+ * - CSS selectors and HTML snippets for precise source code location
+ * - Terminal-friendly formatting for easy reading in CI logs
+ *
+ * The greppable attributes help developers quickly find issues in source code by searching for
+ * the exact attribute values shown in the error output (e.g., grep -r 'href="/rss.xml"' .).
+ *
+ * USAGE:
+ * This runs automatically after `lhci autorun` failures (via npm run lighthouse).
+ * You rarely need to run it manually. If you do: npm run lighthouse
+ *
+ * ESCAPE HATCH:
+ * For local development, you can view full interactive HTML reports with:
+ * - npx lhci open (opens reports with all audit details in browser)
+ * Note: This doesn't work in CI environments where reports must be readable in terminal output.
+ *
+ * MAINTENANCE NOTE:
+ * If greppable attribute extraction proves unused in practice, consider simplifying to just
+ * show audit names/descriptions. The core value is audit-level detail, not necessarily the
+ * attribute extraction.
  */
 
 import { readFileSync, existsSync, readdirSync } from 'fs'
