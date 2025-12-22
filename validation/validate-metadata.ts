@@ -10,7 +10,8 @@
  * Run: npm run build && npm run test:metadata
  */
 
-import { load, type Cheerio, type Element } from 'cheerio'
+import { load, type Cheerio } from 'cheerio'
+import type { AnyNode } from 'domhandler'
 import sharp from 'sharp'
 import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
@@ -105,7 +106,7 @@ export function hasCorrectCloudinaryDimensions(imageUrl: string): boolean {
 /**
  * Extract meta tag content from Cheerio element.
  */
-function getMetaContent(element: Cheerio<Element>): string | undefined {
+function getMetaContent(element: Cheerio<AnyNode>): string | undefined {
   const content = element.attr('content')
   return content && content.trim() !== '' ? content : undefined
 }
