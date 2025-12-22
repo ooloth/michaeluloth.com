@@ -89,10 +89,6 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
         and: [
           { property: 'Destination', multi_select: { contains: 'blog' } },
           { property: 'Status', status: { equals: 'Published' } }, // redundant if "First published" also used?
-          { property: 'Title', title: { is_not_empty: true } },
-          { property: 'Slug', rich_text: { is_not_empty: true } },
-          // NOTE: link posts don't have featured images atm
-          // { property: 'Featured image', url: { is_not_empty: true } },
           { property: 'First published', date: { on_or_before: new Date().toISOString() } },
         ],
       },
