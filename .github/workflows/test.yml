@@ -55,8 +55,8 @@ jobs:
       - run: npm ci
       - run: npm run test:ci
 
-  metadata:
-    name: Metadata
+  build:
+    name: Build
     runs-on: ubuntu-latest
     env:
       NOTION_ACCESS_TOKEN: ${{ secrets.NOTION_ACCESS_TOKEN }}
@@ -78,4 +78,41 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: out/
+
+  metadata:
+    name: Metadata
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: out/
       - run: npm run test:metadata
+
+  lighthouse:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: out/
+      - run: npm run lighthouse
