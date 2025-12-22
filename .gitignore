@@ -10,6 +10,7 @@ out/
 *.log
 *.tsbuildinfo
 next-env.d.ts
+.lighthouseci/
 
 # Mine
 **/cloudinary/*.json
