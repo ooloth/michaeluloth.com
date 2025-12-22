@@ -12,7 +12,7 @@
     "dev": "next dev",
     "format": "prettier --write .",
     "generate:og-image": "tsx metadata/generate-og-image.ts",
-    "lighthouse": "lhci autorun || (node scripts/lighthouse-debug.cjs && exit 1)",
+    "lighthouse": "lhci autorun || (tsx scripts/lighthouse-debug.ts && exit 1)",
     "lint": "eslint",
     "start": "next start",
     "test": "vitest",
