@@ -16,8 +16,8 @@ import sharp from 'sharp'
 import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/io/cloudinary/ogImageTransforms'
+import { SITE_URL } from '@/utils/metadata'
 import {
-  SITE_URL,
   OUT_DIR,
   STATIC_PAGES,
   REQUIRED_OG_TAGS,

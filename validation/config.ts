@@ -5,17 +5,6 @@
 import { join } from 'path'
 
 // ============================================================================
-// Site Configuration
-// ============================================================================
-
-/**
- * Production site URL. Used for validating canonical URLs and OG image URLs.
- *
- * TODO: Consider sourcing from env var or build config to support preview deployments.
- */
-export const SITE_URL = 'https://michaeluloth.com/'
-
-// ============================================================================
 // Build Paths
 // ============================================================================
 
