@@ -10,39 +10,260 @@
  * Run: npm run build && npm run test:metadata
  */
 
-import { load } from 'cheerio'
+import { load, type Cheerio, type Element } from 'cheerio'
 import sharp from 'sharp'
 import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/io/cloudinary/ogImageTransforms'
 
+// ============================================================================
+// Constants
+// ============================================================================
+
+const SITE_URL = 'https://michaeluloth.com/'
+const OUT_DIR = join(process.cwd(), 'out')
+
+const STATIC_PAGES = [
+  { file: 'index.html', name: 'Homepage' },
+  { file: 'blog/index.html', name: 'Blog' },
+  { file: 'likes/index.html', name: 'Likes' },
+]
+
+const REQUIRED_OG_TAGS = ['og:title', 'og:image', 'og:url', 'og:type', 'og:site_name', 'og:locale']
+const REQUIRED_ARTICLE_TAGS = ['article:published_time', 'article:modified_time', 'article:author']
+const REQUIRED_TWITTER_TAGS = ['twitter:card', 'twitter:creator', 'twitter:title', 'twitter:image']
+
+const EXCLUDE_DIRS = new Set(['blog', 'likes', '_next', 'api', '404', '_not-found'])
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface ValidationError {
+  page: string
+  error: string
+}
+
+interface PageToValidate {
+  file: string
+  name: string
+}
+
+// ============================================================================
+// Pure Functions (no I/O, easily testable)
+// ============================================================================
+
 /**
- * Finds all blog posts in the build output for validation.
- * Looks for directories in out/ that contain index.html and aren't special pages.
+ * Check if a URL is valid.
  */
-async function findAllBlogPosts(): Promise<string[]> {
+export function isValidUrl(url: string): boolean {
   try {
-    const outDir = join(process.cwd(), 'out')
-    const entries = await readdir(outDir, { withFileTypes: true })
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
 
-    // Filter for directories (potential blog posts)
-    const directories = entries.filter(entry => entry.isDirectory())
+/**
+ * Check if a date string is valid ISO 8601.
+ */
+export function isValidISODate(dateString: string): boolean {
+  return !isNaN(Date.parse(dateString))
+}
 
-    // Exclude known non-blog directories and Next.js special pages
-    const excludeDirs = new Set(['blog', 'likes', '_next', 'api', '404', '_not-found'])
+/**
+ * Infer the expected canonical URL for a page based on its file path.
+ */
+export function getExpectedCanonicalUrl(file: string): string {
+  if (file === 'index.html') return SITE_URL
+  const path = file.replace('/index.html', '/')
+  return `${SITE_URL}${path}`
+}
 
+/**
+ * Check if an OG image URL is either the default image or a Cloudinary URL.
+ */
+export function isValidOgImageUrl(imageUrl: string): boolean {
+  const isDefault = imageUrl === `${SITE_URL}og-image.png`
+  const isCloudinary = imageUrl.startsWith('https://res.cloudinary.com/')
+  return isDefault || isCloudinary
+}
+
+/**
+ * Check if a Cloudinary URL has the correct OG image dimensions in the transformation.
+ */
+export function hasCorrectCloudinaryDimensions(imageUrl: string): boolean {
+  const expectedDimensions = `w_${OG_IMAGE_WIDTH},h_${OG_IMAGE_HEIGHT}`
+  return imageUrl.includes(expectedDimensions)
+}
+
+// ============================================================================
+// HTML Parsing Functions (testable with sample HTML)
+// ============================================================================
+
+/**
+ * Extract meta tag content from Cheerio element.
+ */
+function getMetaContent(element: Cheerio<Element>): string | undefined {
+  const content = element.attr('content')
+  return content && content.trim() !== '' ? content : undefined
+}
+
+/**
+ * Validate required meta tags are present and have content.
+ */
+function validateRequiredTags(
+  $: ReturnType<typeof load>,
+  tags: string[],
+  selector: (tag: string) => string,
+  pageName: string,
+  tagType: string
+): ValidationError[] {
+  const errors: ValidationError[] = []
+
+  for (const tag of tags) {
+    const element = $(selector(tag))
+    const content = getMetaContent(element)
+
+    if (!element.length) {
+      errors.push({ page: pageName, error: `Missing required ${tagType} tag: ${tag}` })
+    } else if (!content) {
+      errors.push({ page: pageName, error: `Empty content for ${tagType} tag: ${tag}` })
+    }
+  }
+
+  return errors
+}
+
+/**
+ * Validate OpenGraph meta tags in HTML.
+ */
+function validateOgTags(html: string, pageName: string, expectedUrl: string): ValidationError[] {
+  const $ = load(html)
+  const errors: ValidationError[] = []
+
+  // Check required OG tags
+  errors.push(...validateRequiredTags($, REQUIRED_OG_TAGS, tag => `meta[property="${tag}"]`, pageName, 'OG'))
+
+  // Validate og:url
+  const ogUrl = getMetaContent($('meta[property="og:url"]'))
+  if (ogUrl) {
+    if (!isValidUrl(ogUrl)) {
+      errors.push({ page: pageName, error: `og:url is not a valid URL: ${ogUrl}` })
+    } else if (ogUrl !== expectedUrl) {
+      errors.push({
+        page: pageName,
+        error: `og:url does not match expected canonical URL. Expected: ${expectedUrl}, Got: ${ogUrl}`,
+      })
+    }
+  }
+
+  // Validate og:image
+  const ogImage = getMetaContent($('meta[property="og:image"]'))
+  if (ogImage) {
+    if (!isValidUrl(ogImage)) {
+      errors.push({ page: pageName, error: `og:image is not a valid URL: ${ogImage}` })
+    } else if (!isValidOgImageUrl(ogImage)) {
+      errors.push({
+        page: pageName,
+        error: `og:image must be either the default OG image or a Cloudinary URL. Got: ${ogImage}`,
+      })
+    } else if (ogImage.startsWith('https://res.cloudinary.com/') && !hasCorrectCloudinaryDimensions(ogImage)) {
+      const expected = `w_${OG_IMAGE_WIDTH},h_${OG_IMAGE_HEIGHT}`
+      errors.push({
+        page: pageName,
+        error: `Cloudinary og:image must include correct dimensions (${expected}). Got: ${ogImage}`,
+      })
+    }
+  }
+
+  // Validate og:type
+  const ogType = getMetaContent($('meta[property="og:type"]'))
+  if (ogType && !['website', 'article'].includes(ogType)) {
+    errors.push({
+      page: pageName,
+      error: `og:type has invalid value: ${ogType} (expected "website" or "article")`,
+    })
+  }
+
+  // Validate article-specific tags
+  if (ogType === 'article') {
+    errors.push(
+      ...validateRequiredTags($, REQUIRED_ARTICLE_TAGS, tag => `meta[property="${tag}"]`, pageName, 'article')
+    )
+
+    // Validate article dates
+    const publishedTime = getMetaContent($('meta[property="article:published_time"]'))
+    if (publishedTime && !isValidISODate(publishedTime)) {
+      errors.push({ page: pageName, error: `article:published_time is not a valid date: ${publishedTime}` })
+    }
+
+    const modifiedTime = getMetaContent($('meta[property="article:modified_time"]'))
+    if (modifiedTime && !isValidISODate(modifiedTime)) {
+      errors.push({ page: pageName, error: `article:modified_time is not a valid date: ${modifiedTime}` })
+    }
+  }
+
+  return errors
+}
+
+/**
+ * Validate Twitter Card meta tags in HTML.
+ */
+function validateTwitterTags(html: string, pageName: string): ValidationError[] {
+  const $ = load(html)
+  const errors: ValidationError[] = []
+
+  // Check required Twitter tags
+  errors.push(...validateRequiredTags($, REQUIRED_TWITTER_TAGS, tag => `meta[name="${tag}"]`, pageName, 'Twitter'))
+
+  // Validate twitter:card value
+  const twitterCard = getMetaContent($('meta[name="twitter:card"]'))
+  if (twitterCard && twitterCard !== 'summary_large_image') {
+    errors.push({
+      page: pageName,
+      error: `twitter:card has invalid value: ${twitterCard} (expected "summary_large_image")`,
+    })
+  }
+
+  // Validate twitter:image matches og:image
+  const twitterImage = getMetaContent($('meta[name="twitter:image"]'))
+  const ogImage = getMetaContent($('meta[property="og:image"]'))
+
+  if (twitterImage) {
+    if (!isValidUrl(twitterImage)) {
+      errors.push({ page: pageName, error: `twitter:image is not a valid URL: ${twitterImage}` })
+    } else if (ogImage && twitterImage !== ogImage) {
+      errors.push({
+        page: pageName,
+        error: `twitter:image must match og:image. Expected: ${ogImage}, Got: ${twitterImage}`,
+      })
+    }
+  }
+
+  return errors
+}
+
+// ============================================================================
+// I/O Functions
+// ============================================================================
+
+/**
+ * Find all blog post directories in the build output.
+ */
+async function findBlogPosts(): Promise<string[]> {
+  try {
+    const entries = await readdir(OUT_DIR, { withFileTypes: true })
     const posts: string[] = []
 
-    for (const dir of directories) {
-      if (excludeDirs.has(dir.name)) continue
+    for (const entry of entries.filter(e => e.isDirectory())) {
+      if (EXCLUDE_DIRS.has(entry.name)) continue
 
-      // Check if this directory has an index.html (confirms it's a static page)
       try {
-        const indexPath = join(outDir, dir.name, 'index.html')
-        await readFile(indexPath)
-        posts.push(`${dir.name}/index.html`)
+        await readFile(join(OUT_DIR, entry.name, 'index.html'))
+        posts.push(`${entry.name}/index.html`)
       } catch {
-        // Not a static page, skip
         continue
       }
     }
@@ -54,249 +275,52 @@ async function findAllBlogPosts(): Promise<string[]> {
   }
 }
 
-// Pages to validate (static pages)
-// Note: All blog posts will be added dynamically in main function
-const STATIC_PAGES = [
-  { file: 'index.html', name: 'Homepage' },
-  { file: 'blog/index.html', name: 'Blog' },
-  { file: 'likes/index.html', name: 'Likes' },
-]
-
-// Required OG tags (description is optional - posts may not have one)
-const REQUIRED_OG_TAGS = ['og:title', 'og:image', 'og:url', 'og:type', 'og:site_name', 'og:locale']
-
-// Required article-specific OG tags (only for pages where og:type is "article")
-const REQUIRED_ARTICLE_TAGS = ['article:published_time', 'article:modified_time', 'article:author']
-
-// Required Twitter tags (description is optional - posts may not have one)
-const REQUIRED_TWITTER_TAGS = ['twitter:card', 'twitter:creator', 'twitter:title', 'twitter:image']
-
-interface ValidationError {
-  page: string
-  error: string
-}
-
-const errors: ValidationError[] = []
-
 /**
- * Validates OG meta tags in HTML
+ * Fetch and validate OG image dimensions.
  */
-function validateOgTags(html: string, pageName: string, expectedUrl: string): void {
+async function validateOgImage(html: string, pageName: string): Promise<ValidationError[]> {
   const $ = load(html)
+  const imageUrl = getMetaContent($('meta[property="og:image"]'))
 
-  // Check required OG tags
-  for (const tag of REQUIRED_OG_TAGS) {
-    const element = $(`meta[property="${tag}"]`)
-    const content = element.attr('content')
+  if (!imageUrl) return []
 
-    if (!element.length) {
-      errors.push({ page: pageName, error: `Missing required tag: ${tag}` })
-    } else if (!content || content.trim() === '') {
-      errors.push({ page: pageName, error: `Empty content for tag: ${tag}` })
-    }
-  }
-
-  // Validate og:url matches expected canonical URL exactly
-  const ogUrl = $('meta[property="og:url"]').attr('content')
-  if (ogUrl) {
-    try {
-      new URL(ogUrl)
-    } catch {
-      errors.push({ page: pageName, error: `og:url is not a valid URL: ${ogUrl}` })
-    }
-
-    if (ogUrl !== expectedUrl) {
-      errors.push({
-        page: pageName,
-        error: `og:url does not match expected canonical URL. Expected: ${expectedUrl}, Got: ${ogUrl}`,
-      })
-    }
-  }
-
-  // Validate og:image is a valid URL and matches expected patterns
-  const ogImage = $('meta[property="og:image"]').attr('content')
-  if (ogImage) {
-    try {
-      new URL(ogImage)
-    } catch {
-      errors.push({ page: pageName, error: `og:image is not a valid URL: ${ogImage}` })
-    }
-
-    // Check that image is either the default OG image or a Cloudinary URL
-    const isDefaultImage = ogImage === 'https://michaeluloth.com/og-image.png'
-    const isCloudinaryImage = ogImage.startsWith('https://res.cloudinary.com/')
-
-    if (!isDefaultImage && !isCloudinaryImage) {
-      errors.push({
-        page: pageName,
-        error: `og:image must be either the default OG image or a Cloudinary URL. Got: ${ogImage}`,
-      })
-    }
-
-    // If Cloudinary, verify it has the OG transformation parameters
-    const expectedDimensions = `w_${OG_IMAGE_WIDTH},h_${OG_IMAGE_HEIGHT}`
-    if (isCloudinaryImage && !ogImage.includes(expectedDimensions)) {
-      errors.push({
-        page: pageName,
-        error: `Cloudinary og:image must include correct dimensions (${expectedDimensions}). Got: ${ogImage}`,
-      })
-    }
-  }
-
-  // Validate og:type has valid value
-  const ogType = $('meta[property="og:type"]').attr('content')
-  if (ogType && !['website', 'article'].includes(ogType)) {
-    errors.push({ page: pageName, error: `og:type has invalid value: ${ogType} (expected "website" or "article")` })
-  }
-
-  // Check article-specific tags if og:type is "article"
-  if (ogType === 'article') {
-    for (const tag of REQUIRED_ARTICLE_TAGS) {
-      const element = $(`meta[property="${tag}"]`)
-      const content = element.attr('content')
-
-      if (!element.length) {
-        errors.push({ page: pageName, error: `Missing required article tag: ${tag}` })
-      } else if (!content || content.trim() === '') {
-        errors.push({ page: pageName, error: `Empty content for article tag: ${tag}` })
-      }
-    }
-
-    // Validate article dates are valid ISO 8601
-    const publishedTime = $('meta[property="article:published_time"]').attr('content')
-    if (publishedTime && isNaN(Date.parse(publishedTime))) {
-      errors.push({ page: pageName, error: `article:published_time is not a valid date: ${publishedTime}` })
-    }
-
-    const modifiedTime = $('meta[property="article:modified_time"]').attr('content')
-    if (modifiedTime && isNaN(Date.parse(modifiedTime))) {
-      errors.push({ page: pageName, error: `article:modified_time is not a valid date: ${modifiedTime}` })
-    }
-  }
-}
-
-/**
- * Validates Twitter Card meta tags in HTML
- */
-function validateTwitterTags(html: string, pageName: string): void {
-  const $ = load(html)
-
-  // Check required Twitter tags
-  for (const tag of REQUIRED_TWITTER_TAGS) {
-    const element = $(`meta[name="${tag}"]`)
-    const content = element.attr('content')
-
-    if (!element.length) {
-      errors.push({ page: pageName, error: `Missing required tag: ${tag}` })
-    } else if (!content || content.trim() === '') {
-      errors.push({ page: pageName, error: `Empty content for tag: ${tag}` })
-    }
-  }
-
-  // Validate twitter:card has valid value
-  const twitterCard = $('meta[name="twitter:card"]').attr('content')
-  if (twitterCard && twitterCard !== 'summary_large_image') {
-    errors.push({
-      page: pageName,
-      error: `twitter:card has invalid value: ${twitterCard} (expected "summary_large_image")`,
-    })
-  }
-
-  // Validate twitter:image is a valid URL and matches og:image
-  const twitterImage = $('meta[name="twitter:image"]').attr('content')
-  const ogImage = $('meta[property="og:image"]').attr('content')
-
-  if (twitterImage) {
-    try {
-      new URL(twitterImage)
-    } catch {
-      errors.push({ page: pageName, error: `twitter:image is not a valid URL: ${twitterImage}` })
-    }
-
-    // Twitter image should match OpenGraph image
-    if (ogImage && twitterImage !== ogImage) {
-      errors.push({
-        page: pageName,
-        error: `twitter:image must match og:image. Expected: ${ogImage}, Got: ${twitterImage}`,
-      })
-    }
-  }
-}
-
-/**
- * Validates og:image is accessible and has correct dimensions
- */
-async function validateOgImage(html: string, pageName: string): Promise<void> {
-  const $ = load(html)
-  const imageUrl = $('meta[property="og:image"]').attr('content')
-
-  if (!imageUrl) {
-    return // Already caught by validateOgTags
-  }
+  // Skip Cloudinary images (dimensions already validated in URL)
+  if (imageUrl.startsWith('https://res.cloudinary.com/')) return []
 
   try {
-    // Validate imageUrl is a non-empty string
-    if (typeof imageUrl !== 'string' || !imageUrl.trim()) {
-      errors.push({
-        page: pageName,
-        error: `og:image URL is invalid: ${imageUrl}`,
-      })
-      return
-    }
-
-    // For Cloudinary images, we already validated the URL has correct transformation
-    // parameters (w_1200,h_630) in validateOgTags. Cloudinary transformations are
-    // deterministic, so we can trust the dimensions without fetching.
-    if (imageUrl.startsWith('https://res.cloudinary.com/')) {
-      return
-    }
-
     let buffer: ArrayBuffer
 
-    // Check if it's a local image (michaeluloth.com domain)
-    if (imageUrl.startsWith('https://michaeluloth.com/')) {
-      // Extract path and read from local out/ directory
-      const imagePath = imageUrl.replace('https://michaeluloth.com/', '')
-      const localPath = join(process.cwd(), 'out', imagePath)
+    // Local image
+    if (imageUrl.startsWith(SITE_URL)) {
+      const imagePath = imageUrl.replace(SITE_URL, '')
+      const localPath = join(OUT_DIR, imagePath)
 
       try {
         const fileBuffer = await readFile(localPath)
         buffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength)
-      } catch (error) {
-        errors.push({
-          page: pageName,
-          error: `og:image file not found: ${imagePath} (expected at ${localPath})`,
-        })
-        return
+      } catch {
+        return [{ page: pageName, error: `og:image file not found: ${imagePath} (expected at ${localPath})` }]
       }
     } else {
-      // External image - fetch from URL with timeout
+      // External image - fetch with timeout
       const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      const timeout = setTimeout(() => controller.abort(), 10000)
 
       try {
         const response = await fetch(imageUrl, { signal: controller.signal })
         clearTimeout(timeout)
 
         if (!response.ok) {
-          errors.push({
-            page: pageName,
-            error: `og:image not accessible: ${imageUrl} (${response.status})`,
-          })
-          return
+          return [{ page: pageName, error: `og:image not accessible: ${imageUrl} (${response.status})` }]
         }
+
         buffer = await response.arrayBuffer()
       } catch (fetchError) {
         clearTimeout(timeout)
         if (fetchError instanceof Error && fetchError.name === 'AbortError') {
-          errors.push({
-            page: pageName,
-            error: `og:image fetch timed out: ${imageUrl}`,
-          })
-        } else {
-          throw fetchError // Re-throw other errors to be caught by outer catch
+          return [{ page: pageName, error: `og:image fetch timed out: ${imageUrl}` }]
         }
-        return
+        throw fetchError
       }
     }
 
@@ -304,66 +328,61 @@ async function validateOgImage(html: string, pageName: string): Promise<void> {
     const metadata = await sharp(Buffer.from(buffer)).metadata()
 
     if (metadata.width !== OG_IMAGE_WIDTH || metadata.height !== OG_IMAGE_HEIGHT) {
-      errors.push({
-        page: pageName,
-        error: `og:image has wrong dimensions: ${metadata.width}x${metadata.height} (expected ${OG_IMAGE_WIDTH}x${OG_IMAGE_HEIGHT})`,
-      })
+      return [
+        {
+          page: pageName,
+          error: `og:image has wrong dimensions: ${metadata.width}x${metadata.height} (expected ${OG_IMAGE_WIDTH}x${OG_IMAGE_HEIGHT})`,
+        },
+      ]
     }
+
+    return []
   } catch (error) {
-    errors.push({
-      page: pageName,
-      error: `Failed to validate og:image: ${error instanceof Error ? error.message : String(error)}`,
-    })
+    return [
+      {
+        page: pageName,
+        error: `Failed to validate og:image: ${error instanceof Error ? error.message : String(error)}`,
+      },
+    ]
   }
 }
 
 /**
- * Infers the expected canonical URL for a page based on its file path
+ * Validate a single page.
  */
-function getExpectedUrl(file: string): string {
-  const SITE_URL = 'https://michaeluloth.com/'
+async function validatePage(file: string, name: string): Promise<ValidationError[]> {
+  const filePath = join(OUT_DIR, file)
+  const expectedUrl = getExpectedCanonicalUrl(file)
+  const errors: ValidationError[] = []
 
-  if (file === 'index.html') {
-    return SITE_URL
-  }
-
-  // Remove /index.html and ensure trailing slash
-  const path = file.replace('/index.html', '/')
-  return `${SITE_URL}${path}`
-}
-
-/**
- * Validates a single page
- */
-async function validatePage(file: string, name: string): Promise<void> {
-  const filePath = join(process.cwd(), 'out', file)
-  const expectedUrl = getExpectedUrl(file)
   console.log(`Validating ${name}: ${file}`)
 
   try {
     const html = await readFile(filePath, 'utf-8')
 
-    validateOgTags(html, name, expectedUrl)
-    validateTwitterTags(html, name)
-    await validateOgImage(html, name)
+    errors.push(...validateOgTags(html, name, expectedUrl))
+    errors.push(...validateTwitterTags(html, name))
+    errors.push(...(await validateOgImage(html, name)))
   } catch (error) {
     errors.push({
       page: name,
       error: `Failed to read file: ${error instanceof Error ? error.message : String(error)}`,
     })
   }
+
+  return errors
 }
 
-/**
- * Main validation function
- */
+// ============================================================================
+// Main Entry Point
+// ============================================================================
+
 async function validateMetadata() {
   try {
-    // Build pages list dynamically
-    const pages = [...STATIC_PAGES]
+    const pages: PageToValidate[] = [...STATIC_PAGES]
 
-    // Find and add all blog posts for validation
-    const blogPostFiles = await findAllBlogPosts()
+    // Find and add blog posts
+    const blogPostFiles = await findBlogPosts()
     if (blogPostFiles.length > 0) {
       for (const file of blogPostFiles) {
         const postSlug = file.replace('/index.html', '')
@@ -375,18 +394,20 @@ async function validateMetadata() {
     }
 
     // Validate all pages
+    const allErrors: ValidationError[] = []
     for (const page of pages) {
-      await validatePage(page.file, page.name)
+      const pageErrors = await validatePage(page.file, page.name)
+      allErrors.push(...pageErrors)
     }
 
     // Report results
     console.log('\n' + '='.repeat(50))
-    if (errors.length === 0) {
+    if (allErrors.length === 0) {
       console.log('✅ All metadata validation checks passed!')
       process.exit(0)
     } else {
-      console.log(`❌ Found ${errors.length} validation error(s):\n`)
-      for (const error of errors) {
+      console.log(`❌ Found ${allErrors.length} validation error(s):\n`)
+      for (const error of allErrors) {
         console.log(`  ${error.page}:`)
         console.log(`    ${error.error}\n`)
       }
