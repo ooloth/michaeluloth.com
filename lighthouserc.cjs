@@ -2,6 +2,7 @@ module.exports = {
   ci: {
     collect: {
       staticDistDir: './out',
+      numberOfRuns: 1, // Faster iteration during development (default: 3)
     },
     assert: {
       assertions: {
