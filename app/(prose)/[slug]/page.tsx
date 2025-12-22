@@ -28,7 +28,7 @@ type JsonLdArticle = {
   '@context': string
   '@type': string
   headline: string
-  description?: string
+  description: string
   datePublished: string
   dateModified: string
   author: {
@@ -52,7 +52,7 @@ function generateJsonLd(post: PostType, slug: string): JsonLdArticle {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: post.title,
-    description: post.description ?? undefined,
+    description: post.description,
     datePublished: post.firstPublished,
     dateModified: post.lastEditedTime,
     author: {
@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: post.title,
-    description: post.description ?? undefined,
+    description: post.description,
     alternates: {
       canonical: url,
     },
@@ -88,7 +88,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: SITE_NAME,
       locale: 'en_CA',
       title: post.title,
-      description: post.description ?? undefined,
+      description: post.description,
       publishedTime: post.firstPublished,
       modifiedTime: post.lastEditedTime,
       authors: [SITE_AUTHOR],
@@ -98,7 +98,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       creator: TWITTER_HANDLE,
       title: post.title,
-      description: post.description ?? undefined,
+      description: post.description,
       images: [ogImage],
     },
   }

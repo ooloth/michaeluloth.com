@@ -37,7 +37,7 @@ export async function GET() {
       title: postItem.title,
       id: permalink,
       link: permalink,
-      description: postItem.description ?? undefined,
+      description: postItem.description,
       content,
       date: new Date(postItem.firstPublished),
       // Note: author tag added via post-processing below (RSS 2.0 spec requires email in author tag)
