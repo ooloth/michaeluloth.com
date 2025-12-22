@@ -34,7 +34,7 @@ describe('Link', () => {
       render(
         <Link href="/search" ariaLabel="Search the site">
           🔍
-        </Link>
+        </Link>,
       )
       const link = screen.getByRole('link', { name: 'Search the site' })
       expect(link).toBeInTheDocument()
@@ -44,7 +44,7 @@ describe('Link', () => {
       render(
         <Link href="/current" ariaCurrent="page">
           Current Page
-        </Link>
+        </Link>,
       )
       const link = screen.getByRole('link', { name: 'Current Page' })
       expect(link).toHaveAttribute('aria-current', 'page')
@@ -60,7 +60,7 @@ describe('Link', () => {
       render(
         <Link href="/about" className="custom-link">
           About
-        </Link>
+        </Link>,
       )
       const link = screen.getByRole('link', { name: 'About' })
       expect(link).toHaveClass('custom-link')
@@ -85,7 +85,7 @@ describe('Link', () => {
       render(
         <Link href="https://github.com/ooloth" ariaLabel="GitHub">
           <span>GH</span>
-        </Link>
+        </Link>,
       )
       const link = screen.getByRole('link', { name: 'GitHub' })
       expect(link).toBeInTheDocument()
@@ -101,7 +101,7 @@ describe('Link', () => {
       render(
         <Link href="https://example.com" className="external-link">
           Example
-        </Link>
+        </Link>,
       )
       const link = screen.getByRole('link', { name: 'Example' })
       expect(link).toHaveClass('external-link')
