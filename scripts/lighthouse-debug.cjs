@@ -21,12 +21,17 @@ function getFailingAudits(lhr) {
 
   for (const [id, audit] of Object.entries(lhr.audits)) {
     if (audit.score !== null && audit.score < 1) {
+      const items = audit.details?.items || [];
       failing.push({
         id,
         title: audit.title,
         score: audit.score,
         description: audit.description,
-        numItems: audit.details?.items?.length || 0,
+        items: items.map(item => ({
+          selector: item.node?.selector,
+          snippet: item.node?.snippet,
+          explanation: item.node?.explanation,
+        })).filter(item => item.selector || item.snippet),
       });
     }
   }
@@ -75,10 +80,23 @@ function main() {
 
     console.log(`\n  Failing audits (${audits.length}):`);
     for (const audit of audits) {
-      console.log(`    ✗ ${audit.title} (score: ${audit.score})`);
+      console.log(`\n    ✗ ${audit.title} (score: ${audit.score})`);
       console.log(`      ${audit.description}`);
-      if (audit.numItems > 0) {
-        console.log(`      ${audit.numItems} item(s) need fixing`);
+
+      if (audit.items.length > 0) {
+        console.log(`\n      Failing elements (${audit.items.length}):`);
+        for (const item of audit.items) {
+          if (item.selector) {
+            console.log(`        • ${item.selector}`);
+          }
+          if (item.snippet) {
+            // Truncate long snippets
+            const truncated = item.snippet.length > 100
+              ? item.snippet.slice(0, 100) + '...'
+              : item.snippet;
+            console.log(`          ${truncated}`);
+          }
+        }
       }
     }
   }
