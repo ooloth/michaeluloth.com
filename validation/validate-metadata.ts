@@ -14,6 +14,7 @@ import { load, type Cheerio } from 'cheerio'
 import type { AnyNode } from 'domhandler'
 import sharp from 'sharp'
 import { readFile, readdir } from 'fs/promises'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/io/cloudinary/ogImageTransforms'
 import { SITE_URL } from '@/utils/metadata'
@@ -368,8 +369,39 @@ async function validatePage(file: string, name: string): Promise<ValidationError
 // Main Entry Point
 // ============================================================================
 
+/**
+ * Validate required constants and directories before running validation.
+ * Throws descriptive errors if environment is not properly configured.
+ */
+function validateEnvironment(): void {
+  // Check that SITE_URL is defined and valid
+  if (!SITE_URL || typeof SITE_URL !== 'string') {
+    throw new Error('SITE_URL constant is not defined or invalid. Check utils/metadata.ts')
+  }
+
+  // Check that OG image dimensions are defined
+  if (typeof OG_IMAGE_WIDTH !== 'number' || typeof OG_IMAGE_HEIGHT !== 'number') {
+    throw new Error('OG_IMAGE_WIDTH or OG_IMAGE_HEIGHT constants are not defined. Check io/cloudinary/ogImageTransforms.ts')
+  }
+
+  if (OG_IMAGE_WIDTH <= 0 || OG_IMAGE_HEIGHT <= 0) {
+    throw new Error(`Invalid OG image dimensions: ${OG_IMAGE_WIDTH}x${OG_IMAGE_HEIGHT}. Dimensions must be positive numbers.`)
+  }
+
+  // Check that OUT_DIR exists
+  if (!existsSync(OUT_DIR)) {
+    throw new Error(
+      `Build output directory does not exist: ${OUT_DIR}\n` +
+      `Run 'npm run build' before running metadata validation.`
+    )
+  }
+}
+
 async function validateMetadata() {
   try {
+    // Validate environment before proceeding
+    validateEnvironment()
+
     const pages: PageToValidate[] = [...STATIC_PAGES]
 
     // Find and add blog posts
