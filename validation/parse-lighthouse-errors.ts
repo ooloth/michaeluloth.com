@@ -252,24 +252,57 @@ function loadAllFailures(): PageFailures[] {
 }
 
 // ============================================================================
+// Environment Validation
+// ============================================================================
+
+/**
+ * Validate environment and preconditions before running.
+ * Throws descriptive errors if environment is not ready.
+ */
+function validateEnvironment(): void {
+  if (!existsSync(LHCI_DIR)) {
+    throw new Error(
+      `Lighthouse reports directory not found: ${LHCI_DIR}\n` +
+        `This script runs automatically after 'lhci autorun' fails.\n` +
+        `If running manually: npm run lighthouse`
+    )
+  }
+
+  const reportFiles = readdirSync(LHCI_DIR).filter(f => f.startsWith('lhr-') && f.endsWith('.json'))
+
+  if (reportFiles.length === 0) {
+    throw new Error(
+      `No Lighthouse report files found in ${LHCI_DIR}\n` + `Expected files matching pattern: lhr-*.json`
+    )
+  }
+}
+
+// ============================================================================
 // Main Entry Point
 // ============================================================================
 
 function main() {
-  const failures = loadAllFailures()
+  try {
+    validateEnvironment()
 
-  if (failures.length === 0) {
-    console.log('✓ No audit failures found!')
-    return
+    const failures = loadAllFailures()
+
+    if (failures.length === 0) {
+      console.log('✓ No audit failures found!')
+      return
+    }
+
+    console.log('\n=== Lighthouse Audit Failures ===\n')
+
+    for (const pageFailures of failures) {
+      console.log(formatPageFailures(pageFailures))
+    }
+
+    console.log('\n')
+  } catch (error) {
+    console.error('❌ Failed to parse Lighthouse results:', error)
+    process.exit(1)
   }
-
-  console.log('\n=== Lighthouse Audit Failures ===\n')
-
-  for (const pageFailures of failures) {
-    console.log(formatPageFailures(pageFailures))
-  }
-
-  console.log('\n')
 }
 
 main()
