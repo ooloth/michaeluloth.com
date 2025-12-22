@@ -7,6 +7,9 @@
  * - og:image URL is accessible
  * - og:image dimensions are correct (1200x630)
  *
+ * IMPORTANT: This script must run AFTER the build completes.
+ * It validates the static HTML output, not the source code.
+ *
  * Run: npm run build && npm run test:metadata
  */
 
@@ -47,6 +50,11 @@ interface PageToValidate {
 
 /**
  * Check if a URL is valid.
+ *
+ * @example
+ * isValidUrl('https://example.com') // true
+ * isValidUrl('/relative/path') // false
+ * isValidUrl('not a url') // false
  */
 export function isValidUrl(url: string): boolean {
   try {
@@ -59,6 +67,11 @@ export function isValidUrl(url: string): boolean {
 
 /**
  * Check if a date string is valid ISO 8601.
+ *
+ * @example
+ * isValidISODate('2024-01-15T10:30:00Z') // true
+ * isValidISODate('2024-01-15') // true
+ * isValidISODate('not a date') // false
  */
 export function isValidISODate(dateString: string): boolean {
   return !isNaN(Date.parse(dateString))
@@ -66,6 +79,11 @@ export function isValidISODate(dateString: string): boolean {
 
 /**
  * Infer the expected canonical URL for a page based on its file path.
+ *
+ * @example
+ * getExpectedCanonicalUrl('index.html') // 'https://michaeluloth.com/'
+ * getExpectedCanonicalUrl('blog/index.html') // 'https://michaeluloth.com/blog/'
+ * getExpectedCanonicalUrl('blog/my-post/index.html') // 'https://michaeluloth.com/blog/my-post/'
  */
 export function getExpectedCanonicalUrl(file: string): string {
   if (file === 'index.html') return SITE_URL
@@ -75,6 +93,13 @@ export function getExpectedCanonicalUrl(file: string): string {
 
 /**
  * Check if an OG image URL is either the default image or a Cloudinary URL.
+ *
+ * Only these two patterns are allowed to ensure consistent image hosting and sizing.
+ *
+ * @example
+ * isValidOgImageUrl('https://michaeluloth.com/og-image.png') // true (default)
+ * isValidOgImageUrl('https://res.cloudinary.com/ooloth/image.png') // true
+ * isValidOgImageUrl('https://example.com/image.png') // false
  */
 export function isValidOgImageUrl(imageUrl: string): boolean {
   const isDefault = imageUrl === `${SITE_URL}og-image.png`
@@ -84,6 +109,12 @@ export function isValidOgImageUrl(imageUrl: string): boolean {
 
 /**
  * Check if a Cloudinary URL has the correct OG image dimensions in the transformation.
+ *
+ * OG images must be 1200x630px per OpenGraph spec for optimal social sharing previews.
+ *
+ * @example
+ * hasCorrectCloudinaryDimensions('https://res.cloudinary.com/.../w_1200,h_630/image.png') // true
+ * hasCorrectCloudinaryDimensions('https://res.cloudinary.com/.../w_800,h_600/image.png') // false
  */
 export function hasCorrectCloudinaryDimensions(imageUrl: string): boolean {
   const expectedDimensions = `w_${OG_IMAGE_WIDTH},h_${OG_IMAGE_HEIGHT}`
