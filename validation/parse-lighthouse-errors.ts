@@ -132,9 +132,9 @@ function transformAuditItemToElement(item: LighthouseItem): FailingElement | nul
  * including details about failing elements with searchable attributes.
  *
  * @example
- * const lhr = JSON.parse(readFileSync('.lighthouseci/lhr-123.json'))
+ * const lhr = JSON.parse(readFileSync('.lighthouseci/lhr-123.json', 'utf-8'))
  * const failing = extractFailingAudits(lhr)
- * // Returns array of failing audits with elements that have greppable attributes
+ * // Returns: [{ id: 'image-alt', title: 'Image elements have alt', score: 0.5, elements: [...] }]
  */
 export function extractFailingAudits(lhr: LighthouseResult): FailingAudit[] {
   const failing: FailingAudit[] = []
@@ -173,10 +173,10 @@ function formatScore(score: number): string {
  * @example
  * const output = formatPageFailures({
  *   url: 'http://localhost:3000/index.html',
- *   categories: { accessibility: { score: 0.89 }, ... },
- *   audits: [{ title: 'Image alt text', ... }]
+ *   categories: { accessibility: { score: 0.89 }, performance: { score: 0.95 }, ... },
+ *   audits: [{ id: 'image-alt', title: 'Image alt text', score: 0.5, elements: [...] }]
  * })
- * // Returns multi-line string with formatted failure report
+ * // Returns formatted multi-line string for console output with URL, scores, and greppable attributes
  */
 export function formatPageFailures(failures: PageFailures): string {
   const lines: string[] = []
