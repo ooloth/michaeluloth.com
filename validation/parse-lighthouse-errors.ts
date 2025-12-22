@@ -303,4 +303,8 @@ function main() {
   }
 }
 
-main()
+// Only execute main() when this file is run directly (not when imported by tests)
+// Similar to Python's: if __name__ == "__main__"
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main()
+}
