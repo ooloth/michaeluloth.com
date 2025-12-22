@@ -87,6 +87,7 @@ describe('extractSearchableAttrs', () => {
 describe('extractFailingAudits', () => {
   it('returns only audits with score < 1', () => {
     const mockLhr = {
+      finalUrl: 'http://localhost/index.html',
       audits: {
         'image-alt': {
           id: 'image-alt',
@@ -115,7 +116,7 @@ describe('extractFailingAudits', () => {
       },
     }
 
-    const result = extractFailingAudits(mockLhr as any)
+    const result = extractFailingAudits(mockLhr)
 
     expect(result).toHaveLength(2)
     expect(result[0].id).toBe('image-alt')
@@ -126,6 +127,7 @@ describe('extractFailingAudits', () => {
 
   it('extracts element details with searchable attributes', () => {
     const mockLhr = {
+      finalUrl: 'http://localhost/page.html',
       audits: {
         'image-alt': {
           id: 'image-alt',
@@ -152,7 +154,7 @@ describe('extractFailingAudits', () => {
       },
     }
 
-    const result = extractFailingAudits(mockLhr as any)
+    const result = extractFailingAudits(mockLhr)
 
     expect(result).toHaveLength(1)
     expect(result[0].elements).toHaveLength(1)
@@ -163,6 +165,7 @@ describe('extractFailingAudits', () => {
 
   it('handles audits without details', () => {
     const mockLhr = {
+      finalUrl: 'http://localhost/page.html',
       audits: {
         'meta-description': {
           id: 'meta-description',
@@ -180,7 +183,7 @@ describe('extractFailingAudits', () => {
       },
     }
 
-    const result = extractFailingAudits(mockLhr as any)
+    const result = extractFailingAudits(mockLhr)
 
     expect(result).toHaveLength(1)
     expect(result[0].elements).toEqual([])
@@ -188,6 +191,7 @@ describe('extractFailingAudits', () => {
 
   it('handles audits with null score', () => {
     const mockLhr = {
+      finalUrl: 'http://localhost/page.html',
       audits: {
         'not-applicable': {
           id: 'not-applicable',
@@ -204,7 +208,7 @@ describe('extractFailingAudits', () => {
       },
     }
 
-    const result = extractFailingAudits(mockLhr as any)
+    const result = extractFailingAudits(mockLhr)
 
     expect(result).toHaveLength(0)
   })
@@ -223,7 +227,7 @@ describe('formatPageFailures', () => {
       audits: [],
     }
 
-    const output = formatPageFailures(mockFailures as any)
+    const output = formatPageFailures(mockFailures)
 
     expect(output).toContain('http://localhost:3000/index.html')
     expect(output).toContain('Accessibility: 89%')
@@ -252,7 +256,7 @@ describe('formatPageFailures', () => {
       ],
     }
 
-    const output = formatPageFailures(mockFailures as any)
+    const output = formatPageFailures(mockFailures)
 
     expect(output).toContain('✗ Image elements have alt attributes (score: 0.5)')
     expect(output).toContain('Images must have alt text')
@@ -284,7 +288,7 @@ describe('formatPageFailures', () => {
       ],
     }
 
-    const output = formatPageFailures(mockFailures as any)
+    const output = formatPageFailures(mockFailures)
 
     expect(output).toContain('GREP FOR: href="/about"')
     expect(output).toContain('CSS: a.nav-link')
@@ -318,7 +322,7 @@ describe('formatPageFailures', () => {
       ],
     }
 
-    const output = formatPageFailures(mockFailures as any)
+    const output = formatPageFailures(mockFailures)
 
     expect(output).toContain('Failing audits (2)')
   })
