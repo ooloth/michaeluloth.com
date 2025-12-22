@@ -141,7 +141,7 @@ function validateRequiredTags(
   tags: readonly string[],
   selector: (tag: string) => string,
   pageName: string,
-  tagType: string
+  tagType: string,
 ): ValidationError[] {
   const errors: ValidationError[] = []
 
@@ -213,7 +213,7 @@ function validateOgTags(html: string, pageName: string, expectedUrl: string): Va
   // Validate article-specific tags
   if (ogType === 'article') {
     errors.push(
-      ...validateRequiredTags($, REQUIRED_ARTICLE_TAGS, tag => `meta[property="${tag}"]`, pageName, 'article')
+      ...validateRequiredTags($, REQUIRED_ARTICLE_TAGS, tag => `meta[property="${tag}"]`, pageName, 'article'),
     )
 
     // Validate article dates
@@ -412,18 +412,21 @@ function validateEnvironment(): void {
 
   // Check that OG image dimensions are defined
   if (typeof OG_IMAGE_WIDTH !== 'number' || typeof OG_IMAGE_HEIGHT !== 'number') {
-    throw new Error('OG_IMAGE_WIDTH or OG_IMAGE_HEIGHT constants are not defined. Check io/cloudinary/ogImageTransforms.ts')
+    throw new Error(
+      'OG_IMAGE_WIDTH or OG_IMAGE_HEIGHT constants are not defined. Check io/cloudinary/ogImageTransforms.ts',
+    )
   }
 
   if (OG_IMAGE_WIDTH <= 0 || OG_IMAGE_HEIGHT <= 0) {
-    throw new Error(`Invalid OG image dimensions: ${OG_IMAGE_WIDTH}x${OG_IMAGE_HEIGHT}. Dimensions must be positive numbers.`)
+    throw new Error(
+      `Invalid OG image dimensions: ${OG_IMAGE_WIDTH}x${OG_IMAGE_HEIGHT}. Dimensions must be positive numbers.`,
+    )
   }
 
   // Check that OUT_DIR exists
   if (!existsSync(OUT_DIR)) {
     throw new Error(
-      `Build output directory does not exist: ${OUT_DIR}\n` +
-      `Run 'npm run build' before running metadata validation.`
+      `Build output directory does not exist: ${OUT_DIR}\n` + `Run 'npm run build' before running metadata validation.`,
     )
   }
 }

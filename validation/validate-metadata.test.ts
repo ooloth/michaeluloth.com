@@ -64,12 +64,8 @@ describe('getExpectedCanonicalUrl', () => {
   })
 
   it('handles nested paths', () => {
-    expect(getExpectedCanonicalUrl('blog/post-title/index.html')).toBe(
-      'https://michaeluloth.com/blog/post-title/'
-    )
-    expect(getExpectedCanonicalUrl('deep/nested/path/index.html')).toBe(
-      'https://michaeluloth.com/deep/nested/path/'
-    )
+    expect(getExpectedCanonicalUrl('blog/post-title/index.html')).toBe('https://michaeluloth.com/blog/post-title/')
+    expect(getExpectedCanonicalUrl('deep/nested/path/index.html')).toBe('https://michaeluloth.com/deep/nested/path/')
   })
 
   it('preserves trailing slash in converted paths', () => {
@@ -85,9 +81,7 @@ describe('isValidOgImageUrl', () => {
 
   it('returns true for Cloudinary URLs', () => {
     expect(isValidOgImageUrl('https://res.cloudinary.com/ooloth/image/upload/v1/og.png')).toBe(true)
-    expect(
-      isValidOgImageUrl('https://res.cloudinary.com/demo/image/upload/w_1200,h_630/sample.jpg')
-    ).toBe(true)
+    expect(isValidOgImageUrl('https://res.cloudinary.com/demo/image/upload/w_1200,h_630/sample.jpg')).toBe(true)
   })
 
   it('returns false for other URLs', () => {
@@ -105,33 +99,25 @@ describe('isValidOgImageUrl', () => {
 describe('hasCorrectCloudinaryDimensions', () => {
   it('returns true when URL contains correct dimensions (w_1200,h_630)', () => {
     expect(
-      hasCorrectCloudinaryDimensions(
-        'https://res.cloudinary.com/ooloth/image/upload/w_1200,h_630/v1/og.png'
-      )
+      hasCorrectCloudinaryDimensions('https://res.cloudinary.com/ooloth/image/upload/w_1200,h_630/v1/og.png'),
     ).toBe(true)
     expect(
       hasCorrectCloudinaryDimensions(
-        'https://res.cloudinary.com/demo/image/upload/c_fill,w_1200,h_630,g_center/sample.jpg'
-      )
+        'https://res.cloudinary.com/demo/image/upload/c_fill,w_1200,h_630,g_center/sample.jpg',
+      ),
     ).toBe(true)
   })
 
   it('returns false when dimensions are missing', () => {
-    expect(
-      hasCorrectCloudinaryDimensions('https://res.cloudinary.com/ooloth/image/upload/v1/og.png')
-    ).toBe(false)
+    expect(hasCorrectCloudinaryDimensions('https://res.cloudinary.com/ooloth/image/upload/v1/og.png')).toBe(false)
   })
 
   it('returns false when dimensions are incorrect', () => {
+    expect(hasCorrectCloudinaryDimensions('https://res.cloudinary.com/ooloth/image/upload/w_800,h_600/v1/og.png')).toBe(
+      false,
+    )
     expect(
-      hasCorrectCloudinaryDimensions(
-        'https://res.cloudinary.com/ooloth/image/upload/w_800,h_600/v1/og.png'
-      )
-    ).toBe(false)
-    expect(
-      hasCorrectCloudinaryDimensions(
-        'https://res.cloudinary.com/ooloth/image/upload/w_1200,h_800/v1/og.png'
-      )
+      hasCorrectCloudinaryDimensions('https://res.cloudinary.com/ooloth/image/upload/w_1200,h_800/v1/og.png'),
     ).toBe(false)
   })
 

@@ -264,16 +264,14 @@ function validateEnvironment(): void {
     throw new Error(
       `Lighthouse reports directory not found: ${LHCI_DIR}\n` +
         `This script runs automatically after 'lhci autorun' fails.\n` +
-        `If running manually: npm run lighthouse`
+        `If running manually: npm run lighthouse`,
     )
   }
 
   const reportFiles = readdirSync(LHCI_DIR).filter(f => f.startsWith('lhr-') && f.endsWith('.json'))
 
   if (reportFiles.length === 0) {
-    throw new Error(
-      `No Lighthouse report files found in ${LHCI_DIR}\n` + `Expected files matching pattern: lhr-*.json`
-    )
+    throw new Error(`No Lighthouse report files found in ${LHCI_DIR}\n` + `Expected files matching pattern: lhr-*.json`)
   }
 }
 
