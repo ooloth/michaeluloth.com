@@ -1,7 +1,12 @@
 #!/usr/bin/env tsx
 /**
  * Parse Lighthouse CI results and show detailed failure information.
- * Run automatically after lighthouse failures to help debug what went wrong.
+ *
+ * Automatically runs after Lighthouse CI failures (via npm run lighthouse).
+ * Reads .lighthouseci/*.json reports and formats failures with greppable attributes.
+ *
+ * IMPORTANT: This runs automatically when Lighthouse fails - you rarely need to run it manually.
+ * If you do: npm run lighthouse (which calls this script on failure)
  */
 
 import { readFileSync, existsSync, readdirSync } from 'fs'
@@ -122,6 +127,14 @@ function transformAuditItemToElement(item: LighthouseItem): FailingElement | nul
 
 /**
  * Extract all failing audits from a Lighthouse result.
+ *
+ * Parses Lighthouse JSON report and returns only audits with score < 1.0,
+ * including details about failing elements with searchable attributes.
+ *
+ * @example
+ * const lhr = JSON.parse(readFileSync('.lighthouseci/lhr-123.json'))
+ * const failing = extractFailingAudits(lhr)
+ * // Returns array of failing audits with elements that have greppable attributes
  */
 export function extractFailingAudits(lhr: LighthouseResult): FailingAudit[] {
   const failing: FailingAudit[] = []
@@ -153,6 +166,17 @@ function formatScore(score: number): string {
 
 /**
  * Format failures for a single page.
+ *
+ * Returns formatted string showing category scores, failing audits, and
+ * greppable attributes for each failing element.
+ *
+ * @example
+ * const output = formatPageFailures({
+ *   url: 'http://localhost:3000/index.html',
+ *   categories: { accessibility: { score: 0.89 }, ... },
+ *   audits: [{ title: 'Image alt text', ... }]
+ * })
+ * // Returns multi-line string with formatted failure report
  */
 export function formatPageFailures(failures: PageFailures): string {
   const lines: string[] = []
