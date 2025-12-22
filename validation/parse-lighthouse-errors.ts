@@ -6,8 +6,7 @@
 
 import { readFileSync, existsSync, readdirSync } from 'fs'
 import { join } from 'path'
-
-const LHCI_DIR = join(process.cwd(), '.lighthouseci')
+import { LHCI_DIR } from './config'
 
 interface LighthouseNode {
   selector?: string

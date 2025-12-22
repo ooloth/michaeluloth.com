@@ -16,25 +16,15 @@ import sharp from 'sharp'
 import { readFile, readdir } from 'fs/promises'
 import { join } from 'path'
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/io/cloudinary/ogImageTransforms'
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-const SITE_URL = 'https://michaeluloth.com/'
-const OUT_DIR = join(process.cwd(), 'out')
-
-const STATIC_PAGES = [
-  { file: 'index.html', name: 'Homepage' },
-  { file: 'blog/index.html', name: 'Blog' },
-  { file: 'likes/index.html', name: 'Likes' },
-]
-
-const REQUIRED_OG_TAGS = ['og:title', 'og:image', 'og:url', 'og:type', 'og:site_name', 'og:locale']
-const REQUIRED_ARTICLE_TAGS = ['article:published_time', 'article:modified_time', 'article:author']
-const REQUIRED_TWITTER_TAGS = ['twitter:card', 'twitter:creator', 'twitter:title', 'twitter:image']
-
-const EXCLUDE_DIRS = new Set(['blog', 'likes', '_next', 'api', '404', '_not-found'])
+import {
+  SITE_URL,
+  OUT_DIR,
+  STATIC_PAGES,
+  REQUIRED_OG_TAGS,
+  REQUIRED_ARTICLE_TAGS,
+  REQUIRED_TWITTER_TAGS,
+  EXCLUDE_DIRS,
+} from './config'
 
 // ============================================================================
 // Types
@@ -116,7 +106,7 @@ function getMetaContent(element: Cheerio<AnyNode>): string | undefined {
  */
 function validateRequiredTags(
   $: ReturnType<typeof load>,
-  tags: string[],
+  tags: readonly string[],
   selector: (tag: string) => string,
   pageName: string,
   tagType: string
