@@ -21,7 +21,8 @@ module.exports = {
         },
         {
           // All other routes - full validation including SEO
-          matchingUrlPattern: '.*',
+          // Negative lookahead excludes URLs containing /404 or /_not-found
+          matchingUrlPattern: '^((?!/(404|_not-found)).)*$',
           assertions: {
             'categories:accessibility': ['error', { minScore: 1.0 }],
             'categories:best-practices': ['error', { minScore: 1.0 }],
