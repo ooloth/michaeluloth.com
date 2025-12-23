@@ -430,6 +430,15 @@ describe('getPosts', () => {
   })
 
   describe('error cases', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    })
+
     it('returns Err when Notion API call fails', async () => {
       const mockClient = createMockNotionClient()
 
@@ -437,7 +446,9 @@ describe('getPosts', () => {
       const apiError = new Error('Notion API error')
       vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
+      const promise = getPosts({ cache: mockCache, notionClient: mockClient })
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -493,7 +504,9 @@ describe('getPosts', () => {
       const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
 
-      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
+      const promise = getPosts({ cache: mockCache, notionClient: mockClient })
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
