@@ -54,8 +54,6 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
   do {
     try {
       const response = await withRetry(fetch20Items, {
-        maxAttempts: 3,
-        initialDelayMs: 2000,
         onRetry: (error, attempt, delay) => {
           console.log(
             `⚠️  TMDB API timeout (page ${page}/${totalPages}) - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,

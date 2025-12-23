@@ -140,7 +140,6 @@ export default async function getMediaItems(options: Options): Promise<Result<No
           sorts: [{ property: 'Date', direction: 'descending' }],
         }),
       {
-        maxAttempts: 3,
         onRetry: (error, attempt, delay) => {
           console.log(
             `⚠️  Notion API timeout fetching ${category} - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,

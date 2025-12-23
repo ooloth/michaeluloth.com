@@ -145,8 +145,6 @@ export default async function fetchCloudinaryImageMetadata({
             throw Error(`${ERRORS.FETCH_FAILED}: "${publicId}":\n\n${getErrorDetails(error)}\n`)
           }),
       {
-        maxAttempts: 3,
-        initialDelayMs: 2000,
         onRetry: (error, attempt, delay) => {
           console.log(
             `⚠️  Cloudinary API timeout for "${publicId}" - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,

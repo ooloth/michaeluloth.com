@@ -102,7 +102,6 @@ export default async function getBlockChildren(
           block_id: blockId,
         }),
       {
-        maxAttempts: 3,
         onRetry: (error, attempt, delay) => {
           console.log(
             `⚠️  Notion API timeout fetching block children - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,

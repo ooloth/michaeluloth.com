@@ -98,7 +98,6 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
           sorts: [{ property: 'First published', direction: sortDirection }],
         }),
       {
-        maxAttempts: 3,
         onRetry: (error, attempt, delay) => {
           console.log(`⚠️  Notion API timeout - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`)
         },

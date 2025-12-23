@@ -59,8 +59,6 @@ export default async function fetchItunesItems(
           `https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${medium}&entity=${entity}&sort=recent`,
         ),
       {
-        maxAttempts: 3,
-        initialDelayMs: 2000,
         onRetry: (error, attempt, delay) => {
           console.log(`⚠️  iTunes API timeout - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`)
         },
