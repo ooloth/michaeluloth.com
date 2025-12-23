@@ -59,9 +59,10 @@ type MediaSectionProps = {
   title: string
   items: (TmdbItem | iTunesItem)[]
   height: 'h-72' | 'h-48'
+  prioritizeFirstImage?: boolean
 }
 
-function MediaSection({ title, items, height }: MediaSectionProps): ReactElement | null {
+function MediaSection({ title, items, height, prioritizeFirstImage = false }: MediaSectionProps): ReactElement | null {
   if (items.length === 0) {
     return null
   }
@@ -71,9 +72,10 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
       <h2 className="mt-8 text-3xl font-semibold text-bright">{title}</h2>
 
       <ul className="flex gap-10 overflow-x-auto mt-4 hide-scrollbar list-none" aria-label={`${title} list`}>
-        {items.map(item => {
+        {items.map((item, index) => {
           const isItunesItem = 'artist' in item
           const year = item.date.split('-')[0]
+          const isFirstImage = index === 0 && prioritizeFirstImage
 
           return (
             <li key={item.id} className="flex-none w-48">
@@ -93,6 +95,7 @@ function MediaSection({ title, items, height }: MediaSectionProps): ReactElement
                       placeholder="blur"
                       blurDataURL={item.imagePlaceholder}
                       className="object-cover rounded-lg"
+                      priority={isFirstImage}
                     />
                   </div>
                   <figcaption className="text-center">
@@ -125,7 +128,7 @@ export default async function Likes(): Promise<ReactElement> {
       <h1 className="sr-only">Likes</h1>
 
       <div className="-mt-8">
-        <MediaSection title="TV Shows" items={tv} height="h-72" />
+        <MediaSection title="TV Shows" items={tv} height="h-72" prioritizeFirstImage />
         <MediaSection title="Movies" items={movies} height="h-72" />
         <MediaSection title="Books" items={books} height="h-72" />
         <MediaSection title="Albums" items={albums} height="h-48" />
