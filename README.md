@@ -122,7 +122,7 @@ All external API calls include retry logic with exponential backoff to handle tr
 - **Max attempts**: 3
 - **Initial delay**: 2s
 - **Backoff multiplier**: 2x (delays: 2s, 4s, 8s)
-- **Retryable errors**: Network/timeout errors only (fetch failures, ETIMEDOUT, ECONNRESET, ENOTFOUND, EAI_AGAIN)
-- **Non-retryable errors**: Validation errors, missing data, authentication failures
+
+All errors are retried (network failures, timeouts, etc.). Validation errors shouldn't occur at build time since they're caught in tests.
 
 See `utils/retry.ts` for implementation details.

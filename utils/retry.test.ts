@@ -81,25 +81,6 @@ describe('withRetry', () => {
     })
   })
 
-  describe('non-retryable errors', () => {
-    it('does not retry validation errors', async () => {
-      const fn = vi.fn().mockRejectedValue(new Error('Invalid data'))
-
-      const promise = withRetry(fn)
-
-      await expect(promise).rejects.toThrow('Invalid data')
-      expect(fn).toHaveBeenCalledTimes(1)
-    })
-
-    it('does not retry missing data errors', async () => {
-      const fn = vi.fn().mockRejectedValue(new Error('Missing required field'))
-
-      const promise = withRetry(fn)
-
-      await expect(promise).rejects.toThrow('Missing required field')
-      expect(fn).toHaveBeenCalledTimes(1)
-    })
-  })
 
   describe('exponential backoff', () => {
     it('uses initial delay on first retry', async () => {

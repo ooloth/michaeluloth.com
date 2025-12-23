@@ -36,42 +36,7 @@ function calculateDelay(attempt: number, options: Required<RetryOptions>): numbe
 }
 
 /**
- * Determines if an error is retryable (network/timeout errors).
- *
- * Uses dual detection strategy:
- * 1. Message patterns - catches errors from fetch(), third-party SDKs
- * 2. Error codes - catches Node.js network errors with structured cause
- *
- * This handles various error formats from different sources (browser fetch,
- * Node.js net module, Notion SDK, Cloudinary SDK, etc.)
- */
-function isRetryableError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false
-
-  // Check error message for common network/timeout patterns
-  const message = error.message.toLowerCase()
-  const isNetworkError =
-    message.includes('fetch failed') ||
-    message.includes('network') ||
-    message.includes('timeout') ||
-    message.includes('etimedout') ||
-    message.includes('econnreset') ||
-    message.includes('enotfound')
-
-  // Check error cause for timeout/network codes (Node.js errors)
-  const cause = (error as Error & { cause?: { code?: string } }).cause
-  const hasRetryableCode =
-    cause?.code === 'ETIMEDOUT' ||
-    cause?.code === 'ECONNRESET' ||
-    cause?.code === 'ENOTFOUND' ||
-    cause?.code === 'EAI_AGAIN'
-
-  return isNetworkError || hasRetryableCode
-}
-
-/**
  * Retries an async operation with exponential backoff.
- * Only retries on network/timeout errors, not validation or other logical errors.
  *
  * @param fn - The async function to retry
  * @param options - Retry configuration
@@ -96,11 +61,6 @@ export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions =
       return await fn()
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error))
-
-      // Don't retry non-retryable errors (validation errors, missing data, etc.)
-      if (!isRetryableError(lastError)) {
-        throw lastError
-      }
 
       // Don't retry if this was the last attempt
       if (attempt >= opts.maxAttempts) {
