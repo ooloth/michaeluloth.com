@@ -3,25 +3,20 @@
 # See: https://developers.cloudflare.com/pages/configuration/redirects/
 
 # =============================================================================
-# SECTION 1: Specific old page routes
+# SECTION 1: Old page routes that moved to /blog/
 # =============================================================================
+# Only redirect when the content genuinely moved to a new location
+# Everything else should 404 (more honest than redirecting to irrelevant pages)
 
-/blog            /                      301
-/bookmarks       /blog/                 301
-/codes           /                      301
-/contact         /                      301
-/lab             /                      301
-/metrics         /                      301
-/notes           /blog/                 301
-/opera           /                      301
-/sings           /                      301
-/tax-preparation /                      301
-/til             /blog/                 301
-/uses            /                      301
-/web-design      /                      301
-/websites        /                      301
-/writes          /blog/                 301
-/writing         /blog/                 301
+/blog            /blog/                 301  # They wanted the blog
+/notes           /blog/                 301  # Notes are now blog posts
+/til             /blog/                 301  # TIL posts are now blog posts
+/writes          /blog/                 301  # Writing is now blog
+/writing         /blog/                 301  # Writing is now blog
+
+# The following now 404 (content completely removed):
+# /bookmarks, /codes, /contact, /lab, /metrics, /opera, /sings,
+# /tax-preparation, /uses, /web-design, /websites
 
 # =============================================================================
 # SECTION 2: Old post route redirects (renamed slugs)
