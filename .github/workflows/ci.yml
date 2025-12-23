@@ -163,20 +163,30 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy out --project-name=michaeluloth --branch=main
 
-      - name: Notify deployment success
-        if: success()
+  # Notify - always runs on main, reports success or which check failed
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [format, lint, typecheck, test, build, metadata, lighthouse, deploy]
+    if: always() && github.ref == 'refs/heads/main'
+    steps:
+      - name: Determine status and send notification
         uses: desiderati/github-action-pushover@v1
         with:
           job-status: ${{ job.status }}
           pushover-api-token: ${{ secrets.PUSHOVER_API_TOKEN }}
           pushover-user-key: ${{ secrets.PUSHOVER_USER_KEY }}
-          pushover-message: '✅ michaeluloth.com deployed successfully'
-
-      - name: Notify deployment failure
-        if: failure()
-        uses: desiderati/github-action-pushover@v1
-        with:
-          job-status: ${{ job.status }}
-          pushover-api-token: ${{ secrets.PUSHOVER_API_TOKEN }}
-          pushover-user-key: ${{ secrets.PUSHOVER_USER_KEY }}
-          pushover-message: '❌ michaeluloth.com deployment failed'
+          pushover-message: |
+            ${{
+              needs.deploy.result == 'success' && '✅ michaeluloth.com deployed successfully' ||
+              needs.deploy.result == 'failure' && '❌ Deployment to Cloudflare failed' ||
+              needs.lighthouse.result == 'failure' && '❌ Lighthouse checks failed' ||
+              needs.metadata.result == 'failure' && '❌ Metadata validation failed' ||
+              needs.build.result == 'failure' && '❌ Build failed' ||
+              needs.test.result == 'failure' && '❌ Tests failed' ||
+              needs.typecheck.result == 'failure' && '❌ Type checking failed' ||
+              needs.lint.result == 'failure' && '❌ Linting failed' ||
+              needs.format.result == 'failure' && '❌ Formatting check failed' ||
+              '❌ Deployment pipeline failed'
+            }}
+          pushover-url: ${{ needs.deploy.result != 'success' && format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) || '' }}
