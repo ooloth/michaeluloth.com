@@ -4,29 +4,75 @@
 
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import Link from './link'
+import Link, { normalizeInternalHref } from './link'
+
+describe('normalizeInternalHref', () => {
+  describe('adds missing slashes', () => {
+    it('adds leading slash when missing', () => {
+      expect(normalizeInternalHref('blog')).toBe('/blog/')
+    })
+
+    it('adds trailing slash when missing', () => {
+      expect(normalizeInternalHref('/blog')).toBe('/blog/')
+    })
+
+    it('adds both slashes when both missing', () => {
+      expect(normalizeInternalHref('about')).toBe('/about/')
+    })
+  })
+
+  describe('preserves existing slashes', () => {
+    it('preserves leading and trailing slashes', () => {
+      expect(normalizeInternalHref('/blog/')).toBe('/blog/')
+    })
+
+    it('preserves nested paths', () => {
+      expect(normalizeInternalHref('/blog/post/')).toBe('/blog/post/')
+    })
+  })
+
+  describe('removes domain', () => {
+    it('strips michaeluloth.com domain', () => {
+      expect(normalizeInternalHref('https://michaeluloth.com/blog')).toBe('/blog/')
+    })
+
+    it('strips domain and normalizes slashes', () => {
+      expect(normalizeInternalHref('https://michaeluloth.com/about')).toBe('/about/')
+    })
+
+    it('handles domain with trailing slash', () => {
+      expect(normalizeInternalHref('https://michaeluloth.com/blog/')).toBe('/blog/')
+    })
+  })
+
+  describe('deduplicates slashes', () => {
+    it('removes duplicate slashes', () => {
+      expect(normalizeInternalHref('//blog//')).toBe('/blog/')
+    })
+
+    it('handles multiple consecutive slashes', () => {
+      expect(normalizeInternalHref('///blog///')).toBe('/blog/')
+    })
+  })
+})
 
 describe('Link', () => {
   describe('internal links', () => {
     it('renders internal link with Next.js Link', () => {
       render(<Link href="/about">About</Link>)
       const link = screen.getByRole('link', { name: 'About' })
-      // Next.js Link in test environment doesn't normalize, but we verify component uses it
       expect(link).toBeInTheDocument()
     })
 
-    it('normalizes internal URLs to have leading and trailing slashes', () => {
-      render(<Link href="contact">Contact</Link>)
+    it('treats paths starting with / as internal', () => {
+      render(<Link href="/contact">Contact</Link>)
       const link = screen.getByRole('link', { name: 'Contact' })
-      // Component normalizes to "/contact/" but Next.js Link in test env shows original
-      // We're testing the component logic, not Next.js routing
       expect(link).toBeInTheDocument()
     })
 
-    it('handles michaeluloth.com URLs as internal', () => {
+    it('treats michaeluloth.com URLs as internal', () => {
       render(<Link href="https://michaeluloth.com/blog">Blog</Link>)
       const link = screen.getByRole('link', { name: 'Blog' })
-      // Component treats michaeluloth.com as internal and uses Next.js Link
       expect(link).toBeInTheDocument()
     })
 

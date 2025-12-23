@@ -9,13 +9,26 @@ type Props = Readonly<{
   className?: string
 }>
 
+/**
+ * Normalizes internal URLs to have leading and trailing slashes.
+ * Removes domain if present, ensures consistent /path/ format.
+ *
+ * @example
+ * normalizeInternalHref('/blog') // '/blog/'
+ * normalizeInternalHref('blog/') // '/blog/'
+ * normalizeInternalHref('https://michaeluloth.com/about') // '/about/'
+ */
+export function normalizeInternalHref(href: string): string {
+  // Remove domain if present, then ensure leading and trailing slashes
+  return `/${href.replace('https://michaeluloth.com/', '')}/`.replace(/\/\/+/g, '/')
+}
+
 export default function Link({ ariaCurrent, ariaLabel, href, children, className }: Props) {
   const isInternalUrl = href.startsWith('/') || href.includes('michaeluloth.com')
   const classes = className ? className : 'link'
 
   if (isInternalUrl) {
-    // Relative, starting and ending with slash
-    const internalHref = `/${href.replace('https://michaeluloth.com/', '')}/`.replace(/\/\/+/g, '/')
+    const internalHref = normalizeInternalHref(href)
 
     return (
       <NextLink href={internalHref} aria-current={ariaCurrent} aria-label={ariaLabel} className={classes}>
