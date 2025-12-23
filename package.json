@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "generate:og-image": "tsx metadata/generate-og-image.ts",
     "lighthouse": "lhci autorun || (tsx validation/parse-lighthouse-errors.ts && exit 1)",
+    "prelighthouse": "tsx validation/generate-lighthouse-urls.ts",
     "lint": "eslint",
     "start": "next start",
     "test": "vitest",

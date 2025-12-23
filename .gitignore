@@ -11,6 +11,7 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 .lighthouseci/
+validation/lighthouse-urls.json
 
 # Mine
 **/cloudinary/*.json

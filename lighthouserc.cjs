@@ -1,7 +1,12 @@
+// URLs are generated dynamically from RSS feed before each run
+// See: validation/generate-lighthouse-urls.ts (runs via "prelighthouse" script)
+const urls = require('./validation/lighthouse-urls.json')
+
 module.exports = {
   ci: {
     collect: {
       staticDistDir: './out',
+      url: urls,
     },
     assert: {
       // Category-level assertions automatically include all current Lighthouse audits.
