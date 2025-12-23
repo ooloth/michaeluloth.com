@@ -4,21 +4,21 @@ describe('transformCloudinaryImage', () => {
   it('transforms upload URLs with optimization parameters', () => {
     const input = 'https://res.cloudinary.com/demo/upload/sample.jpg'
     const result = transformCloudinaryImage(input, 400)
-    expect(result).toBe('https://res.cloudinary.com/demo/upload/w_400,f_auto,q_auto,dpr_2.0/sample.jpg')
+    expect(result).toBe('https://res.cloudinary.com/demo/upload/w_400,f_auto,q_auto/sample.jpg')
   })
 
   it('transforms fetch URLs with optimization parameters', () => {
     const input = 'https://res.cloudinary.com/demo/fetch/https://example.com/image.jpg'
     const result = transformCloudinaryImage(input, 192)
     expect(result).toBe(
-      'https://res.cloudinary.com/demo/fetch/w_192,f_auto,q_auto,dpr_2.0/https://example.com/image.jpg',
+      'https://res.cloudinary.com/demo/fetch/w_192,f_auto,q_auto/https://example.com/image.jpg',
     )
   })
 
   it('transforms youtube URLs with optimization parameters', () => {
     const input = 'https://res.cloudinary.com/demo/youtube/abc123.jpg'
     const result = transformCloudinaryImage(input, 640)
-    expect(result).toBe('https://res.cloudinary.com/demo/youtube/w_640,f_auto,q_auto,dpr_2.0/abc123.jpg')
+    expect(result).toBe('https://res.cloudinary.com/demo/youtube/w_640,f_auto,q_auto/abc123.jpg')
   })
 
   it('returns URL unchanged if not a Cloudinary URL', () => {
