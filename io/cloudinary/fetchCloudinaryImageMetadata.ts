@@ -145,16 +145,19 @@ export default async function fetchCloudinaryImageMetadata({
 
     const { public_id, width, height, context } = parseResult.data
 
-    // Warn about missing alt text (soft failure)
+    // Require alt text for all images (hard failure)
     const alt = context?.custom?.alt
     if (!alt) {
-      // TODO: restore strictness? I disabled it after a couple "/fetch/" gifs were missing all contextual metadata
-      console.error(`🚨 Cloudinary image "${publicId}" is missing alt text in contextual metadata.`)
+      throw new Error(
+        `🚨 Cloudinary image "${publicId}" is missing alt text.\n` +
+          `Alt text is required for accessibility.\n` +
+          `Add it in Cloudinary dashboard: https://console.cloudinary.com/pm/c-9ef62c1f208a0bd85088fb70b2fcd0/media-library/search/asset/${public_id}`,
+      )
     }
 
     // Build metadata
     const metadata: CloudinaryImageMetadata = {
-      alt: alt ?? '',
+      alt,
       caption: context?.custom?.caption ?? '',
       width,
       height,
