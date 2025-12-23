@@ -6,10 +6,6 @@ vi.mock('@/io/cloudinary/transformCloudinaryImage', () => ({
   default: vi.fn((url: string) => url),
 }))
 
-vi.mock('@/utils/getImagePlaceholderForEnv', () => ({
-  default: vi.fn(async () => 'data:image/png;base64,placeholder'),
-}))
-
 vi.mock('@/io/env', () => ({
   env: {
     TMDB_READ_ACCESS_TOKEN: 'mock-token',

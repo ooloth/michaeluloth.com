@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
-import getImagePlaceholderForEnv from '@/io/plaiceholder/getImagePlaceholderForEnv'
 import { formatValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, Err, toErr } from '@/utils/errors/result'
@@ -21,7 +20,6 @@ const TmdbItemSchema = z.object({
   title: z.string().min(1),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   imageUrl: z.url(),
-  imagePlaceholder: z.string(),
   link: z.url(),
 })
 
@@ -88,7 +86,6 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
             `https://res.cloudinary.com/ooloth/image/fetch/https://image.tmdb.org/t/p/original${poster_path}`,
             192,
           )
-          const imagePlaceholder = await getImagePlaceholderForEnv(imageUrl, 4)
           const link = `https://www.themoviedb.org/${api}/${id}`
 
           // Validate final item before adding to results
@@ -97,7 +94,6 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
             title: itemTitle,
             date: itemDate,
             imageUrl,
-            imagePlaceholder,
             link,
           })
 
