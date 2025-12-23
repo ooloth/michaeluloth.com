@@ -83,7 +83,7 @@ function MediaSection({ title, items, height, prioritizeFirstImage = false }: Me
           const isFirstImage = index === 0 && prioritizeFirstImage
 
           return (
-            <li key={item.id} className="flex-none w-48">
+            <li key={item.id} className="flex-none w-48" style={{ contentVisibility: 'auto' }}>
               <a
                 href={item.link}
                 target="_blank"
