@@ -109,7 +109,8 @@ export default async function getPost({
     })
 
     if (response.results.length === 0) {
-      console.error(`No post found for slug: ${slug}`)
+      // Not an error in the case of a user arriving at a non-existent path
+      console.warn(`No post found for slug: ${slug}`)
       return Ok(null)
     }
 
