@@ -58,6 +58,7 @@ describe('Notion API Integration Tests', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     vi.resetAllMocks()
+    vi.useFakeTimers()
 
     // Reset mocks to default implementations
     const notion = (await import('./client')).default
@@ -65,6 +66,11 @@ describe('Notion API Integration Tests', () => {
 
     vi.mocked(notion.dataSources.query).mockReset()
     vi.mocked(collectPaginatedAPI).mockReset()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   describe('getPost with nested Result calls', () => {
@@ -201,14 +207,16 @@ describe('Notion API Integration Tests', () => {
       const queryResponse: MockQueryResponse = { results: [mockPost] }
       vi.mocked(notion.dataSources.query).mockResolvedValueOnce(queryResponse)
 
-      // Mock getPosts failure (via collectPaginatedAPI)
-      vi.mocked(collectPaginatedAPI).mockRejectedValueOnce(new Error('Failed to fetch posts for navigation'))
+      // Mock getPosts failure (via collectPaginatedAPI) - use mockRejectedValue not Once because retry logic calls it 3 times
+      vi.mocked(collectPaginatedAPI).mockRejectedValue(new Error('Failed to fetch posts for navigation'))
 
-      const result = await getPost({
+      const promise = getPost({
         slug: 'test-post',
         includePrevAndNext: true,
         skipCache: true,
       })
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       // Verify error propagated
       expect(isErr(result)).toBe(true)
@@ -240,11 +248,13 @@ describe('Notion API Integration Tests', () => {
 
       vi.mocked(collectPaginatedAPI).mockRejectedValue(new Error('Failed to fetch blocks'))
 
-      const result = await getPost({
+      const promise = getPost({
         slug: 'test-post',
         includeBlocks: true,
         skipCache: true,
       })
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       // Verify error propagated
       expect(isErr(result)).toBe(true)
