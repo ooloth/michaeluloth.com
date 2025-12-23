@@ -149,7 +149,6 @@ describe('generateLighthouseUrls', () => {
       'http://localhost/blog/index.html',
       'http://localhost/likes/index.html',
       'http://localhost/404/index.html',
-      'http://localhost/_not-found/index.html',
       'http://localhost/my-post/index.html',
       'http://localhost/another-post/index.html',
     ])
@@ -163,7 +162,6 @@ describe('generateLighthouseUrls', () => {
       'http://localhost/blog/index.html',
       'http://localhost/likes/index.html',
       'http://localhost/404/index.html',
-      'http://localhost/_not-found/index.html',
     ])
   })
 

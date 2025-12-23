@@ -59,7 +59,7 @@ export function generateLighthouseUrls(postSlugs: string[]): string[] {
     'http://localhost/blog/index.html',
     'http://localhost/likes/index.html',
     'http://localhost/404/index.html',
-    'http://localhost/_not-found/index.html',
+    // Note: /_not-found removed - it's identical to /404 (same MD5 hash)
   ]
 
   const postUrls = postSlugs.map(slug => `http://localhost/${slug}/index.html`)
