@@ -2,7 +2,9 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   output: 'export',
+  staticPageGenerationTimeout: 180, // Increase timeout for pages with slow external API calls (likes page)
   images: {
+    unoptimized: true, // Required for static exports - no image optimization server
     remotePatterns: [
       {
         protocol: 'https',

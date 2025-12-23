@@ -80,7 +80,7 @@ describe('generateStaticParams', () => {
           id: '1',
           slug: 'test-slug',
           title: 'Test',
-          description: null,
+          description: 'Test description',
           firstPublished: '2024-01-01',
           featuredImage: null,
         },
@@ -188,38 +188,12 @@ describe('DynamicRoute page', () => {
       expect(jsonLd.image).toBe('/og-image.png')
     })
 
-    it('omits description when null', async () => {
-      const mockPost = {
-        id: '123',
-        slug: 'no-desc',
-        title: 'Post Without Description',
-        description: null,
-        firstPublished: '2024-01-15',
-        lastEditedTime: '2024-01-15T00:00:00.000Z',
-        featuredImage: null,
-        blocks: [],
-        prevPost: null,
-        nextPost: null,
-      }
-
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
-
-      const params = Promise.resolve({ slug: 'no-desc' })
-      const jsx = await DynamicRoute({ params })
-      render(jsx)
-
-      const scriptTag = document.querySelector('script[type="application/ld+json"]')
-      const jsonLd = JSON.parse(scriptTag?.textContent ?? '{}')
-
-      expect(jsonLd.description).toBeUndefined()
-    })
-
     it('includes correct URL structure', async () => {
       const mockPost = {
         id: '123',
         slug: 'my-awesome-post',
         title: 'My Awesome Post',
-        description: null,
+        description: 'Test description',
         firstPublished: '2024-01-15',
         lastEditedTime: '2024-01-15T00:00:00.000Z',
         featuredImage: null,
@@ -308,7 +282,7 @@ describe('DynamicRoute page', () => {
         id: '123',
         slug: 'my-post',
         title: 'My Post',
-        description: null,
+        description: 'Test description',
         firstPublished: '2024-01-15',
         lastEditedTime: '2024-01-15T00:00:00.000Z',
         featuredImage: null,
@@ -338,7 +312,7 @@ describe('DynamicRoute page', () => {
         id: '123',
         slug: 'standalone-post',
         title: 'Standalone Post',
-        description: null,
+        description: 'Test description',
         firstPublished: '2024-01-15',
         lastEditedTime: '2024-01-15T00:00:00.000Z',
         featuredImage: null,
@@ -485,36 +459,12 @@ describe('generateMetadata', () => {
       expect(metadata.twitter?.images).toEqual(['/og-image.png'])
     })
 
-    it('handles null description by converting to undefined', async () => {
-      const mockPost = {
-        id: '123',
-        slug: 'no-description-post',
-        title: 'Post Without Description',
-        description: null,
-        firstPublished: '2024-01-15',
-        lastEditedTime: '2024-01-15T00:00:00.000Z',
-        featuredImage: null,
-        blocks: [],
-        prevPost: null,
-        nextPost: null,
-      }
-
-      vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
-
-      const params = Promise.resolve({ slug: 'no-description-post' })
-      const metadata = await generateMetadata({ params })
-
-      expect(metadata.description).toBeUndefined()
-      expect(metadata.openGraph?.description).toBeUndefined()
-      expect(metadata.twitter?.description).toBeUndefined()
-    })
-
     it('calls getPost with correct slug', async () => {
       const mockPost = {
         id: '123',
         slug: 'my-test-post',
         title: 'My Test Post',
-        description: null,
+        description: 'Test description',
         firstPublished: '2024-01-15',
         lastEditedTime: '2024-01-15T00:00:00.000Z',
         featuredImage: null,

@@ -6,10 +6,6 @@ vi.mock('@/io/cloudinary/transformCloudinaryImage', () => ({
   default: vi.fn((url: string) => url), // Return URL unchanged for simplicity
 }))
 
-vi.mock('@/utils/getImagePlaceholderForEnv', () => ({
-  default: vi.fn(async () => 'data:image/png;base64,placeholder'),
-}))
-
 describe('fetchItunesItems', () => {
   beforeEach(() => {
     vi.clearAllMocks()

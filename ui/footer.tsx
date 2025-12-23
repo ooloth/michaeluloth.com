@@ -21,7 +21,7 @@ function SocialNav() {
     <ul className="flex gap-3">
       {socials.map(item => (
         <li key={item.href}>
-          <Link href={item.href} className="hover:text-accent" aria-label={item.label}>
+          <Link href={item.href} className="hover:text-accent" ariaLabel={item.label}>
             <Icon src={item.icon} className="w-7" />
           </Link>
         </li>

@@ -56,7 +56,6 @@ describe('fetchItunesMedia', () => {
           title: 'Book 1',
           date: '2024-01-15',
           imageUrl: 'https://example.com/1.jpg',
-          imagePlaceholder: 'base64',
           link: 'https://books.apple.com/1',
         },
         {
@@ -64,7 +63,6 @@ describe('fetchItunesMedia', () => {
           title: 'Book 2',
           date: '2024-02-20',
           imageUrl: 'https://example.com/2.jpg',
-          imagePlaceholder: 'base64',
           link: 'https://books.apple.com/2',
         },
       ]
@@ -100,7 +98,6 @@ describe('fetchItunesMedia', () => {
           artist: 'Artist 1',
           date: '2024-03-10',
           imageUrl: 'https://example.com/1.jpg',
-          imagePlaceholder: 'base64',
           link: 'https://music.apple.com/123',
         },
       ]
@@ -128,7 +125,6 @@ describe('fetchItunesMedia', () => {
           title: 'Podcast 1',
           date: '2024-04-01',
           imageUrl: 'https://example.com/1.jpg',
-          imagePlaceholder: 'base64',
           link: 'https://podcasts.apple.com/456',
         },
       ]
@@ -220,7 +216,6 @@ describe('Likes page', () => {
           title: 'TV Show 1',
           date: '2024-01-01',
           imageUrl: 'https://image.tmdb.org/tv1.jpg',
-          imagePlaceholder: 'base64-tv',
           link: 'https://tmdb.org/tv/1',
         },
       ]
@@ -231,7 +226,6 @@ describe('Likes page', () => {
           title: 'Movie 1',
           date: '2024-02-01',
           imageUrl: 'https://image.tmdb.org/movie1.jpg',
-          imagePlaceholder: 'base64-movie',
           link: 'https://tmdb.org/movie/2',
         },
       ]
@@ -242,7 +236,6 @@ describe('Likes page', () => {
           title: 'Book 1',
           date: '2024-03-01',
           imageUrl: 'https://itunes.apple.com/book1.jpg',
-          imagePlaceholder: 'base64-book',
           link: 'https://books.apple.com/3',
         },
       ]
@@ -254,7 +247,6 @@ describe('Likes page', () => {
           artist: 'Artist 1',
           date: '2024-04-01',
           imageUrl: 'https://itunes.apple.com/album1.jpg',
-          imagePlaceholder: 'base64-album',
           link: 'https://music.apple.com/4',
         },
       ]
@@ -265,7 +257,6 @@ describe('Likes page', () => {
           title: 'Podcast 1',
           date: '2024-05-01',
           imageUrl: 'https://itunes.apple.com/podcast1.jpg',
-          imagePlaceholder: 'base64-podcast',
           link: 'https://podcasts.apple.com/5',
         },
       ]

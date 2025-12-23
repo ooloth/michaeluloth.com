@@ -83,7 +83,7 @@ describe('RSS feed route', () => {
           id: 'post-1',
           slug: 'test-post',
           title: 'Test Post',
-          description: null,
+          description: 'Test post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
@@ -148,7 +148,7 @@ describe('RSS feed route', () => {
           id: 'post-1',
           slug: 'test-post',
           title: 'Test Post',
-          description: null,
+          description: 'Test post description',
           firstPublished: '2024-01-15',
           featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test.jpg',
         },
@@ -188,7 +188,7 @@ describe('RSS feed route', () => {
           id: 'post-2',
           slug: 'newer-post',
           title: 'Newer Post',
-          description: null,
+          description: 'Newer post description',
           firstPublished: '2024-01-20',
           featuredImage: null,
           feedId: null,
@@ -197,7 +197,7 @@ describe('RSS feed route', () => {
           id: 'post-1',
           slug: 'older-post',
           title: 'Older Post',
-          description: null,
+          description: 'Older post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
@@ -252,7 +252,7 @@ describe('RSS feed route', () => {
           id: 'post-1',
           slug: 'test-post',
           title: 'Test Post',
-          description: null,
+          description: 'Test post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
@@ -275,7 +275,7 @@ describe('RSS feed route', () => {
           id: 'post-1',
           slug: 'valid-post',
           title: 'Valid Post',
-          description: null,
+          description: 'Valid post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
@@ -284,7 +284,7 @@ describe('RSS feed route', () => {
           id: 'post-2',
           slug: 'broken-post',
           title: 'Broken Post',
-          description: null,
+          description: 'Broken post description',
           firstPublished: '2024-01-14',
           featuredImage: null,
           feedId: null,
@@ -317,39 +317,13 @@ describe('RSS feed route', () => {
       await expect(GET()).rejects.toThrow('Block fetch failed')
     })
 
-    it('handles posts without description', async () => {
-      const mockPostListItems: PostListItem[] = [
-        {
-          id: 'post-1',
-          slug: 'no-description',
-          title: 'No Description Post',
-          description: null,
-          firstPublished: '2024-01-15',
-          featuredImage: null,
-          feedId: null,
-        },
-      ]
-
-      const mockBlocks: GroupedBlock[] = []
-
-      vi.mocked(getPosts).mockResolvedValue(Ok(mockPostListItems))
-      vi.mocked(getBlockChildren).mockResolvedValue(Ok(mockBlocks))
-
-      const response = await GET()
-      const xml = await response.text()
-
-      // Verify post is included without description element
-      expect(xml).toContain('<![CDATA[No Description Post]]>')
-      // RSS feed may or may not include empty description - that's OK
-    })
-
     it('uses feedId as guid when present', async () => {
       const mockPostListItems: PostListItem[] = [
         {
           id: 'post-1',
           slug: 'test-post',
           title: 'Test Post',
-          description: null,
+          description: 'Test post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: 'https://old-site.com/original-url/',
@@ -378,7 +352,7 @@ describe('RSS feed route', () => {
           id: 'post-1',
           slug: 'test-post',
           title: 'Test Post',
-          description: null,
+          description: 'Test post description',
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,

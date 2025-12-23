@@ -28,7 +28,7 @@ export const PostListItemSchema = z.object({
   id: z.string().min(1),
   slug: z.string().min(1),
   title: z.string().min(1),
-  description: z.string().nullish(),
+  description: z.string().min(1), // Required for SEO - description is marketing copy for your knowledge
   featuredImage: z.url().nullish(),
   firstPublished: z.string().regex(/^\d{4}-\d{2}-\d{2}/), // ISO 8601 date or datetime
   feedId: z.string().nullish(),

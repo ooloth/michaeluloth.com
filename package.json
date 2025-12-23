@@ -12,11 +12,13 @@
     "dev": "next dev",
     "format": "prettier --write .",
     "generate:og-image": "tsx metadata/generate-og-image.ts",
+    "lighthouse": "lhci autorun || (tsx validation/parse-lighthouse-errors.ts && exit 1)",
+    "prelighthouse": "tsx validation/generate-lighthouse-urls.ts",
     "lint": "eslint",
     "start": "next start",
     "test": "vitest",
     "test:ci": "vitest run",
-    "test:metadata": "tsx metadata/validate-metadata.ts",
+    "test:metadata": "tsx validation/validate-metadata.ts",
     "test:ui": "vitest --ui",
     "typecheck": "tsc"
   },
@@ -26,7 +28,6 @@
     "cloudinary": "^2.8.0",
     "feed": "^5.1.0",
     "next": "^16.0.1",
-    "plaiceholder": "^3.0.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "rehype-pretty-code": "^0.14.1",
@@ -37,6 +38,7 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",

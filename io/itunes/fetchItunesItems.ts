@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
-import getImagePlaceholderForEnv from '@/io/plaiceholder/getImagePlaceholderForEnv'
 import { formatValidationError } from '@/utils/logging/zod'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 
@@ -37,7 +36,6 @@ const iTunesItemSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   link: z.url(),
   imageUrl: z.url(),
-  imagePlaceholder: z.string(),
 })
 
 export type iTunesItem = z.infer<typeof iTunesItemSchema>
@@ -90,7 +88,6 @@ export default async function fetchItunesItems(
           `https://res.cloudinary.com/ooloth/image/fetch/${artworkUrl100.replace('100x100bb', '400x0w')}`,
           192,
         )
-        const imagePlaceholder = await getImagePlaceholderForEnv(imageUrl, 4)
 
         // Validate final item before adding to results
         const parsedItem = iTunesItemSchema.safeParse({
@@ -100,7 +97,6 @@ export default async function fetchItunesItems(
           date: matchingItem.date,
           link,
           imageUrl,
-          imagePlaceholder,
         })
 
         if (!parsedItem.success) {

@@ -116,7 +116,7 @@ describe('fetchCloudinaryImageMetadata', () => {
       }
     })
 
-    it('handles images with missing alt text', async () => {
+    it('requires alt text for all images', async () => {
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
       const mockCache = createMockCache()
@@ -143,10 +143,10 @@ describe('fetchCloudinaryImageMetadata', () => {
         cloudinaryClient: mockClient,
       })
 
-      expect(isOk(result)).toBe(true)
-      if (isOk(result)) {
-        expect(result.value.alt).toBe('') // Empty string when alt is missing
-        expect(result.value.caption).toBe('Test caption')
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error.message).toContain('missing alt text')
+        expect(result.error.message).toContain('sample/image')
       }
     })
 

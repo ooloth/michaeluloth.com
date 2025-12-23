@@ -80,7 +80,7 @@ describe('transformNotionPagesToPostListItems', () => {
         properties: {
           Slug: createRichTextProperty('minimal-post'),
           Title: createTitleProperty('Minimal Post'),
-          Description: createRichTextProperty(null),
+          Description: createRichTextProperty('A minimal post description'),
           'First published': createDateProperty('2024-02-20'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
@@ -95,7 +95,7 @@ describe('transformNotionPagesToPostListItems', () => {
         id: '456',
         slug: 'minimal-post',
         title: 'Minimal Post',
-        description: null,
+        description: 'A minimal post description',
         firstPublished: '2024-02-20',
         featuredImage: null,
         feedId: null,
@@ -117,7 +117,7 @@ describe('transformNotionPagesToPostListItems', () => {
       properties: {
         Slug: createRichTextProperty(null),
         Title: createTitleProperty('Valid Title'),
-        Description: createRichTextProperty(null),
+        Description: createRichTextProperty('Valid description'),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
@@ -128,7 +128,7 @@ describe('transformNotionPagesToPostListItems', () => {
       properties: {
         Slug: createRichTextProperty(''),
         Title: createTitleProperty('Valid Title'),
-        Description: createRichTextProperty(null),
+        Description: createRichTextProperty('Valid description'),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
@@ -139,7 +139,29 @@ describe('transformNotionPagesToPostListItems', () => {
       properties: {
         Slug: createRichTextProperty('valid-slug'),
         Title: createTitleProperty(null),
+        Description: createRichTextProperty('Valid description'),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty([]),
+        'Feed ID': createUrlProperty(null),
+      },
+    },
+    {
+      case: 'missing description',
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty('Valid Title'),
         Description: createRichTextProperty(null),
+        'First published': createDateProperty('2024-01-15'),
+        'Featured image': createFilesProperty([]),
+        'Feed ID': createUrlProperty(null),
+      },
+    },
+    {
+      case: 'empty description',
+      properties: {
+        Slug: createRichTextProperty('valid-slug'),
+        Title: createTitleProperty('Valid Title'),
+        Description: createRichTextProperty(''),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
@@ -150,7 +172,7 @@ describe('transformNotionPagesToPostListItems', () => {
       properties: {
         Slug: createRichTextProperty('valid-slug'),
         Title: createTitleProperty('Valid Title'),
-        Description: createRichTextProperty(null),
+        Description: createRichTextProperty('Valid description'),
         'First published': createDateProperty(null),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
@@ -161,7 +183,7 @@ describe('transformNotionPagesToPostListItems', () => {
       properties: {
         Slug: createRichTextProperty('valid-slug'),
         Title: createTitleProperty('Valid Title'),
-        Description: createRichTextProperty(null),
+        Description: createRichTextProperty('Valid description'),
         'First published': createDateProperty('01/15/2024'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
@@ -173,7 +195,7 @@ describe('transformNotionPagesToPostListItems', () => {
       properties: {
         Slug: createRichTextProperty('valid-slug'),
         Title: createTitleProperty('Valid Title'),
-        Description: createRichTextProperty(null),
+        Description: createRichTextProperty('Valid description'),
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty(['not-a-url']),
         'Feed ID': createUrlProperty(null),
@@ -197,7 +219,7 @@ describe('transformNotionPagesToPostListItems', () => {
         properties: {
           Slug: createRichTextProperty('post-1'),
           Title: createTitleProperty('Post 1'),
-          Description: createRichTextProperty(null),
+          Description: createRichTextProperty('Description for post 1'),
           'First published': createDateProperty('2024-01-01'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
@@ -208,7 +230,7 @@ describe('transformNotionPagesToPostListItems', () => {
         properties: {
           Slug: createRichTextProperty('post-2'),
           Title: createTitleProperty('Post 2'),
-          Description: createRichTextProperty(null),
+          Description: createRichTextProperty('Description for post 2'),
           'First published': createDateProperty('2024-02-02'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
@@ -230,7 +252,7 @@ describe('transformNotionPagesToPostListItems', () => {
         properties: {
           Slug: createRichTextProperty('post-1'),
           Title: createTitleProperty('Post 1'),
-          Description: createRichTextProperty(null),
+          Description: createRichTextProperty('Description for post 1'),
           'First published': createDateProperty('2024-01-01'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
@@ -241,7 +263,7 @@ describe('transformNotionPagesToPostListItems', () => {
         properties: {
           Slug: createRichTextProperty('post-2'),
           Title: createTitleProperty(null), // Invalid - missing title
-          Description: createRichTextProperty(null),
+          Description: createRichTextProperty('Description for post 2'),
           'First published': createDateProperty('2024-02-02'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
@@ -300,7 +322,7 @@ describe('getPosts', () => {
           id: '456',
           slug: 'cached-post',
           title: 'Cached Post',
-          description: null,
+          description: 'A cached post description',
           firstPublished: '2024-01-01',
           featuredImage: null,
           feedId: null,
@@ -329,7 +351,7 @@ describe('getPosts', () => {
           id: 'old',
           slug: 'old',
           title: 'Old',
-          description: null,
+          description: 'Old post description',
           firstPublished: '2020-01-01',
           featuredImage: null,
           feedId: null,
@@ -342,7 +364,7 @@ describe('getPosts', () => {
           properties: {
             Slug: createRichTextProperty('fresh-post'),
             Title: createTitleProperty('Fresh Post'),
-            Description: createRichTextProperty(null),
+            Description: createRichTextProperty('Fresh post description'),
             'First published': createDateProperty('2024-03-15'),
             'Featured image': createFilesProperty([]),
             'Feed ID': createUrlProperty(null),

@@ -18,6 +18,7 @@ export default function Icon({ src, width, height, style, ...props }: IconProps)
       width={width ?? src.width}
       height={height ?? src.height}
       src={EMPTY_SVG}
+      alt="" // treat as decorative so screen readers ignore it
       style={{
         ...style,
         backgroundColor: `currentcolor`,
