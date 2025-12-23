@@ -31,29 +31,25 @@ export default function PostFooter() {
 
   return (
     <footer className="my-10">
-      <div className="relative">
+      <div className="relative min-h-[360px]">
         {/* Loading skeleton matching actual Giscus layout */}
         {!isLoaded && (
           <div className="absolute inset-0 animate-pulse" aria-hidden="true">
             {/* Centered reaction count */}
             <div className="flex justify-center mb-3">
-              <div className="h-5 bg-zinc-800 rounded w-16"></div>
+              <div className="h-5 bg-zinc-800 rounded w-24"></div>
             </div>
 
             {/* Centered emoji row */}
             <div className="flex justify-center gap-2 mb-4">
               <div className="h-8 w-8 bg-zinc-800 rounded-full"></div>
-              <div className="h-8 w-8 bg-zinc-800 rounded-full"></div>
-              <div className="h-8 w-8 bg-zinc-800 rounded-full"></div>
-              <div className="h-8 w-8 bg-zinc-800 rounded-full"></div>
-              <div className="h-8 w-8 bg-zinc-800 rounded-full"></div>
             </div>
 
             {/* Left-aligned comment count */}
-            <div className="h-6 bg-zinc-800 rounded w-24 mb-3"></div>
+            <div className="h-6 bg-zinc-800 rounded w-24 mt-8 mb-6"></div>
 
             {/* Input box */}
-            <div className="h-40 bg-zinc-800 rounded"></div>
+            <div className="h-56 bg-zinc-800 rounded"></div>
           </div>
         )}
 
