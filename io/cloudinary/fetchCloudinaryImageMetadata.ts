@@ -65,6 +65,12 @@ const CloudinaryResourceSchema = z.object({
 })
 
 /**
+ * Type representing the validated subset of Cloudinary API response
+ * This is what our code actually expects and validates, not the full SDK type
+ */
+export type CloudinaryResource = z.infer<typeof CloudinaryResourceSchema>
+
+/**
  * Generates responsive image URLs for Cloudinary images.
  * Pure function - testable without I/O.
  *

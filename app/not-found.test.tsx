@@ -5,6 +5,15 @@
 import { render, screen } from '@testing-library/react'
 import NotFound from './not-found'
 
+// Mock Header and Footer components to avoid async data fetching in tests
+vi.mock('@/ui/header', () => ({
+  default: () => <header data-testid="header">Header</header>,
+}))
+
+vi.mock('@/ui/footer', () => ({
+  default: () => <footer data-testid="footer">Footer</footer>,
+}))
+
 describe('NotFound', () => {
   it('renders main landmark with correct id', async () => {
     const jsx = await NotFound()
@@ -48,9 +57,8 @@ describe('NotFound', () => {
 
   it('renders separator dot between links', async () => {
     const jsx = await NotFound()
-    render(jsx)
-
     const { container } = render(jsx)
+
     expect(container.textContent).toContain('•')
   })
 })

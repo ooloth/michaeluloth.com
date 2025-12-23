@@ -9,6 +9,11 @@ vi.mock('@/io/cloudinary/transformCloudinaryImage', () => ({
 describe('fetchItunesItems', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   describe('success cases', () => {
@@ -255,7 +260,9 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
-      const result = await fetchItunesItems(inputItems, 'music', 'album')
+      const promise = fetchItunesItems(inputItems, 'music', 'album')
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {

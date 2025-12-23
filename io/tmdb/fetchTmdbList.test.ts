@@ -15,6 +15,11 @@ vi.mock('@/io/env', () => ({
 describe('fetchTmdbList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   describe('success cases', () => {
@@ -279,7 +284,9 @@ describe('fetchTmdbList', () => {
         throw networkError
       }) as unknown as typeof global.fetch
 
-      const result = await fetchTmdbList('test-list-id', 'movie')
+      const promise = fetchTmdbList('test-list-id', 'movie')
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
