@@ -141,7 +141,6 @@ export default async function getMediaItems(options: Options): Promise<Result<No
         }),
       {
         maxAttempts: 3,
-        initialDelayMs: 2000,
         onRetry: (error, attempt, delay) => {
           console.log(
             `⚠️  Notion API timeout fetching ${category} - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,

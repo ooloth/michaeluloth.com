@@ -112,7 +112,6 @@ export default async function getPost({
         }),
       {
         maxAttempts: 3,
-        initialDelayMs: 2000,
         onRetry: (error, attempt, delay) => {
           console.log(
             `⚠️  Notion API timeout fetching post "${slug}" - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,

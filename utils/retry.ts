@@ -14,7 +14,7 @@ export type RetryOptions = {
  */
 const DEFAULT_OPTIONS: Required<RetryOptions> = {
   maxAttempts: 3,
-  initialDelayMs: 1000,
+  initialDelayMs: 2000,
   maxDelayMs: 10000,
   backoffMultiplier: 2,
   onRetry: () => {},
