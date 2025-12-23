@@ -3,6 +3,7 @@ import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
 import { formatValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, Err, toErr } from '@/utils/errors/result'
+import { withRetry } from '@/utils/retry'
 
 // Schema for raw TMDB API response item
 const TmdbApiResultSchema = z.object({
@@ -52,7 +53,15 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
 
   do {
     try {
-      const response = await fetch20Items()
+      const response = await withRetry(fetch20Items, {
+        maxAttempts: 3,
+        initialDelayMs: 2000,
+        onRetry: (error, attempt, delay) => {
+          console.log(
+            `⚠️  TMDB API timeout (page ${page}/${totalPages}) - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
+          )
+        },
+      })
       const data = await response.json()
       totalPages = data.total_pages
 
