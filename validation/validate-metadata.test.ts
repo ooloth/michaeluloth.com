@@ -133,11 +133,13 @@ describe('validateOgImage', () => {
 
   beforeEach(() => {
     originalFetch = global.fetch
+    vi.useFakeTimers()
   })
 
   afterEach(() => {
     global.fetch = originalFetch
     vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   it('returns timeout error when external image fetch exceeds 10 seconds', async () => {
@@ -166,12 +168,14 @@ describe('validateOgImage', () => {
       })
     }) as typeof global.fetch
 
-    const errors = await validateOgImage(html, 'test-page')
+    const promise = validateOgImage(html, 'test-page')
+    await vi.runAllTimersAsync()
+    const errors = await promise
 
     expect(errors).toHaveLength(1)
     expect(errors[0]).toEqual({
       page: 'test-page',
       error: 'og:image fetch timed out: https://slow-server.example.com/image.png',
     })
-  }, 15000) // Set test timeout to 15s to allow for the 10s fetch timeout
+  })
 })
