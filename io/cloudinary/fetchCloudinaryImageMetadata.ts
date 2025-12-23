@@ -65,8 +65,8 @@ const CloudinaryResourceSchema = z.object({
 })
 
 /**
- * Type representing the validated subset of Cloudinary API response
- * This is what our code actually expects and validates, not the full SDK type
+ * Type representing the subset of the Cloudinary API response that our schema validates.
+ * This is the expected shape after successful validation, not the full SDK type.
  */
 export type CloudinaryResource = z.infer<typeof CloudinaryResourceSchema>
 
