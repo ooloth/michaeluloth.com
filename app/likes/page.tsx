@@ -83,7 +83,14 @@ function MediaSection({ title, items, height, prioritizeFirstImage = false }: Me
           const isFirstImage = index === 0 && prioritizeFirstImage
 
           return (
-            <li key={item.id} className="flex-none w-48" style={{ contentVisibility: 'auto' }}>
+            <li
+              key={item.id}
+              className="flex-none w-48"
+              style={{
+                contentVisibility: 'auto',
+                containIntrinsicSize: `192px ${height === 'h-72' ? '288px' : '192px'}`,
+              }}
+            >
               <a
                 href={item.link}
                 target="_blank"
@@ -91,7 +98,7 @@ function MediaSection({ title, items, height, prioritizeFirstImage = false }: Me
                 className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300 rounded-lg"
               >
                 <figure>
-                  <div className={`relative ${height} overflow-hidden`}>
+                  <div className={`relative ${height} overflow-hidden rounded-lg bg-zinc-800`}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.imageUrl}
@@ -100,12 +107,7 @@ function MediaSection({ title, items, height, prioritizeFirstImage = false }: Me
                       alt={item.title}
                       loading={isFirstImage ? 'eager' : 'lazy'}
                       decoding="async"
-                      className="object-cover rounded-lg w-full h-full"
-                      style={{
-                        backgroundImage: `url(${item.imagePlaceholder})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: '50% 50%',
-                      }}
+                      className="absolute inset-0 object-cover rounded-lg w-full h-full"
                     />
                   </div>
                   <figcaption className="text-center">
