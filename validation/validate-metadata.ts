@@ -300,8 +300,9 @@ async function findBlogPosts(): Promise<string[]> {
 
 /**
  * Fetch and validate OG image dimensions.
+ * Exported for testing purposes.
  */
-async function validateOgImage(html: string, pageName: string): Promise<ValidationError[]> {
+export async function validateOgImage(html: string, pageName: string): Promise<ValidationError[]> {
   const $ = load(html)
   const imageUrl = getMetaContent($('meta[property="og:image"]'))
 

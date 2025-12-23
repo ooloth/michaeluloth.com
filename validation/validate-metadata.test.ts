@@ -1,11 +1,13 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   isValidUrl,
   isValidISODate,
   getExpectedCanonicalUrl,
   isValidOgImageUrl,
   hasCorrectCloudinaryDimensions,
+  validateOgImage,
 } from './validate-metadata'
+import { SITE_URL } from '@/utils/metadata'
 
 describe('isValidUrl', () => {
   it('returns true for valid absolute URLs', () => {
@@ -55,17 +57,17 @@ describe('isValidISODate', () => {
 
 describe('getExpectedCanonicalUrl', () => {
   it('returns SITE_URL for index.html', () => {
-    expect(getExpectedCanonicalUrl('index.html')).toBe('https://michaeluloth.com/')
+    expect(getExpectedCanonicalUrl('index.html')).toBe(SITE_URL)
   })
 
   it('converts file path to URL path for non-index files', () => {
-    expect(getExpectedCanonicalUrl('blog/index.html')).toBe('https://michaeluloth.com/blog/')
-    expect(getExpectedCanonicalUrl('likes/index.html')).toBe('https://michaeluloth.com/likes/')
+    expect(getExpectedCanonicalUrl('blog/index.html')).toBe(`${SITE_URL}blog/`)
+    expect(getExpectedCanonicalUrl('likes/index.html')).toBe(`${SITE_URL}likes/`)
   })
 
   it('handles nested paths', () => {
-    expect(getExpectedCanonicalUrl('blog/post-title/index.html')).toBe('https://michaeluloth.com/blog/post-title/')
-    expect(getExpectedCanonicalUrl('deep/nested/path/index.html')).toBe('https://michaeluloth.com/deep/nested/path/')
+    expect(getExpectedCanonicalUrl('blog/post-title/index.html')).toBe(`${SITE_URL}blog/post-title/`)
+    expect(getExpectedCanonicalUrl('deep/nested/path/index.html')).toBe(`${SITE_URL}deep/nested/path/`)
   })
 
   it('preserves trailing slash in converted paths', () => {
@@ -76,7 +78,7 @@ describe('getExpectedCanonicalUrl', () => {
 
 describe('isValidOgImageUrl', () => {
   it('returns true for default OG image', () => {
-    expect(isValidOgImageUrl('https://michaeluloth.com/og-image.png')).toBe(true)
+    expect(isValidOgImageUrl(`${SITE_URL}og-image.png`)).toBe(true)
   })
 
   it('returns true for Cloudinary URLs', () => {
@@ -124,4 +126,52 @@ describe('hasCorrectCloudinaryDimensions', () => {
   it('returns false for non-Cloudinary URLs', () => {
     expect(hasCorrectCloudinaryDimensions('https://example.com/image.png')).toBe(false)
   })
+})
+
+describe('validateOgImage', () => {
+  let originalFetch: typeof global.fetch
+
+  beforeEach(() => {
+    originalFetch = global.fetch
+  })
+
+  afterEach(() => {
+    global.fetch = originalFetch
+    vi.restoreAllMocks()
+  })
+
+  it('returns timeout error when external image fetch exceeds 10 seconds', async () => {
+    // HTML with external og:image (not Cloudinary, not local)
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta property="og:image" content="https://slow-server.example.com/image.png" />
+        </head>
+      </html>
+    `
+
+    // Mock fetch to never resolve (simulating a hang that triggers AbortController)
+    global.fetch = vi.fn((url: string, options?: RequestInit) => {
+      return new Promise((_, reject) => {
+        // Simulate abort after timeout by listening to abort signal
+        const signal = options?.signal
+        if (signal) {
+          signal.addEventListener('abort', () => {
+            const error = new Error('The operation was aborted')
+            error.name = 'AbortError'
+            reject(error)
+          })
+        }
+      })
+    }) as typeof global.fetch
+
+    const errors = await validateOgImage(html, 'test-page')
+
+    expect(errors).toHaveLength(1)
+    expect(errors[0]).toEqual({
+      page: 'test-page',
+      error: 'og:image fetch timed out: https://slow-server.example.com/image.png',
+    })
+  }, 15000) // Set test timeout to 15s to allow for the 10s fetch timeout
 })
