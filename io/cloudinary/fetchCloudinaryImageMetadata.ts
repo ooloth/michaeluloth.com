@@ -151,7 +151,7 @@ export default async function fetchCloudinaryImageMetadata({
       throw new Error(
         `🚨 Cloudinary image "${publicId}" is missing alt text.\n` +
           `Alt text is required for accessibility.\n` +
-          `Add it in Cloudinary dashboard: https://console.cloudinary.com/pm/c-9ef62c1f208a0bd85088fb70b2fcd0/media-library/search/asset/${public_id}`,
+          `Add alt text in Cloudinary Media Library by searching for: ${publicId}`,
       )
     }
 
