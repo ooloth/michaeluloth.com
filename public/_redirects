@@ -1,21 +1,14 @@
-# Netlify/Cloudflare Redirects
-# See: https://docs.netlify.com/routing/redirects/#syntax-for-the-redirects-file
-# See: https://developers.cloudflare.com/pages/configuration/redirects/
+# Cloudflare Pages Redirects
+# Only specific redirects - Next.js handles trailing slashes via trailingSlash: true config
 
-# =============================================================================
-# SECTION 1: Old page routes that moved to /blog/
-# =============================================================================
-
+# Old page routes that moved to /blog/
 /blog /blog/ 301
 /notes /blog/ 301
 /til /blog/ 301
 /writes /blog/ 301
 /writing /blog/ 301
 
-# =============================================================================
-# SECTION 2: Old post route redirects (renamed slugs)
-# =============================================================================
-
+# Old post route redirects (renamed slugs)
 /how-to-shrink-video-file-size-using-ffmpeg /ffmpeg-reducing-video-file-size/ 301
 /translate-z /css-translate-z/ 301
 /what-is-a-factory-function /javascript-what-is-a-factory-function/ 301
@@ -35,9 +28,3 @@
 /what-is-gatsby /gatsby-what-is-it/ 301
 /introducing-gatsby-tutorials /gatsby-tutorials/ 301
 /how-to-set-up-a-mac-for-web-development /macos-set-up-for-web-development/ 301
-
-# =============================================================================
-# SECTION 3: Trailing slash normalization
-# =============================================================================
-
-/* /:splat/ 301
