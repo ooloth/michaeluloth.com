@@ -1,11 +1,10 @@
-name: CI/CD
+name: Check
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened, ready_for_review, review_requested]
 
 jobs:
   # Fast checks - always run
@@ -60,7 +59,7 @@ jobs:
       - run: npm ci
       - run: npm run test:ci
 
-  # Slow checks - only run on main or when PR is ready for review
+  # Slow checks - only run on main or when PR is not draft
   build:
     name: Build
     runs-on: ubuntu-latest
