@@ -81,7 +81,6 @@ describe('withRetry', () => {
     })
   })
 
-
   describe('exponential backoff', () => {
     it('uses initial delay on first retry', async () => {
       const fn = vi.fn().mockRejectedValueOnce(new Error('fetch failed')).mockResolvedValue('success')

@@ -13,7 +13,7 @@ describe('_redirects file', () => {
   })
 
   it('has valid redirect format (source destination status)', () => {
-    const redirectLines = lines.filter((line) => {
+    const redirectLines = lines.filter(line => {
       const trimmed = line.trim()
       return trimmed && !trimmed.startsWith('#')
     })
@@ -24,41 +24,34 @@ describe('_redirects file', () => {
       const parts = line.trim().split(/\s+/)
 
       // Each redirect should have exactly 3 parts: source, destination, status
-      expect(parts.length).toBe(
-        3,
-        `Line ${index + 1}: "${line}" should have format "source destination status"`,
-      )
+      expect(parts.length, `Line ${index + 1}: "${line}" should have format "source destination status"`).toBe(3)
 
       const [source, destination, status] = parts
 
       // Source should start with /
-      expect(source.startsWith('/')).toBe(
-        true,
-        `Line ${index + 1}: source "${source}" should start with /`,
-      )
+      expect(source.startsWith('/'), `Line ${index + 1}: source "${source}" should start with /`).toBe(true)
 
       // Destination should start with /
-      expect(destination.startsWith('/')).toBe(
+      expect(destination.startsWith('/'), `Line ${index + 1}: destination "${destination}" should start with /`).toBe(
         true,
-        `Line ${index + 1}: destination "${destination}" should start with /`,
       )
 
       // Status should be a valid HTTP redirect code
       const validStatuses = ['301', '302', '303', '307', '308']
-      expect(validStatuses.includes(status)).toBe(
-        true,
+      expect(
+        validStatuses.includes(status),
         `Line ${index + 1}: status "${status}" should be one of ${validStatuses.join(', ')}`,
-      )
+      ).toBe(true)
     })
   })
 
   it('uses 301 (permanent redirect) for all redirects', () => {
-    const redirectLines = lines.filter((line) => {
+    const redirectLines = lines.filter(line => {
       const trimmed = line.trim()
       return trimmed && !trimmed.startsWith('#')
     })
 
-    redirectLines.forEach((line) => {
+    redirectLines.forEach(line => {
       const parts = line.trim().split(/\s+/)
       const status = parts[2]
       expect(status).toBe('301')
