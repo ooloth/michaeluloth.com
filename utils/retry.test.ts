@@ -31,10 +31,7 @@ describe('withRetry', () => {
 
   describe('retryable errors', () => {
     it('retries on fetch failed error', async () => {
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('fetch failed'))
-        .mockResolvedValue('success')
+      const fn = vi.fn().mockRejectedValueOnce(new Error('fetch failed')).mockResolvedValue('success')
 
       const promise = withRetry(fn, { initialDelayMs: 100 })
       await vi.runAllTimersAsync()
@@ -73,10 +70,7 @@ describe('withRetry', () => {
     })
 
     it('retries on network timeout error', async () => {
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('network timeout'))
-        .mockResolvedValue('success')
+      const fn = vi.fn().mockRejectedValueOnce(new Error('network timeout')).mockResolvedValue('success')
 
       const promise = withRetry(fn, { initialDelayMs: 100 })
       await vi.runAllTimersAsync()
@@ -109,10 +103,7 @@ describe('withRetry', () => {
 
   describe('exponential backoff', () => {
     it('uses initial delay on first retry', async () => {
-      const fn = vi
-        .fn()
-        .mockRejectedValueOnce(new Error('fetch failed'))
-        .mockResolvedValue('success')
+      const fn = vi.fn().mockRejectedValueOnce(new Error('fetch failed')).mockResolvedValue('success')
 
       const onRetry = vi.fn()
       const promise = withRetry(fn, { initialDelayMs: 1000, onRetry })

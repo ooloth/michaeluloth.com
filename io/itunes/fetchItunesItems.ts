@@ -55,7 +55,9 @@ export default async function fetchItunesItems(
   try {
     const response = await withRetry(
       () =>
-        fetch(`https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${medium}&entity=${entity}&sort=recent`),
+        fetch(
+          `https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${medium}&entity=${entity}&sort=recent`,
+        ),
       {
         maxAttempts: 3,
         initialDelayMs: 2000,

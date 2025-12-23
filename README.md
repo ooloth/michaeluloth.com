@@ -54,11 +54,13 @@ The site is deployed to **Cloudflare Pages** using the **Wrangler CLI**.
 ### Deploy Commands
 
 **Preview deployment** (allows uncommitted changes):
+
 ```bash
 npm run deploy:preview
 ```
 
 **Production deployment** (from main branch):
+
 ```bash
 npm run deploy:production
 ```
@@ -84,6 +86,7 @@ This site uses Next.js static export (`output: 'export'` in `next.config.ts`). A
 Comments use [Giscus](https://giscus.app/) backed by the [`ooloth/comments`](https://github.com/ooloth/comments) repository.
 
 **Allowed origins** (configured in `ooloth/comments/giscus.json`):
+
 - `https://michaeluloth.com`
 - `https://michaeluloth.netlify.app`
 - `https://*.michaeluloth.pages.dev` (Cloudflare preview deployments)
