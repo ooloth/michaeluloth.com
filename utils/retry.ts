@@ -36,7 +36,14 @@ function calculateDelay(attempt: number, options: Required<RetryOptions>): numbe
 }
 
 /**
- * Determines if an error is retryable (network/timeout errors)
+ * Determines if an error is retryable (network/timeout errors).
+ *
+ * Uses dual detection strategy:
+ * 1. Message patterns - catches errors from fetch(), third-party SDKs
+ * 2. Error codes - catches Node.js network errors with structured cause
+ *
+ * This handles various error formats from different sources (browser fetch,
+ * Node.js net module, Notion SDK, Cloudinary SDK, etc.)
  */
 function isRetryableError(error: unknown): boolean {
   if (!(error instanceof Error)) return false
@@ -51,7 +58,7 @@ function isRetryableError(error: unknown): boolean {
     message.includes('econnreset') ||
     message.includes('enotfound')
 
-  // Check error cause for timeout/network codes
+  // Check error cause for timeout/network codes (Node.js errors)
   const cause = (error as Error & { cause?: { code?: string } }).cause
   const hasRetryableCode =
     cause?.code === 'ETIMEDOUT' ||

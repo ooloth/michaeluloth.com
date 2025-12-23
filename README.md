@@ -24,13 +24,29 @@ Open [http://localhost:3000](http://localhost:3000) to view the site.
 Create a `.env.local` file with:
 
 ```
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_CLOUD_NAME=
 NOTION_ACCESS_TOKEN=
-NOTION_DATA_SOURCE_ID_WRITING=
-NOTION_DATA_SOURCE_ID_BOOKS=
 NOTION_DATA_SOURCE_ID_ALBUMS=
+NOTION_DATA_SOURCE_ID_BOOKS=
 NOTION_DATA_SOURCE_ID_PODCASTS=
+NOTION_DATA_SOURCE_ID_WRITING=
 TMDB_READ_ACCESS_TOKEN=
+TMDB_MOVIE_LIST_ID=
+TMDB_TV_LIST_ID=
 ```
+
+**CI-only variables** (configured in GitHub Actions secrets):
+
+```
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_API_TOKEN=
+PUSHOVER_API_TOKEN=
+PUSHOVER_USER_KEY=
+```
+
+See `.env.example` for the complete list.
 
 ### Available Scripts
 
@@ -101,4 +117,12 @@ All external API calls include retry logic with exponential backoff to handle tr
 - **iTunes API**: Book/album/podcast metadata
 - **TMDB API**: Movie/TV metadata
 
-Configuration: 3 max attempts, 2s initial delay, 2x backoff multiplier.
+**Configuration:**
+
+- **Max attempts**: 3
+- **Initial delay**: 2s
+- **Backoff multiplier**: 2x (delays: 2s, 4s, 8s)
+- **Retryable errors**: Network/timeout errors only (fetch failures, ETIMEDOUT, ECONNRESET, ENOTFOUND, EAI_AGAIN)
+- **Non-retryable errors**: Validation errors, missing data, authentication failures
+
+See `utils/retry.ts` for implementation details.
