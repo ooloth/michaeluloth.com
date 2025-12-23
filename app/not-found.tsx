@@ -1,6 +1,7 @@
+import Dot from '@/ui/dot'
 import Link from '@/ui/link'
 
-export default function NotFound() {
+export default async function NotFound() {
   return (
     <main id="main" className="flex-auto pt-8 sm:pt-16 md:pt-20 text-center">
       <h1 className="text-xl md:text-2xl">Oops! There&apos;s no page here.</h1>
@@ -9,9 +10,11 @@ export default function NotFound() {
         404
       </p>
 
-      <Link href="/" className="mt-6 link text-xl md:text-2xl">
-        Go Home
-      </Link>
+      <div className="mt-8 flex gap-4 justify-center items-center text-xl md:text-2xl">
+        <Link href="/blog/">Browse Blog</Link>
+        <Dot color="muted" />
+        <Link href="/">Go Home</Link>
+      </div>
     </main>
   )
 }
