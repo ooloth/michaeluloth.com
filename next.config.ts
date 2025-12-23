@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  trailingSlash: true, // match Astro site norms (which I think apply to RSS feed URLs too)
+  trailingSlash: true, // change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
   turbopack: {
     rules: {
       // See: https://github.com/vitalets/turbopack-inline-svg-loader?tab=readme-ov-file#configuration
