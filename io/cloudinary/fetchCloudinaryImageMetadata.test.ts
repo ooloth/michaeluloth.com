@@ -407,6 +407,118 @@ describe('fetchCloudinaryImageMetadata', () => {
       }
     })
   })
+
+  describe('retry logic', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('retries on timeout error and succeeds', async () => {
+      const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
+
+      const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
+
+      vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
+
+      const timeoutError = new Error('fetch failed')
+      ;(timeoutError as Error & { cause: { code: string } }).cause = { code: 'ETIMEDOUT' }
+
+      const validResponse: CloudinaryResource = {
+        public_id: 'sample/image',
+        width: 1200,
+        height: 800,
+        context: {
+          custom: {
+            alt: 'Test Image',
+            caption: 'A test image',
+          },
+        },
+      }
+
+      // First call fails with timeout, second succeeds
+      vi.mocked(mockClient.api.resource).mockRejectedValueOnce(timeoutError).mockResolvedValueOnce(validResponse)
+
+      const promise = fetchCloudinaryImageMetadata({
+        url: 'https://res.cloudinary.com/test/image.jpg',
+        cache: mockCache,
+        cloudinaryClient: mockClient,
+      })
+      await vi.runAllTimersAsync()
+      const result = await promise
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value.alt).toBe('Test Image')
+      }
+      expect(mockClient.api.resource).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not retry on validation errors', async () => {
+      const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
+
+      const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
+
+      vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
+
+      const invalidResponse = {
+        public_id: 'sample/image',
+        width: 'invalid', // Invalid - should be number
+        height: 800,
+        context: {
+          custom: {
+            alt: 'Test',
+          },
+        },
+      }
+
+      vi.mocked(mockClient.api.resource).mockResolvedValue(invalidResponse)
+
+      const result = await fetchCloudinaryImageMetadata({
+        url: 'https://res.cloudinary.com/test/image.jpg',
+        cache: mockCache,
+        cloudinaryClient: mockClient,
+      })
+
+      expect(isErr(result)).toBe(true)
+      // Should only call once - validation errors are not retried
+      expect(mockClient.api.resource).toHaveBeenCalledTimes(1)
+    })
+
+    it('fails after max retry attempts', async () => {
+      const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
+
+      const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
+
+      vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
+
+      const timeoutError = new Error('network timeout')
+      ;(timeoutError as Error & { cause: { code: string } }).cause = { code: 'ETIMEDOUT' }
+
+      vi.mocked(mockClient.api.resource).mockRejectedValue(timeoutError)
+
+      const promise = fetchCloudinaryImageMetadata({
+        url: 'https://res.cloudinary.com/test/image.jpg',
+        cache: mockCache,
+        cloudinaryClient: mockClient,
+      })
+      await vi.runAllTimersAsync()
+      const result = await promise
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error.message).toContain(ERRORS.FETCH_FAILED)
+      }
+      // Should retry 3 times total
+      expect(mockClient.api.resource).toHaveBeenCalledTimes(3)
+    })
+  })
 })
 
 describe('generateResponsiveImageUrls', () => {
