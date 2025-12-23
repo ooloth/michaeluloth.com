@@ -1,2 +1,27 @@
+# Cloudflare Pages Headers
+# Applies to all routes
+
 /*
+  # Content Security Policy (CSP) - controls what resources can be loaded and from where
+  # This prevents XSS attacks by restricting scripts, styles, and other resources
+  #
+  # CSP directives explained:
+  # - default-src 'self'
+  #     Fallback for any directive not explicitly set - only allow resources from same origin
+  # - script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app
+  #     Allow JavaScript from: same origin, inline <script> tags, eval(), and giscus.app
+  #     Note: 'unsafe-inline' and 'unsafe-eval' needed for Next.js and Giscus to work
+  # - style-src 'self' 'unsafe-inline'
+  #     Allow CSS from: same origin and inline styles
+  #     Note: 'unsafe-inline' needed for Next.js style injection
+  # - img-src 'self' data: https:
+  #     Allow images from: same origin, data URIs, and any HTTPS source
+  # - font-src 'self' data:
+  #     Allow fonts from: same origin and data URIs
+  # - connect-src 'self' https://giscus.app
+  #     Allow fetch/XHR requests to: same origin and giscus.app API
+  # - frame-src https://giscus.app
+  #     Only allow iframes from giscus.app (needed for Giscus comments widget)
+  # - frame-ancestors 'self'
+  #     Only allow this site to be embedded in iframes on same origin (prevents clickjacking)
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://giscus.app; frame-src https://giscus.app; frame-ancestors 'self'
