@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# michaeluloth.com
 
-## Getting Started
+Personal website and blog built with Next.js 16, deployed as a static site to Cloudflare Pages.
 
-First, run the development server:
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router, static export)
+- **Styling**: Tailwind CSS 4
+- **Content**: Notion API (posts, books, albums, podcasts)
+- **Images**: Cloudinary
+- **Comments**: Giscus (GitHub Discussions)
+- **Deployment**: Cloudflare Pages (via Wrangler CLI)
+
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the site.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file with:
 
-## Learn More
+```
+NOTION_ACCESS_TOKEN=
+NOTION_DATA_SOURCE_ID_WRITING=
+NOTION_DATA_SOURCE_ID_BOOKS=
+NOTION_DATA_SOURCE_ID_ALBUMS=
+NOTION_DATA_SOURCE_ID_PODCASTS=
+TMDB_READ_ACCESS_TOKEN=
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Available Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `npm run dev` - Start development server
+- `npm run build` - Build static site to `out/`
+- `npm run deploy:preview` - Build and deploy to Cloudflare Pages (preview)
+- `npm run deploy:production` - Build and deploy to Cloudflare Pages (production)
+- `npm test` - Run tests
+- `npm run lighthouse` - Run Lighthouse CI
+- `npm run cache:clear` - Clear all local caches
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+The site is deployed to **Cloudflare Pages** using the **Wrangler CLI**.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Prerequisites
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Install Wrangler CLI (included in devDependencies, runs via `npx`)
+2. Authenticate: `npx wrangler login`
+
+### Deploy Commands
+
+**Preview deployment** (allows uncommitted changes):
+```bash
+npm run deploy:preview
+```
+
+**Production deployment** (from main branch):
+```bash
+npm run deploy:production
+```
+
+### Deployment Details
+
+- **Project name**: `michaeluloth`
+- **Preview URL**: `https://michaeluloth.pages.dev`
+- **Production URL**: `https://michaeluloth.com` (custom domain)
+- **Build output**: `out/` directory (static files)
+- **Build command**: `npm run build` (Next.js static export)
+
+### Static Export Configuration
+
+This site uses Next.js static export (`output: 'export'` in `next.config.ts`). All pages are pre-rendered at build time:
+
+- Blog posts generated via `generateStaticParams()`
+- 404 page at `app/not-found.tsx`
+- Redirects handled via `public/_redirects` (Cloudflare Pages format)
+
+## Comments Configuration
+
+Comments use [Giscus](https://giscus.app/) backed by the [`ooloth/comments`](https://github.com/ooloth/comments) repository.
+
+**Allowed origins** (configured in `ooloth/comments/giscus.json`):
+- `https://michaeluloth.com`
+- `https://michaeluloth.netlify.app`
+- `https://*.michaeluloth.pages.dev` (Cloudflare preview deployments)
+- `http://localhost:[0-9]+` (local development)
+
+## API Retry Logic
+
+All external API calls include retry logic with exponential backoff to handle transient network failures:
+
+- **Notion API**: Posts, media items, block children
+- **Cloudinary API**: Image metadata
+- **iTunes API**: Book/album/podcast metadata
+- **TMDB API**: Movie/TV metadata
+
+Configuration: 3 max attempts, 2s initial delay, 2x backoff multiplier.
