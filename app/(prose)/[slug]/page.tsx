@@ -129,9 +129,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-// Support static exports by disabling dynamic params
-// export const dynamicParams = false
-
 /**
  * Generates the list of static params (slugs) for all blog posts.
  * Replaces getStaticPaths in Next.js 13+
