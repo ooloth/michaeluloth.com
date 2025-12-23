@@ -10,6 +10,7 @@
     "cache:clear:next": "trash .next",
     "cache:clear:notion": "trash .local-cache/notion",
     "deploy:preview": "npm run build && wrangler pages deploy out --project-name=mu --commit-dirty=true",
+    "deploy:production": "npm run build && wrangler pages deploy out --project-name=mu --branch=main",
     "dev": "next dev",
     "format": "prettier --write .",
     "generate:og-image": "tsx metadata/generate-og-image.ts",
