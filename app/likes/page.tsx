@@ -92,6 +92,7 @@ function MediaSection({ title, items, height, prioritizeFirstImage = false }: Me
               >
                 <figure>
                   <div className={`relative ${height} overflow-hidden`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.imageUrl}
                       srcSet={buildSrcSet(item.imageUrl)}

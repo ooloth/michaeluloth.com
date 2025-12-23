@@ -10,9 +10,7 @@ describe('transformCloudinaryImage', () => {
   it('transforms fetch URLs with optimization parameters', () => {
     const input = 'https://res.cloudinary.com/demo/fetch/https://example.com/image.jpg'
     const result = transformCloudinaryImage(input, 192)
-    expect(result).toBe(
-      'https://res.cloudinary.com/demo/fetch/w_192,f_auto,q_auto/https://example.com/image.jpg',
-    )
+    expect(result).toBe('https://res.cloudinary.com/demo/fetch/w_192,f_auto,q_auto/https://example.com/image.jpg')
   })
 
   it('transforms youtube URLs with optimization parameters', () => {
