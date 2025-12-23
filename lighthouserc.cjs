@@ -1,5 +1,6 @@
 // URLs are generated dynamically from RSS feed before each run
 // See: validation/generate-lighthouse-urls.ts (runs via "prelighthouse" script)
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- Lighthouse CI requires CommonJS
 const urls = require('./validation/lighthouse-urls.json')
 
 module.exports = {
