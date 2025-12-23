@@ -1,6 +1,5 @@
 import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
-import Image from 'next/image'
 import fetchTmdbList, { type TmdbItem } from '@/io/tmdb/fetchTmdbList'
 import getMediaItems from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
@@ -67,6 +66,12 @@ function MediaSection({ title, items, height, prioritizeFirstImage = false }: Me
     return null
   }
 
+  // Build srcset for responsive images at 1x, 2x, 3x DPR
+  const buildSrcSet = (url: string) => {
+    const widths = [192, 384, 576] // 1x, 2x, 3x for 192px display width
+    return widths.map(w => `${url.replace('w_192,', `w_${w},`)} ${w}w`).join(', ')
+  }
+
   return (
     <section>
       <h2 className="mt-8 text-3xl font-semibold text-bright">{title}</h2>
@@ -87,15 +92,19 @@ function MediaSection({ title, items, height, prioritizeFirstImage = false }: Me
               >
                 <figure>
                   <div className={`relative ${height} overflow-hidden`}>
-                    <Image
+                    <img
                       src={item.imageUrl}
-                      alt={item.title}
-                      fill
+                      srcSet={buildSrcSet(item.imageUrl)}
                       sizes="192px"
-                      placeholder="blur"
-                      blurDataURL={item.imagePlaceholder}
-                      className="object-cover rounded-lg"
-                      priority={isFirstImage}
+                      alt={item.title}
+                      loading={isFirstImage ? 'eager' : 'lazy'}
+                      decoding="async"
+                      className="object-cover rounded-lg w-full h-full"
+                      style={{
+                        backgroundImage: `url(${item.imagePlaceholder})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: '50% 50%',
+                      }}
                     />
                   </div>
                   <figcaption className="text-center">
