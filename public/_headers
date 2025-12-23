@@ -18,10 +18,10 @@
   #     Allow images from: same origin, data URIs, and any HTTPS source
   # - font-src 'self' data:
   #     Allow fonts from: same origin and data URIs
-  # - connect-src 'self' https://giscus.app
-  #     Allow fetch/XHR requests to: same origin and giscus.app API
-  # - frame-src https://giscus.app https://github.com
-  #     Only allow iframes from giscus.app and github.com (Giscus loads GitHub discussions in iframes)
+  # - connect-src 'self' https://giscus.app https://api.github.com
+  #     Allow fetch/XHR requests to: same origin, giscus.app, and GitHub API (required for Giscus)
+  # - frame-src https://giscus.app
+  #     Only allow iframes from giscus.app (Giscus widget communicates with GitHub API, doesn't embed GitHub pages)
   # - frame-ancestors 'self'
   #     Only allow this site to be embedded in iframes on same origin (prevents clickjacking)
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://giscus.app; frame-src https://giscus.app https://github.com; frame-ancestors 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://giscus.app; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://giscus.app https://api.github.com; frame-src https://giscus.app; frame-ancestors 'self'
