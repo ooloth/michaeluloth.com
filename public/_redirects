@@ -57,15 +57,10 @@
 /*  //:splat/  301!
 
 # =============================================================================
-# SECTION 4: Catch-all for deleted content → /blog/
+# SECTION 4: Deleted content
 # =============================================================================
-# Any URL that doesn't exist (tag pages, bookmark pages, old notes, etc.)
-# redirects to /blog/ where all content now lives
+# No catch-all redirect - let Next.js serve 404s for deleted content
+# This is more honest UX and better for SEO than mass-redirecting to homepage
 #
-# How this works with trailing slash rule:
-# 1. User visits /python → trailing slash rule adds slash → /python/
-# 2. /python/ doesn't exist → this catch-all fires → /blog/ ✅
-# 3. User visits /css-translate-z → trailing slash adds slash → /css-translate-z/
-# 4. /css-translate-z/ exists → this catch-all doesn't fire → serves page ✅
-
-/*  /blog/  301
+# Tag pages, bookmark pages, and old notes that no longer exist will 404
+# Users will see the custom 404 page which can help them find what they need
