@@ -259,6 +259,15 @@ describe('fetchCloudinaryImageMetadata', () => {
   })
 
   describe('error cases', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    })
+
     it('returns Err when URL cannot be parsed', async () => {
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
@@ -292,11 +301,14 @@ describe('fetchCloudinaryImageMetadata', () => {
       const apiError = new Error('Cloudinary API error')
       vi.mocked(mockClient.api.resource).mockRejectedValue(apiError)
 
-      const result = await fetchCloudinaryImageMetadata({
+      const promise = fetchCloudinaryImageMetadata({
         url: 'https://res.cloudinary.com/test/image.jpg',
         cache: mockCache,
         cloudinaryClient: mockClient,
       })
+
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -397,11 +409,14 @@ describe('fetchCloudinaryImageMetadata', () => {
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
       vi.mocked(mockClient.api.resource).mockRejectedValue('string error')
 
-      const result = await fetchCloudinaryImageMetadata({
+      const promise = fetchCloudinaryImageMetadata({
         url: 'https://res.cloudinary.com/test/image.jpg',
         cache: mockCache,
         cloudinaryClient: mockClient,
       })
+
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
