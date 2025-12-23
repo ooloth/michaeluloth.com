@@ -1,8 +1,6 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  output: 'export',
-  staticPageGenerationTimeout: 180, // Increase timeout for pages with slow external API calls (likes page)
   images: {
     unoptimized: true, // Required for static exports - no image optimization server
     remotePatterns: [
@@ -12,7 +10,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  trailingSlash: true, // match Astro site norms (which I think apply to RSS feed URLs too)
+  output: 'export', // NOTE: temporary disable this to be able to see the 404 page while dev server is running
+  staticPageGenerationTimeout: 180, // Increase timeout for pages with slow external API calls (likes page)
+  trailingSlash: true, // change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
   turbopack: {
     rules: {
       // See: https://github.com/vitalets/turbopack-inline-svg-loader?tab=readme-ov-file#configuration

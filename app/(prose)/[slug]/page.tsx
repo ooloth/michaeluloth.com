@@ -17,6 +17,31 @@ type Props = Readonly<{
   params: Promise<Params>
 }>
 
+export default async function DynamicRoute({ params }: Props) {
+  const slug = (await params).slug
+
+  const post = (await getPost({ slug, includeBlocks: true, includePrevAndNext: true })).unwrap()
+
+  if (!post) {
+    notFound()
+  }
+
+  const jsonLd = generateJsonLd(post, slug)
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          // Escape < to prevent XSS if content contains </script>
+          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
+        }}
+      />
+      <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
+    </>
+  )
+}
+
 /**
  * Constructs the full URL for a blog post.
  */
@@ -102,31 +127,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [ogImage],
     },
   }
-}
-
-export default async function DynamicRoute({ params }: Props) {
-  const slug = (await params).slug
-
-  const post = (await getPost({ slug, includeBlocks: true, includePrevAndNext: true })).unwrap()
-
-  if (!post) {
-    notFound()
-  }
-
-  const jsonLd = generateJsonLd(post, slug)
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          // Escape < to prevent XSS if content contains </script>
-          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
-        }}
-      />
-      <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
-    </>
-  )
 }
 
 /**

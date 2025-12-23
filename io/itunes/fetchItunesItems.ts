@@ -2,6 +2,7 @@ import { z } from 'zod'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
 import { formatValidationError } from '@/utils/logging/zod'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
+import { withRetry } from '@/utils/retry'
 
 interface iTunesListItem {
   date: string
@@ -52,8 +53,16 @@ export default async function fetchItunesItems(
 
   // See: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/#lookup
   try {
-    const response = await fetch(
-      `https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${medium}&entity=${entity}&sort=recent`,
+    const response = await withRetry(
+      () =>
+        fetch(
+          `https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${medium}&entity=${entity}&sort=recent`,
+        ),
+      {
+        onRetry: (error, attempt, delay) => {
+          console.log(`⚠️  iTunes API timeout - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`)
+        },
+      },
     )
 
     const data = await response.json()

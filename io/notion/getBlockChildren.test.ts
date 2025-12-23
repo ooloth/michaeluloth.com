@@ -839,29 +839,44 @@ describe('getBlockChildren', () => {
     }
   })
 
-  it('returns Err when Notion API call fails', async () => {
-    const mockClient = createMockNotionClient()
-    const apiError = new Error('Notion API error')
-    vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
+  describe('error cases', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
 
-    const result = await getBlockChildren('test-block-id', mockClient)
+    afterEach(() => {
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    })
 
-    expect(isErr(result)).toBe(true)
-    if (isErr(result)) {
-      expect(result.error).toBe(apiError)
-    }
-  })
+    it('returns Err when Notion API call fails', async () => {
+      const mockClient = createMockNotionClient()
+      const apiError = new Error('Notion API error')
+      vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-  it('wraps non-Error exceptions as Error', async () => {
-    const mockClient = createMockNotionClient()
-    vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
+      const promise = getBlockChildren('test-block-id', mockClient)
+      await vi.runAllTimersAsync()
+      const result = await promise
 
-    const result = await getBlockChildren('test-block-id', mockClient)
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBe(apiError)
+      }
+    })
 
-    expect(isErr(result)).toBe(true)
-    if (isErr(result)) {
-      expect(result.error).toBeInstanceOf(Error)
-      expect(result.error.message).toBe('string error')
-    }
+    it('wraps non-Error exceptions as Error', async () => {
+      const mockClient = createMockNotionClient()
+      vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
+
+      const promise = getBlockChildren('test-block-id', mockClient)
+      await vi.runAllTimersAsync()
+      const result = await promise
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBeInstanceOf(Error)
+        expect(result.error.message).toBe('string error')
+      }
+    })
   })
 })

@@ -290,13 +290,24 @@ describe('getMediaItems', () => {
   })
 
   describe('error cases', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    })
+
     it('returns Err when Notion API call fails', async () => {
       const mockCache = createMockCache()
       const mockClient = createMockNotionClient()
       const apiError = new Error('Notion API error')
       vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-      const result = await getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
+      const promise = getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -349,7 +360,9 @@ describe('getMediaItems', () => {
 
       vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
 
-      const result = await getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
+      const promise = getMediaItems({ category: 'books', cache: mockCache, notionClient: mockClient })
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {

@@ -1,6 +1,9 @@
-import fetchCloudinaryImageMetadata, { generateResponsiveImageUrls, ERRORS } from './fetchCloudinaryImageMetadata'
+import fetchCloudinaryImageMetadata, {
+  generateResponsiveImageUrls,
+  ERRORS,
+  type CloudinaryResource,
+} from './fetchCloudinaryImageMetadata'
 import { isOk, isErr } from '@/utils/errors/result'
-import type { CloudinaryResource } from './types'
 import { type CacheAdapter } from '@/io/cache/adapter'
 import { type CloudinaryClient } from './client'
 
@@ -44,7 +47,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
-      const mockCloudinaryResource = {
+      const mockCloudinaryResource: CloudinaryResource = {
         public_id: 'sample/image',
         width: 1200,
         height: 800,
@@ -54,7 +57,7 @@ describe('fetchCloudinaryImageMetadata', () => {
             caption: 'Test caption',
           },
         },
-      } as CloudinaryResource
+      }
 
       vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
@@ -124,7 +127,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
-      const mockCloudinaryResource = {
+      const mockCloudinaryResource: CloudinaryResource = {
         public_id: 'sample/image',
         width: 1200,
         height: 800,
@@ -133,7 +136,7 @@ describe('fetchCloudinaryImageMetadata', () => {
             caption: 'Test caption',
           },
         },
-      } as CloudinaryResource
+      }
 
       vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
@@ -158,7 +161,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
-      const mockCloudinaryResource = {
+      const mockCloudinaryResource: CloudinaryResource = {
         public_id: 'sample/image',
         width: 1200,
         height: 800,
@@ -167,7 +170,7 @@ describe('fetchCloudinaryImageMetadata', () => {
             alt: 'Test image',
           },
         },
-      } as CloudinaryResource
+      }
 
       vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
@@ -192,7 +195,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
 
-      const mockCloudinaryResource = {
+      const mockCloudinaryResource: CloudinaryResource = {
         public_id: 'sample/image',
         width: 1200,
         height: 800,
@@ -202,7 +205,7 @@ describe('fetchCloudinaryImageMetadata', () => {
             caption: '',
           },
         },
-      } as CloudinaryResource
+      }
 
       vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
@@ -228,7 +231,7 @@ describe('fetchCloudinaryImageMetadata', () => {
 
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('http://example.com/image.jpg')
 
-      const mockCloudinaryResource = {
+      const mockCloudinaryResource: CloudinaryResource = {
         public_id: 'http://example.com/image.jpg',
         width: 1200,
         height: 800,
@@ -237,7 +240,7 @@ describe('fetchCloudinaryImageMetadata', () => {
             alt: 'Test',
           },
         },
-      } as CloudinaryResource
+      }
 
       vi.mocked(mockClient.api.resource).mockResolvedValue(mockCloudinaryResource)
 
@@ -256,6 +259,15 @@ describe('fetchCloudinaryImageMetadata', () => {
   })
 
   describe('error cases', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    })
+
     it('returns Err when URL cannot be parsed', async () => {
       const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
 
@@ -289,11 +301,14 @@ describe('fetchCloudinaryImageMetadata', () => {
       const apiError = new Error('Cloudinary API error')
       vi.mocked(mockClient.api.resource).mockRejectedValue(apiError)
 
-      const result = await fetchCloudinaryImageMetadata({
+      const promise = fetchCloudinaryImageMetadata({
         url: 'https://res.cloudinary.com/test/image.jpg',
         cache: mockCache,
         cloudinaryClient: mockClient,
       })
+
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -394,6 +409,94 @@ describe('fetchCloudinaryImageMetadata', () => {
       vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
       vi.mocked(mockClient.api.resource).mockRejectedValue('string error')
 
+      const promise = fetchCloudinaryImageMetadata({
+        url: 'https://res.cloudinary.com/test/image.jpg',
+        cache: mockCache,
+        cloudinaryClient: mockClient,
+      })
+
+      await vi.runAllTimersAsync()
+      const result = await promise
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBeInstanceOf(Error)
+        expect(result.error.message).toContain('string error')
+      }
+    })
+  })
+
+  describe('retry logic', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('retries on timeout error and succeeds', async () => {
+      const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
+
+      const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
+
+      vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
+
+      const timeoutError = new Error('fetch failed')
+      ;(timeoutError as Error & { cause: { code: string } }).cause = { code: 'ETIMEDOUT' }
+
+      const validResponse: CloudinaryResource = {
+        public_id: 'sample/image',
+        width: 1200,
+        height: 800,
+        context: {
+          custom: {
+            alt: 'Test Image',
+            caption: 'A test image',
+          },
+        },
+      }
+
+      // First call fails with timeout, second succeeds
+      vi.mocked(mockClient.api.resource).mockRejectedValueOnce(timeoutError).mockResolvedValueOnce(validResponse)
+
+      const promise = fetchCloudinaryImageMetadata({
+        url: 'https://res.cloudinary.com/test/image.jpg',
+        cache: mockCache,
+        cloudinaryClient: mockClient,
+      })
+      await vi.runAllTimersAsync()
+      const result = await promise
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value.alt).toBe('Test Image')
+      }
+      expect(mockClient.api.resource).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not retry on validation errors', async () => {
+      const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
+
+      const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
+
+      vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
+
+      const invalidResponse = {
+        public_id: 'sample/image',
+        width: 'invalid', // Invalid - should be number
+        height: 800,
+        context: {
+          custom: {
+            alt: 'Test',
+          },
+        },
+      }
+
+      vi.mocked(mockClient.api.resource).mockResolvedValue(invalidResponse)
+
       const result = await fetchCloudinaryImageMetadata({
         url: 'https://res.cloudinary.com/test/image.jpg',
         cache: mockCache,
@@ -401,10 +504,37 @@ describe('fetchCloudinaryImageMetadata', () => {
       })
 
       expect(isErr(result)).toBe(true)
+      // Should only call once - validation errors are not retried
+      expect(mockClient.api.resource).toHaveBeenCalledTimes(1)
+    })
+
+    it('fails after max retry attempts', async () => {
+      const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
+
+      const mockCache = createMockCache()
+      const mockClient = createMockCloudinaryClient()
+
+      vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
+
+      const timeoutError = new Error('network timeout')
+      ;(timeoutError as Error & { cause: { code: string } }).cause = { code: 'ETIMEDOUT' }
+
+      vi.mocked(mockClient.api.resource).mockRejectedValue(timeoutError)
+
+      const promise = fetchCloudinaryImageMetadata({
+        url: 'https://res.cloudinary.com/test/image.jpg',
+        cache: mockCache,
+        cloudinaryClient: mockClient,
+      })
+      await vi.runAllTimersAsync()
+      const result = await promise
+
+      expect(isErr(result)).toBe(true)
       if (isErr(result)) {
-        expect(result.error).toBeInstanceOf(Error)
-        expect(result.error.message).toContain('string error')
+        expect(result.error.message).toContain(ERRORS.FETCH_FAILED)
       }
+      // Should retry 3 times total
+      expect(mockClient.api.resource).toHaveBeenCalledTimes(3)
     })
   })
 })

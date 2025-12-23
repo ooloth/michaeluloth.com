@@ -7,6 +7,7 @@ import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { Ok, Err, toErr, type Result } from '@/utils/errors/result'
+import { withRetry } from '@/utils/retry'
 
 type Options = {
   slug: string | null
@@ -101,15 +102,27 @@ export default async function getPost({
 
     console.info(`📥 Fetching post from Notion API: ${slug}`)
 
-    const response = await notionClient.dataSources.query({
-      data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
-      filter: {
-        and: [{ property: 'Slug', rich_text: { equals: slug } }],
+    const response = await withRetry(
+      () =>
+        notionClient.dataSources.query({
+          data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
+          filter: {
+            and: [{ property: 'Slug', rich_text: { equals: slug } }],
+          },
+        }),
+      {
+        onRetry: (error, attempt, delay) => {
+          console.log(
+            `⚠️  Notion API timeout fetching post "${slug}" - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
+          )
+        },
       },
-    })
+    )
 
     if (response.results.length === 0) {
-      console.error(`No post found for slug: ${slug}`)
+      // Treat missing posts as a successful "not found" result so callers can render a 404
+      // (or similar) without this being surfaced as an application error.
+      console.warn(`No post found for slug: ${slug}`)
       return Ok(null)
     }
 

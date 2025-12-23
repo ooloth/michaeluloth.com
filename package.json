@@ -9,6 +9,8 @@
     "cache:clear:cloudinary": "trash .local-cache/cloudinary",
     "cache:clear:next": "trash .next",
     "cache:clear:notion": "trash .local-cache/notion",
+    "deploy:preview": "npm run build && npx wrangler pages deploy out --project-name=michaeluloth --commit-dirty=true",
+    "deploy:production": "bash scripts/deploy-production-check.sh && npm run build && npx wrangler pages deploy out --project-name=michaeluloth --branch=main",
     "dev": "next dev",
     "format": "prettier --write .",
     "generate:og-image": "tsx metadata/generate-og-image.ts",

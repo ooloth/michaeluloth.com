@@ -11,6 +11,7 @@ import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
+import { withRetry } from '@/utils/retry'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'
 
@@ -125,17 +126,27 @@ export default async function getMediaItems(options: Options): Promise<Result<No
 
     console.log(`📥 Fetching ${category} from Notion API`)
 
-    const pages = await collectPaginatedAPI(notionClient.dataSources.query, {
-      data_source_id: DATA_SOURCE_IDS[category],
-      filter: {
-        and: [
-          { property: 'Title', title: { is_not_empty: true } },
-          { property: 'Apple ID', number: { is_not_empty: true } },
-          { property: 'Date', date: { on_or_before: new Date().toISOString() } },
-        ],
+    const pages = await withRetry(
+      () =>
+        collectPaginatedAPI(notionClient.dataSources.query, {
+          data_source_id: DATA_SOURCE_IDS[category],
+          filter: {
+            and: [
+              { property: 'Title', title: { is_not_empty: true } },
+              { property: 'Apple ID', number: { is_not_empty: true } },
+              { property: 'Date', date: { on_or_before: new Date().toISOString() } },
+            ],
+          },
+          sorts: [{ property: 'Date', direction: 'descending' }],
+        }),
+      {
+        onRetry: (error, attempt, delay) => {
+          console.log(
+            `⚠️  Notion API timeout fetching ${category} - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
+          )
+        },
       },
-      sorts: [{ property: 'Date', direction: 'descending' }],
-    })
+    )
 
     // Transform and validate external data at boundary
     const items = transformNotionPagesToMediaItems(pages, category)

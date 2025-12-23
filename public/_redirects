@@ -1,0 +1,30 @@
+# Cloudflare Pages Redirects
+# Only specific redirects - Next.js handles trailing slashes via trailingSlash: true config
+
+# Old page routes that moved to /blog/
+/blog     /blog/  301
+/notes    /blog/  301
+/til      /blog/  301
+/writes   /blog/  301
+/writing  /blog/  301
+
+# Old post route redirects (renamed slugs)
+/how-to-shrink-video-file-size-using-ffmpeg  /ffmpeg-reducing-video-file-size/        301
+/translate-z                                 /css-translate-z/                        301
+/what-is-a-factory-function                  /javascript-what-is-a-factory-function/  301
+/writing-great-alt-text                      /html-writing-great-alt-text/            301
+/levels-of-abstraction-in-testing            /testing-levels-of-abstraction/          301
+/slack-alerts-for-cms-errors                 /slack-notifications-for-cms-errors/     301
+/filter-boolean                              /javascript-filter-boolean/              301
+/using-graphql-with-gatsby                   /gatsby-using-graphql/                   301
+/adding-content-to-a-gatsby-project          /gatsby-adding-content/                  301
+/writing-css-in-js-in-a-gatsby-project       /gatsby-writing-css-in-js/               301
+/writing-css-in-a-gatsby-project             /gatsby-writing-css/                     301
+/wrapping-pages-in-a-layout-component        /gatsby-layout-component/                301
+/adding-pages-to-a-gatsby-project            /gatsby-adding-pages/                    301
+/writing-html-in-a-gatsby-project            /gatsby-writing-html/                    301
+/gatsbys-default-files-and-folders           /gatsby-default-files-and-folders/       301
+/starting-a-new-gatsby-project               /gatsby-starting-a-new-project/          301
+/what-is-gatsby                              /gatsby-what-is-it/                      301
+/introducing-gatsby-tutorials                /gatsby-tutorials/                       301
+/how-to-set-up-a-mac-for-web-development     /macos-set-up-for-web-development/       301

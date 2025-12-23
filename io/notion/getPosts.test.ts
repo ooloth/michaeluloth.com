@@ -430,6 +430,15 @@ describe('getPosts', () => {
   })
 
   describe('error cases', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    })
+
     it('returns Err when Notion API call fails', async () => {
       const mockClient = createMockNotionClient()
 
@@ -437,7 +446,9 @@ describe('getPosts', () => {
       const apiError = new Error('Notion API error')
       vi.mocked(collectPaginatedAPI).mockRejectedValue(apiError)
 
-      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
+      const promise = getPosts({ cache: mockCache, notionClient: mockClient })
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -493,13 +504,106 @@ describe('getPosts', () => {
       const mockCache = createMockCache()
       vi.mocked(collectPaginatedAPI).mockRejectedValue('string error')
 
-      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
+      const promise = getPosts({ cache: mockCache, notionClient: mockClient })
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
         expect(result.error).toBeInstanceOf(Error)
         expect(result.error.message).toBe('string error')
       }
+    })
+  })
+
+  describe('retry logic', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('retries on timeout error and succeeds', async () => {
+      const mockClient = createMockNotionClient()
+      const mockCache = createMockCache()
+
+      const timeoutError = new Error('fetch failed')
+      ;(timeoutError as Error & { cause: { code: string } }).cause = { code: 'ETIMEDOUT' }
+
+      // First call fails with timeout, second succeeds
+      vi.mocked(collectPaginatedAPI)
+        .mockRejectedValueOnce(timeoutError)
+        .mockResolvedValueOnce([
+          {
+            id: '123',
+            properties: {
+              Slug: createRichTextProperty('retry-post'),
+              Title: createTitleProperty('Retry Post'),
+              Description: createRichTextProperty('Post fetched after retry'),
+              'First published': createDateProperty('2024-01-15'),
+              'Featured image': createFilesProperty([]),
+              'Feed ID': createUrlProperty(null),
+            },
+          },
+        ])
+
+      const promise = getPosts({ cache: mockCache, notionClient: mockClient })
+      await vi.runAllTimersAsync()
+      const result = await promise
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value[0].slug).toBe('retry-post')
+      }
+      expect(collectPaginatedAPI).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not retry on validation errors', async () => {
+      const mockClient = createMockNotionClient()
+      const mockCache = createMockCache()
+
+      vi.mocked(collectPaginatedAPI).mockResolvedValue([
+        {
+          id: '123',
+          properties: {
+            Slug: createRichTextProperty(null), // Invalid - will fail validation
+            Title: createTitleProperty('Post'),
+            Description: createRichTextProperty(null),
+            'First published': createDateProperty('2024-01-15'),
+            'Featured image': createFilesProperty([]),
+            'Feed ID': createUrlProperty(null),
+          },
+        },
+      ])
+
+      const result = await getPosts({ cache: mockCache, notionClient: mockClient })
+
+      expect(isErr(result)).toBe(true)
+      // Should only call once - validation errors are not retried
+      expect(collectPaginatedAPI).toHaveBeenCalledTimes(1)
+    })
+
+    it('fails after max retry attempts', async () => {
+      const mockClient = createMockNotionClient()
+      const mockCache = createMockCache()
+
+      const timeoutError = new Error('fetch failed')
+      ;(timeoutError as Error & { cause: { code: string } }).cause = { code: 'ETIMEDOUT' }
+
+      vi.mocked(collectPaginatedAPI).mockRejectedValue(timeoutError)
+
+      const promise = getPosts({ cache: mockCache, notionClient: mockClient })
+      await vi.runAllTimersAsync()
+      const result = await promise
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error.message).toContain('fetch failed')
+      }
+      // Should retry 3 times total
+      expect(collectPaginatedAPI).toHaveBeenCalledTimes(3)
     })
   })
 })

@@ -1,0 +1,200 @@
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Fast checks - always run
+  format:
+    name: Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npx prettier --check .
+
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+
+  typecheck:
+    name: Types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test:ci
+
+  # Slow checks - only run on main or when PR is not draft
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [format, lint, typecheck, test]
+    if: |
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
+    env:
+      NOTION_ACCESS_TOKEN: ${{ secrets.NOTION_ACCESS_TOKEN }}
+      NOTION_DATA_SOURCE_ID_BOOKS: ${{ secrets.NOTION_DATA_SOURCE_ID_BOOKS }}
+      NOTION_DATA_SOURCE_ID_ALBUMS: ${{ secrets.NOTION_DATA_SOURCE_ID_ALBUMS }}
+      NOTION_DATA_SOURCE_ID_PODCASTS: ${{ secrets.NOTION_DATA_SOURCE_ID_PODCASTS }}
+      NOTION_DATA_SOURCE_ID_WRITING: ${{ secrets.NOTION_DATA_SOURCE_ID_WRITING }}
+      TMDB_READ_ACCESS_TOKEN: ${{ secrets.TMDB_READ_ACCESS_TOKEN }}
+      TMDB_TV_LIST_ID: ${{ secrets.TMDB_TV_LIST_ID }}
+      TMDB_MOVIE_LIST_ID: ${{ secrets.TMDB_MOVIE_LIST_ID }}
+      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+      CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+      CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - name: Build
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: out/
+
+  metadata:
+    name: Metadata
+    runs-on: ubuntu-latest
+    needs: build
+    if: |
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: out/
+      - run: npm run test:metadata
+
+  lighthouse:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    needs: build
+    if: |
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
+    env:
+      LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: lighthouse-chrome-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: out/
+      - run: npm run lighthouse
+
+  # Deploy - only on main, only if all checks pass
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [metadata, lighthouse]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: out/
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy out --project-name=michaeluloth --branch=main
+
+  # Notify - always runs on main, reports success or which check failed
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [format, lint, typecheck, test, build, metadata, lighthouse, deploy]
+    if: always() && github.ref == 'refs/heads/main'
+    steps:
+      - name: Determine notification message
+        id: message
+        run: |
+          if [ "${{ needs.deploy.result }}" = "success" ]; then
+            echo "text=✅ michaeluloth.com deployed successfully" >> "$GITHUB_OUTPUT"
+          elif [ "${{ needs.deploy.result }}" = "failure" ]; then
+            echo "text=❌ Deployment to Cloudflare failed" >> "$GITHUB_OUTPUT"
+          elif [ "${{ needs.lighthouse.result }}" = "failure" ]; then
+            echo "text=❌ Lighthouse checks failed" >> "$GITHUB_OUTPUT"
+          elif [ "${{ needs.metadata.result }}" = "failure" ]; then
+            echo "text=❌ Metadata validation failed" >> "$GITHUB_OUTPUT"
+          elif [ "${{ needs.build.result }}" = "failure" ]; then
+            echo "text=❌ Build failed" >> "$GITHUB_OUTPUT"
+          elif [ "${{ needs.test.result }}" = "failure" ]; then
+            echo "text=❌ Tests failed" >> "$GITHUB_OUTPUT"
+          elif [ "${{ needs.typecheck.result }}" = "failure" ]; then
+            echo "text=❌ Type checking failed" >> "$GITHUB_OUTPUT"
+          elif [ "${{ needs.lint.result }}" = "failure" ]; then
+            echo "text=❌ Linting failed" >> "$GITHUB_OUTPUT"
+          elif [ "${{ needs.format.result }}" = "failure" ]; then
+            echo "text=❌ Formatting check failed" >> "$GITHUB_OUTPUT"
+          else
+            echo "text=❌ Deployment pipeline failed" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Send notification
+        uses: desiderati/github-action-pushover@v1
+        with:
+          job-status: ${{ job.status }}
+          pushover-api-token: ${{ secrets.PUSHOVER_API_TOKEN }}
+          pushover-user-key: ${{ secrets.PUSHOVER_USER_KEY }}
+          pushover-message: ${{ steps.message.outputs.text }}
+          pushover-url: ${{ needs.deploy.result != 'success' && format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) || '' }}

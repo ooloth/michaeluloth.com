@@ -5,6 +5,7 @@ import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
+import { withRetry } from '@/utils/retry'
 
 type Options = {
   cache?: CacheAdapter
@@ -83,17 +84,25 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
 
     console.log(`📥 Fetching posts from Notion API`)
 
-    const pages = await collectPaginatedAPI(notionClient.dataSources.query, {
-      data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
-      filter: {
-        and: [
-          { property: 'Destination', multi_select: { contains: 'blog' } },
-          { property: 'Status', status: { equals: 'Published' } }, // redundant if "First published" also used?
-          { property: 'First published', date: { on_or_before: new Date().toISOString() } },
-        ],
+    const pages = await withRetry(
+      () =>
+        collectPaginatedAPI(notionClient.dataSources.query, {
+          data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
+          filter: {
+            and: [
+              { property: 'Destination', multi_select: { contains: 'blog' } },
+              { property: 'Status', status: { equals: 'Published' } }, // redundant if "First published" also used?
+              { property: 'First published', date: { on_or_before: new Date().toISOString() } },
+            ],
+          },
+          sorts: [{ property: 'First published', direction: sortDirection }],
+        }),
+      {
+        onRetry: (error, attempt, delay) => {
+          console.log(`⚠️  Notion API timeout - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`)
+        },
       },
-      sorts: [{ property: 'First published', direction: sortDirection }],
-    })
+    )
 
     // Transform and validate external data at boundary
     const posts = transformNotionPagesToPostListItems(pages)

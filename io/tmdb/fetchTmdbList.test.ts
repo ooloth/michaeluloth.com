@@ -15,6 +15,11 @@ vi.mock('@/io/env', () => ({
 describe('fetchTmdbList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   describe('success cases', () => {
@@ -279,7 +284,9 @@ describe('fetchTmdbList', () => {
         throw networkError
       }) as unknown as typeof global.fetch
 
-      const result = await fetchTmdbList('test-list-id', 'movie')
+      const promise = fetchTmdbList('test-list-id', 'movie')
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -307,7 +314,9 @@ describe('fetchTmdbList', () => {
         throw 'string error'
       }) as unknown as typeof global.fetch
 
-      const result = await fetchTmdbList('test-list-id', 'movie')
+      const promise = fetchTmdbList('test-list-id', 'movie')
+      await vi.runAllTimersAsync()
+      const result = await promise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -320,7 +329,7 @@ describe('fetchTmdbList', () => {
       let callCount = 0
       global.fetch = vi.fn(async () => {
         callCount++
-        if (callCount === 2) {
+        if (callCount >= 2) {
           throw new Error('Pagination error')
         }
         return {
@@ -338,7 +347,12 @@ describe('fetchTmdbList', () => {
         }
       }) as unknown as typeof global.fetch
 
-      const result = await fetchTmdbList('test-list-id', 'movie')
+      const resultPromise = fetchTmdbList('test-list-id', 'movie')
+
+      // Advance timers in a loop to handle all retry attempts across pagination
+      await vi.runAllTimersAsync()
+
+      const result = await resultPromise
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {

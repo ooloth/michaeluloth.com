@@ -6,6 +6,7 @@ import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
 import { z } from 'zod'
 import { ImageEffect } from 'cloudinary'
+import { withRetry } from '@/utils/retry'
 
 export const ERRORS = {
   FETCH_FAILED: '🚨 Error fetching Cloudinary image',
@@ -62,6 +63,12 @@ const CloudinaryResourceSchema = z.object({
     })
     .optional(),
 })
+
+/**
+ * Type representing the subset of the Cloudinary API response that our schema validates.
+ * This is the expected shape after successful validation, not the full SDK type.
+ */
+export type CloudinaryResource = z.infer<typeof CloudinaryResourceSchema>
 
 /**
  * Generates responsive image URLs for Cloudinary images.
@@ -126,15 +133,25 @@ export default async function fetchCloudinaryImageMetadata({
 
     console.log(`📥 Fetching Cloudinary image metadata from API for "${publicId}"`)
 
-    // Fetch image details from Cloudinary Admin API
-    const cloudinaryResponse = await cloudinaryClient.api
-      .resource(publicId, {
-        context: true, // include contextual metadata (alt, caption, plus any custom fields)
-        type: publicId.startsWith('http') ? 'fetch' : 'upload',
-      })
-      .catch(error => {
-        throw Error(`${ERRORS.FETCH_FAILED}: "${publicId}":\n\n${getErrorDetails(error)}\n`)
-      })
+    // Fetch image details from Cloudinary Admin API with retry logic
+    const cloudinaryResponse = await withRetry(
+      () =>
+        cloudinaryClient.api
+          .resource(publicId, {
+            context: true, // include contextual metadata (alt, caption, plus any custom fields)
+            type: publicId.startsWith('http') ? 'fetch' : 'upload',
+          })
+          .catch(error => {
+            throw Error(`${ERRORS.FETCH_FAILED}: "${publicId}":\n\n${getErrorDetails(error)}\n`)
+          }),
+      {
+        onRetry: (error, attempt, delay) => {
+          console.log(
+            `⚠️  Cloudinary API timeout for "${publicId}" - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
+          )
+        },
+      },
+    )
 
     // Validate response with Zod
     const parseResult = CloudinaryResourceSchema.safeParse(cloudinaryResponse)
