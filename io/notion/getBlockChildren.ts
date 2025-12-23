@@ -8,6 +8,7 @@ import {
 } from './schemas/block'
 import { logValidationError } from '@/utils/logging/zod'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
+import { withRetry } from '@/utils/retry'
 
 export const INVALID_BLOCK_ERROR = 'Invalid block data - build aborted'
 
@@ -95,9 +96,21 @@ export default async function getBlockChildren(
   notionClient: Client = notion,
 ): Promise<Result<GroupedBlock[], Error>> {
   try {
-    const children = await collectPaginatedAPI(notionClient.blocks.children.list, {
-      block_id: blockId,
-    })
+    const children = await withRetry(
+      () =>
+        collectPaginatedAPI(notionClient.blocks.children.list, {
+          block_id: blockId,
+        }),
+      {
+        maxAttempts: 3,
+        initialDelayMs: 2000,
+        onRetry: (error, attempt, delay) => {
+          console.log(
+            `⚠️  Notion API timeout fetching block children - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
+          )
+        },
+      },
+    )
 
     // Validate and transform blocks at API boundary
     const blocks = validateBlocks(children)
