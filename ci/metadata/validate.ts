@@ -28,7 +28,7 @@ import {
   REQUIRED_ARTICLE_TAGS,
   REQUIRED_TWITTER_TAGS,
   EXCLUDE_DIRS,
-} from './config'
+} from '../config'
 
 // ============================================================================
 // Types

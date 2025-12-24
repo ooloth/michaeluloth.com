@@ -34,7 +34,7 @@
 
 import { readFileSync, existsSync, readdirSync } from 'fs'
 import { join } from 'path'
-import { LHCI_DIR } from './config'
+import { LHCI_DIR } from '../config'
 
 interface LighthouseNode {
   selector?: string

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { extractSearchableAttrs, extractFailingAudits, formatPageFailures } from './parse-lighthouse-errors'
+import { extractSearchableAttrs, extractFailingAudits, formatPageFailures } from './parse-errors'
 
 describe('extractSearchableAttrs', () => {
   it('extracts href attribute', () => {

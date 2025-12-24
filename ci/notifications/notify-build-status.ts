@@ -16,7 +16,7 @@
  * USAGE:
  * Called by GitHub Actions workflow with job results as arguments:
  *
- *   tsx io/github/notify-build-status.ts \
+ *   tsx ci/notifications/notify-build-status.ts \
  *     --deploy=success \
  *     --lighthouse=success \
  *     --metadata=success \

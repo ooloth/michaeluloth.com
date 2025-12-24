@@ -177,7 +177,7 @@ jobs:
       - run: npm ci
       - name: Send Pushover notification
         run: |
-          tsx io/github/notify-build-status.ts \
+          tsx ci/notifications/notify-build-status.ts \
             --deploy=${{ needs.deploy.result }} \
             --lighthouse=${{ needs.lighthouse.result }} \
             --metadata=${{ needs.metadata.result }} \

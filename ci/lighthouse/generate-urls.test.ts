@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { extractPostSlugsFromRss, generateLighthouseUrls } from './generate-lighthouse-urls'
+import { extractPostSlugsFromRss, generateLighthouseUrls } from './generate-urls'
 
 describe('extractPostSlugsFromRss', () => {
   it('extracts post slugs from well-formed RSS', () => {

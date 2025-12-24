@@ -6,7 +6,7 @@ import {
   isValidOgImageUrl,
   hasCorrectCloudinaryDimensions,
   validateOgImage,
-} from './validate-metadata'
+} from './validate'
 import { SITE_URL } from '@/utils/metadata'
 
 describe('isValidUrl', () => {

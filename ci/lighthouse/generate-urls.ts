@@ -9,7 +9,7 @@
  *
  * USAGE:
  * Runs automatically before `npm run lighthouse` via the "prelighthouse" script in package.json.
- * You rarely need to run it manually. If you do: tsx validation/generate-lighthouse-urls.ts
+ * You rarely need to run it manually. If you do: tsx ci/lighthouse/generate-urls.ts
  */
 
 import { readFile, writeFile } from 'fs/promises'
@@ -17,7 +17,7 @@ import { join } from 'path'
 
 const OUT_DIR = join(process.cwd(), 'out')
 const RSS_PATH = join(OUT_DIR, 'rss.xml')
-const OUTPUT_PATH = join(process.cwd(), 'validation', 'lighthouse-urls.json')
+const OUTPUT_PATH = join(process.cwd(), 'ci/lighthouse', 'urls.json')
 
 // ============================================================================
 // Pure Functions (no I/O, easily testable)
