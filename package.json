@@ -17,6 +17,7 @@
     "lighthouse": "lhci autorun || (tsx ci/lighthouse/parse-errors.ts && exit 1)",
     "prelighthouse": "tsx ci/lighthouse/generate-urls.ts",
     "lint": "eslint",
+    "notify:ci": "tsx ci/notifications/notify-build-status.ts",
     "start": "next start",
     "test": "vitest",
     "test:ci": "vitest run",
