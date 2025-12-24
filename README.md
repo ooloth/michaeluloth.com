@@ -126,3 +126,4 @@ All external API calls include retry logic with exponential backoff to handle tr
 All errors are retried (network failures, timeouts, etc.). Validation errors shouldn't occur at build time since they're caught in tests.
 
 See `utils/retry.ts` for implementation details.
+# Deployment test
