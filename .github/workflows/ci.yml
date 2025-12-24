@@ -171,30 +171,49 @@ jobs:
         run: |
           if [ "${{ needs.deploy.result }}" = "success" ]; then
             echo "text=✅ michaeluloth.com deployed successfully" >> "$GITHUB_OUTPUT"
+            echo "url=" >> "$GITHUB_OUTPUT"
           elif [ "${{ needs.deploy.result }}" = "failure" ]; then
             echo "text=❌ Deployment to Cloudflare failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ needs.lighthouse.result }}" = "failure" ]; then
             echo "text=❌ Lighthouse checks failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ needs.metadata.result }}" = "failure" ]; then
             echo "text=❌ Metadata validation failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ needs.build.result }}" = "failure" ]; then
             echo "text=❌ Build failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ needs.test.result }}" = "failure" ]; then
             echo "text=❌ Tests failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ needs.typecheck.result }}" = "failure" ]; then
             echo "text=❌ Type checking failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ needs.lint.result }}" = "failure" ]; then
             echo "text=❌ Linting failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           elif [ "${{ needs.format.result }}" = "failure" ]; then
             echo "text=❌ Formatting check failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           else
             echo "text=❌ Deployment pipeline failed" >> "$GITHUB_OUTPUT"
+            echo "url=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> "$GITHUB_OUTPUT"
           fi
+      - name: Validate notification message
+        run: |
+          if [ -z "${{ steps.message.outputs.text }}" ]; then
+            echo "ERROR: Notification message is empty!"
+            exit 1
+          fi
+          echo "Notification message: ${{ steps.message.outputs.text }}"
       - name: Send notification
-        uses: desiderati/github-action-pushover@v1
-        with:
-          job-status: ${{ job.status }}
-          pushover-api-token: ${{ secrets.PUSHOVER_API_TOKEN }}
-          pushover-user-key: ${{ secrets.PUSHOVER_USER_KEY }}
-          pushover-message: ${{ steps.message.outputs.text }}
-          pushover-url: ${{ needs.deploy.result != 'success' && format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) || '' }}
+        run: |
+          curl -s \
+            --form-string "token=${{ secrets.PUSHOVER_API_TOKEN }}" \
+            --form-string "user=${{ secrets.PUSHOVER_USER_KEY }}" \
+            --form-string "message=${{ steps.message.outputs.text }}" \
+            ${URL:+--form-string "url=${{ steps.message.outputs.url }}"} \
+            https://api.pushover.net/1/messages.json
+        env:
+          URL: ${{ steps.message.outputs.url }}
