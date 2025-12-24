@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { parseArgs, validateInputs } from './notify-build-status'
-import type { BuildStatusInputs } from '@/io/pushover/types'
+import type { BuildStatusInputs, JobResult } from '@/io/pushover/types'
 
 describe('parseArgs', () => {
   const originalArgv = process.argv
@@ -203,7 +203,7 @@ describe('validateInputs', () => {
       const jobKeys = ['deploy', 'lighthouse', 'metadata', 'build', 'test', 'typecheck', 'lint', 'format'] as const
 
       for (const key of jobKeys) {
-        const inputs = {
+        const inputs: BuildStatusInputs = {
           deploy: '',
           lighthouse: '',
           metadata: '',
@@ -213,7 +213,7 @@ describe('validateInputs', () => {
           lint: '',
           format: '',
           workflowUrl: 'https://example.com',
-          [key]: 'failure',
+          [key]: 'failure' as JobResult,
         }
 
         expect(() => validateInputs(inputs)).not.toThrow()
@@ -291,7 +291,7 @@ describe('validateInputs', () => {
 
     it('accepts non-standard job result values', () => {
       const inputs: BuildStatusInputs = {
-        deploy: 'unknown' as any,
+        deploy: 'unknown' as unknown as JobResult,
         lighthouse: '',
         metadata: '',
         build: '',
