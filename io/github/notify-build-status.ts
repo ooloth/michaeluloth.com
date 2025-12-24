@@ -16,7 +16,7 @@
  * USAGE:
  * Called by GitHub Actions workflow with job results as arguments:
  *
- *   tsx scripts/notify-build-status.ts \
+ *   tsx io/github/notify-build-status.ts \
  *     --deploy=success \
  *     --lighthouse=success \
  *     --metadata=success \
@@ -35,7 +35,7 @@
  */
 
 import { pushover } from '@/io/pushover/client'
-import { determineBuildStatus } from '@/io/pushover/determine-build-status'
+import { determineBuildStatus } from './determine-build-notification'
 import { sendNotification } from '@/io/pushover/send-notification'
 import type { BuildStatusInputs, JobResult } from '@/io/pushover/types'
 

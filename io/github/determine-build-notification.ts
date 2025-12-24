@@ -19,7 +19,7 @@
  * - Reliable and predictable
  */
 
-import type { BuildStatusInputs, BuildNotification } from './types'
+import type { BuildStatusInputs, BuildNotification } from '@/io/pushover/types'
 
 export function determineBuildStatus(inputs: BuildStatusInputs): BuildNotification {
   const { deploy, lighthouse, metadata, build, test, typecheck, lint, format, workflowUrl } = inputs

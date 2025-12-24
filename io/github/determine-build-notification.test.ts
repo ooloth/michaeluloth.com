@@ -1,5 +1,5 @@
-import { determineBuildStatus } from './determine-build-status'
-import type { BuildStatusInputs } from './types'
+import { determineBuildStatus } from './determine-build-notification'
+import type { BuildStatusInputs } from '@/io/pushover/types'
 
 const WORKFLOW_URL = 'https://github.com/ooloth/mu-next-16/actions/runs/123'
 
