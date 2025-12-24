@@ -17,6 +17,8 @@ describe('env', () => {
     CLOUDINARY_CLOUD_NAME: 'my-cloud',
     CLOUDINARY_API_KEY: 'cloudinary-key',
     CLOUDINARY_API_SECRET: 'cloudinary-secret',
+    PUSHOVER_API_TOKEN: 'pushover-token',
+    PUSHOVER_USER_KEY: 'pushover-user',
   }
 
   beforeEach(() => {
@@ -76,6 +78,17 @@ describe('env', () => {
       expect(env.CLOUDINARY_API_KEY).toBe('cloudinary-key')
       expect(env.CLOUDINARY_API_SECRET).toBe('cloudinary-secret')
     })
+
+    it('includes all Pushover environment variables', async () => {
+      Object.entries(validEnv).forEach(([key, value]) => {
+        vi.stubEnv(key, value)
+      })
+
+      const { env } = await import('./env')
+
+      expect(env.PUSHOVER_API_TOKEN).toBe('pushover-token')
+      expect(env.PUSHOVER_USER_KEY).toBe('pushover-user')
+    })
   })
 
   describe('error cases - missing variables', () => {
@@ -91,6 +104,8 @@ describe('env', () => {
       'CLOUDINARY_CLOUD_NAME',
       'CLOUDINARY_API_KEY',
       'CLOUDINARY_API_SECRET',
+      'PUSHOVER_API_TOKEN',
+      'PUSHOVER_USER_KEY',
     ])('throws when %s is missing', async key => {
       // Stub all env vars except the one being tested
       Object.entries(validEnv).forEach(([envKey, value]) => {
@@ -118,6 +133,8 @@ describe('env', () => {
       { key: 'CLOUDINARY_CLOUD_NAME', message: 'CLOUDINARY_CLOUD_NAME is required' },
       { key: 'CLOUDINARY_API_KEY', message: 'CLOUDINARY_API_KEY is required' },
       { key: 'CLOUDINARY_API_SECRET', message: 'CLOUDINARY_API_SECRET is required' },
+      { key: 'PUSHOVER_API_TOKEN', message: 'PUSHOVER_API_TOKEN is required' },
+      { key: 'PUSHOVER_USER_KEY', message: 'PUSHOVER_USER_KEY is required' },
     ])('throws when $key is empty string', async ({ key, message }) => {
       // Stub all env vars, but set the tested one to empty string
       Object.entries(validEnv).forEach(([envKey, value]) => {
