@@ -7,6 +7,7 @@ const imageStylesDefault = 'shadow-xl rounded bg-zinc-800'
 
 type Props = Readonly<{
   loading?: 'eager' | 'lazy'
+  fetchPriority?: 'high' | 'low' | 'auto'
   url: string
   effect?: ImageEffect
   showCaption?: boolean
@@ -21,7 +22,8 @@ type Props = Readonly<{
  * @returns A JSX element containing the optimized image, optionally wrapped in a figure with a caption.
  */
 export default async function CloudinaryImage({
-  loading = 'eager',
+  loading = 'lazy',
+  fetchPriority,
   url,
   effect,
   showCaption,
@@ -44,6 +46,7 @@ export default async function CloudinaryImage({
       alt={alt}
       height={height}
       loading={loading}
+      fetchPriority={fetchPriority}
       sizes={sizes}
       src={src}
       srcSet={srcSet}

@@ -105,7 +105,8 @@ function MediaSection({ title, items, height, prioritizeFirstImage = false }: Me
                       srcSet={buildSrcSet(item.imageUrl)}
                       sizes="192px"
                       alt={item.title}
-                      loading={isFirstImage ? 'eager' : 'lazy'}
+                      loading="lazy"
+                      fetchPriority={isFirstImage ? 'high' : 'auto'}
                       decoding="async"
                       className="absolute inset-0 object-cover rounded-lg w-full h-full"
                     />
