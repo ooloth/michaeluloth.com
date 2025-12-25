@@ -61,7 +61,12 @@ export function selectPostSlugs(allSlugs: string[]): string[] {
   // Always include the latest post (first in RSS feed)
   const latestPost = allSlugs[0]
 
-  // Randomly select one from the remaining posts
+  /**
+   * Randomly select one from the remaining posts.
+   * NOTE: The standard JavaScript pattern Math.floor(Math.random() * n) returns indices {0, 1, 2, ..., n-1} with equal
+   * probability. The last index (n-1) is reachable because Math.random() can get arbitrarily close to 1 (but never
+   * equal to 1), which when multiplied by n and floored gives n-1.
+   */
   const remainingPosts = allSlugs.slice(1)
   const randomIndex = Math.floor(Math.random() * remainingPosts.length)
   const randomPost = remainingPosts[randomIndex]
