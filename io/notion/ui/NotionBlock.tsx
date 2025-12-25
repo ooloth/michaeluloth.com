@@ -83,7 +83,7 @@ export default function NotionBlock({ block }: Props): ReactElement {
       return <CloudinaryImage url={block.url} />
 
     case 'video':
-      return <Video url={block.url} caption={block.caption} showCaption={!!block.caption} />
+      return <Video url={block.url} caption={block.caption} />
 
     default:
       // TypeScript exhaustiveness check

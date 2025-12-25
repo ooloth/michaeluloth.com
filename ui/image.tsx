@@ -10,7 +10,6 @@ type Props = Readonly<{
   fetchPriority?: 'high' | 'low' | 'auto'
   url: string
   effect?: ImageEffect
-  showCaption?: boolean
   imageStyles?: string
   outerStyles?: string
 }>
@@ -26,7 +25,6 @@ export default async function CloudinaryImage({
   fetchPriority,
   url,
   effect,
-  showCaption,
   imageStyles,
   outerStyles,
 }: Props) {
@@ -55,7 +53,7 @@ export default async function CloudinaryImage({
     />
   )
 
-  return caption && showCaption ? (
+  return caption ? (
     <figure className={outerClasses}>
       {image}
       <figcaption className="caption">{caption}</figcaption>
