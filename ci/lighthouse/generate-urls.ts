@@ -1,11 +1,12 @@
 #!/usr/bin/env tsx
 /**
- * Generates Lighthouse CI URLs dynamically based on the most recent blog posts.
+ * Generates Lighthouse CI URLs dynamically based on blog posts.
  *
  * WHY THIS EXISTS:
  * Hard-coding post URLs in lighthouserc.cjs falls out of date immediately as new posts are published.
- * This script reads the RSS feed (already sorted by publish date) to find the 3 most recent posts,
- * ensuring we always test fresh content where issues are most likely.
+ * This script reads the RSS feed (already sorted by publish date) to select posts for testing:
+ * - Latest post (always tested - catches issues in new content)
+ * - 1 random post (provides coverage across different posts over time)
  *
  * USAGE:
  * Runs automatically before `npm run lighthouse` via the "prelighthouse" script in package.json.
@@ -24,14 +25,14 @@ const OUTPUT_PATH = join(process.cwd(), 'ci/lighthouse', 'urls.json')
 // ============================================================================
 
 /**
- * Extract post slugs from RSS feed XML.
+ * Extract all post slugs from RSS feed XML.
  * RSS feed is already sorted by publication date (newest first).
  *
  * @example
  * const xml = '<rss>...<link>https://michaeluloth.com/my-post/</link>...</rss>'
- * extractPostSlugsFromRss(xml, 3) // ['my-post']
+ * extractPostSlugsFromRss(xml) // ['my-post', 'another-post', ...]
  */
-export function extractPostSlugsFromRss(xml: string, limit: number = 3): string[] {
+export function extractPostSlugsFromRss(xml: string, limit?: number): string[] {
   // Match <link> tags containing blog post URLs
   const linkRegex = /<link>https:\/\/michaeluloth\.com\/(.*?)\/<\/link>/g
   const matches = [...xml.matchAll(linkRegex)]
@@ -42,7 +43,30 @@ export function extractPostSlugsFromRss(xml: string, limit: number = 3): string[
     // Filter out homepage and special pages
     .filter(slug => slug && slug !== '' && !slug.includes('/'))
 
-  return slugs.slice(0, limit)
+  return limit !== undefined ? slugs.slice(0, limit) : slugs
+}
+
+/**
+ * Select posts for Lighthouse testing: latest post + 1 random post.
+ * This ensures new posts are always tested while providing coverage across different posts over time.
+ *
+ * @example
+ * selectPostSlugs(['newest', 'older-1', 'older-2', 'oldest'])
+ * // Returns: ['newest', <one of: 'older-1', 'older-2', 'oldest'>]
+ */
+export function selectPostSlugs(allSlugs: string[]): string[] {
+  if (allSlugs.length === 0) return []
+  if (allSlugs.length === 1) return [allSlugs[0]]
+
+  // Always include the latest post (first in RSS feed)
+  const latestPost = allSlugs[0]
+
+  // Randomly select one from the remaining posts
+  const remainingPosts = allSlugs.slice(1)
+  const randomIndex = Math.floor(Math.random() * remainingPosts.length)
+  const randomPost = remainingPosts[randomIndex]
+
+  return [latestPost, randomPost]
 }
 
 /**
@@ -79,20 +103,23 @@ export async function generateLighthouseUrlsFile(): Promise<void> {
   // Read RSS feed (already sorted by date)
   const rss = await readFile(RSS_PATH, 'utf-8')
 
-  // Extract recent post slugs
-  const slugs = extractPostSlugsFromRss(rss)
+  // Extract all post slugs
+  const allSlugs = extractPostSlugsFromRss(rss)
 
-  if (slugs.length === 0) {
+  if (allSlugs.length === 0) {
     throw new Error('No blog posts found in RSS feed. Build may have failed.')
   }
 
+  // Select posts for testing (latest + 1 random)
+  const selectedSlugs = selectPostSlugs(allSlugs)
+
   // Generate full URLs
-  const urls = generateLighthouseUrls(slugs)
+  const urls = generateLighthouseUrls(selectedSlugs)
 
   // Write to JSON file for lighthouserc.cjs to read
   await writeFile(OUTPUT_PATH, JSON.stringify(urls, null, 2) + '\n', 'utf-8')
 
-  console.log(`✓ Generated ${urls.length} Lighthouse URLs (${slugs.length} recent posts)`)
+  console.log(`✓ Generated ${urls.length} Lighthouse URLs (${selectedSlugs.length} posts: latest + random)`)
 }
 
 // ============================================================================

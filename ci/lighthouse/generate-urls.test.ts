@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { extractPostSlugsFromRss, generateLighthouseUrls } from './generate-urls'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { extractPostSlugsFromRss, selectPostSlugs, generateLighthouseUrls } from './generate-urls'
 
 describe('extractPostSlugsFromRss', () => {
   it('extracts post slugs from well-formed RSS', () => {
@@ -135,6 +135,96 @@ describe('extractPostSlugsFromRss', () => {
     const slugs = extractPostSlugsFromRss(xml, 3)
 
     expect(slugs).toEqual(['my-post-123', 'another-post-with-many-hyphens'])
+  })
+
+  it('returns all slugs when no limit provided', () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss>
+  <channel>
+    <item>
+      <link>https://michaeluloth.com/post-1/</link>
+    </item>
+    <item>
+      <link>https://michaeluloth.com/post-2/</link>
+    </item>
+    <item>
+      <link>https://michaeluloth.com/post-3/</link>
+    </item>
+    <item>
+      <link>https://michaeluloth.com/post-4/</link>
+    </item>
+  </channel>
+</rss>`
+
+    const slugs = extractPostSlugsFromRss(xml)
+
+    expect(slugs).toEqual(['post-1', 'post-2', 'post-3', 'post-4'])
+  })
+})
+
+describe('selectPostSlugs', () => {
+  let randomSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    randomSpy = vi.spyOn(Math, 'random')
+  })
+
+  afterEach(() => {
+    randomSpy.mockRestore()
+  })
+
+  it('returns empty array when no slugs provided', () => {
+    const selected = selectPostSlugs([])
+
+    expect(selected).toEqual([])
+  })
+
+  it('returns single slug when only one slug provided', () => {
+    const selected = selectPostSlugs(['only-post'])
+
+    expect(selected).toEqual(['only-post'])
+  })
+
+  it('returns latest post + random post from remaining posts', () => {
+    // Mock Math.random to return 0 (selects first of remaining posts)
+    randomSpy.mockReturnValue(0)
+
+    const selected = selectPostSlugs(['newest', 'older-1', 'older-2', 'oldest'])
+
+    expect(selected).toEqual(['newest', 'older-1'])
+  })
+
+  it('selects different random posts based on Math.random', () => {
+    const allSlugs = ['newest', 'older-1', 'older-2', 'oldest']
+
+    // Mock to select first remaining post (index 0)
+    randomSpy.mockReturnValue(0)
+    expect(selectPostSlugs(allSlugs)).toEqual(['newest', 'older-1'])
+
+    // Mock to select middle remaining post (index 1)
+    randomSpy.mockReturnValue(0.4)
+    expect(selectPostSlugs(allSlugs)).toEqual(['newest', 'older-2'])
+
+    // Mock to select last remaining post (index 2)
+    randomSpy.mockReturnValue(0.99)
+    expect(selectPostSlugs(allSlugs)).toEqual(['newest', 'oldest'])
+  })
+
+  it('always includes latest post as first element', () => {
+    randomSpy.mockReturnValue(0.5)
+
+    const selected = selectPostSlugs(['newest', 'older-1', 'older-2'])
+
+    expect(selected[0]).toBe('newest')
+    expect(selected).toHaveLength(2)
+  })
+
+  it('handles exactly 2 posts (returns both)', () => {
+    randomSpy.mockReturnValue(0.5)
+
+    const selected = selectPostSlugs(['newest', 'second-newest'])
+
+    expect(selected).toEqual(['newest', 'second-newest'])
   })
 })
 
