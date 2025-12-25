@@ -1,7 +1,7 @@
 import { determineBuildStatus } from './determine-build-notification'
 import type { BuildStatusInputs } from '@/io/pushover/types'
 
-const WORKFLOW_URL = 'https://github.com/ooloth/mu-next-16/actions/runs/123'
+const WORKFLOW_URL = 'https://github.com/ooloth/michaeluloth.com/actions/runs/123'
 
 function createInputs(overrides: Partial<BuildStatusInputs> = {}): BuildStatusInputs {
   return {
