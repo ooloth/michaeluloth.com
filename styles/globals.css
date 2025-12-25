@@ -31,10 +31,6 @@
   background-color: var(--accent);
 }
 
-@utility bg-accent {
-  background-color: var(--accent);
-}
-
 @utility text-accent {
   color: var(--accent);
 }
