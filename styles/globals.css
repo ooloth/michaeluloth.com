@@ -112,7 +112,7 @@
 
 @utility caption {
   @apply mt-1 text-center text-[0.9rem];
-  @apply text-zinc-500;
+  @apply text-zinc-400;
 }
 
 @utility timestamp {
