@@ -30,8 +30,17 @@ export default function Link({ ariaCurrent, ariaLabel, href, children, className
   if (isInternalUrl) {
     const internalHref = normalizeInternalHref(href)
 
+    // Disable viewport-based prefetching for heavy pages; otherwise use default behavior (prefetch in prod, not dev)
+    const shouldPrefetch = internalHref === '/likes/' ? false : undefined
+
     return (
-      <NextLink href={internalHref} aria-current={ariaCurrent} aria-label={ariaLabel} className={classes}>
+      <NextLink
+        href={internalHref}
+        prefetch={shouldPrefetch}
+        aria-current={ariaCurrent}
+        aria-label={ariaLabel}
+        className={classes}
+      >
         {children}
       </NextLink>
     )
