@@ -1,130 +1,54 @@
 # michaeluloth.com
 
-Personal website and blog built with Next.js 16, deployed as a static site to Cloudflare Pages.
+Personal site with writing, projects, and media consumption. Built with Next.js, deployed as a static site to Cloudflare Pages.
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 (App Router, static export)
-- **Styling**: Tailwind CSS 4
-- **Content**: Notion API (posts, books, albums, podcasts)
-- **Images**: Cloudinary
-- **Comments**: Giscus (GitHub Discussions)
-- **Deployment**: Cloudflare Pages (via Wrangler CLI)
+- Next.js 16 (App Router, static export)
+- TypeScript + Zod (runtime validation)
+- Tailwind CSS 4
+- Vitest + Testing Library
+- Content from Notion, images from Cloudinary
+- CI via GitHub Actions (format, lint, typecheck, test, build, Lighthouse, metadata validation)
 
-## Development
+## Code Worth Looking At
 
-```bash
-npm run dev
-```
+### Data Pipeline
 
-Open [http://localhost:3000](http://localhost:3000) to view the site.
+The interesting bit is how external data gets validated and transformed at the I/O boundary:
 
-### Environment Variables
+- **I/O boundary pattern**: `io/notion/getPosts.ts` - Fetch → validate with Zod → transform to domain types → cache → return Result
+- **Schema transformers**: `io/notion/schemas/properties.ts` - Zod schemas that both validate and reshape data
+- **Responsive images**: `io/cloudinary/fetchCloudinaryImageMetadata.ts` - Generates 9 srcset sizes with retry logic
+- **Environment validation**: `io/env/env.ts` - All env vars validated at startup
 
-Create a `.env.local` file with:
+### Error Handling
 
-```
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-CLOUDINARY_CLOUD_NAME=
-NOTION_ACCESS_TOKEN=
-NOTION_DATA_SOURCE_ID_ALBUMS=
-NOTION_DATA_SOURCE_ID_BOOKS=
-NOTION_DATA_SOURCE_ID_PODCASTS=
-NOTION_DATA_SOURCE_ID_WRITING=
-TMDB_READ_ACCESS_TOKEN=
-TMDB_MOVIE_LIST_ID=
-TMDB_TV_LIST_ID=
-```
+- **Result type**: `utils/errors/result.ts` - Explicit error handling (no try/catch everywhere)
+- **Invariants**: `utils/errors/invariant.ts` - Runtime assertions with context
+- **Retry logic**: `utils/retry.ts` - Exponential backoff for all external APIs
 
-**CI-only variables** (configured in GitHub Actions secrets):
+### Testing
 
-```
-CLOUDFLARE_ACCOUNT_ID=
-CLOUDFLARE_API_TOKEN=
-PUSHOVER_API_TOKEN=
-PUSHOVER_USER_KEY=
-```
+- **Pure function tests**: `io/notion/getPosts.test.ts` - Dependency injection, no mocking needed
+- **Component tests**: `ui/link.test.tsx` - Testing Library patterns
+- 46 test files, ~70k lines of test code
 
-See `.env.example` for the complete list.
+### CI/CD
 
-### Available Scripts
+- **Pipeline**: `.github/workflows/ci.yml` - Eight stages (format → lint → typecheck → test → build → Lighthouse → metadata → deploy)
+- **Metadata validation**: `ci/metadata/validate.ts` - Post-build validation of OG tags, images, SEO
+- **Dynamic Lighthouse**: `ci/lighthouse/generate-urls.ts` - Tests actual content from RSS feed
 
-- `npm run dev` - Start development server
-- `npm run build` - Build static site to `out/`
-- `npm run deploy:preview` - Build and deploy to Cloudflare Pages (preview)
-- `npm run deploy:production` - Build and deploy to Cloudflare Pages (production)
-- `npm test` - Run tests
-- `npm run lighthouse` - Run Lighthouse CI
-- `npm run cache:clear` - Clear all local caches
+### Frontend
 
-## Deployment
+- **Accessibility**: Components tested with Testing Library, semantic HTML throughout
+- **Link component**: `ui/link.tsx` - Auto-detects internal/external, adds security attributes
+- **Tailwind utilities**: `styles/globals.css` - Custom utilities for consistent design tokens
 
-The site is deployed to **Cloudflare Pages** using the **Wrangler CLI**.
+## Notable Details
 
-### Prerequisites
-
-1. Install Wrangler CLI (included in devDependencies, runs via `npx`)
-2. Authenticate: `npx wrangler login`
-
-### Deploy Commands
-
-**Preview deployment** (allows uncommitted changes):
-
-```bash
-npm run deploy:preview
-```
-
-**Production deployment** (from main branch):
-
-```bash
-npm run deploy:production
-```
-
-### Deployment Details
-
-- **Project name**: `michaeluloth`
-- **Preview URL**: `https://michaeluloth.pages.dev`
-- **Production URL**: `https://michaeluloth.com` (custom domain)
-- **Build output**: `out/` directory (static files)
-- **Build command**: `npm run build` (Next.js static export)
-
-### Static Export Configuration
-
-This site uses Next.js static export (`output: 'export'` in `next.config.ts`). All pages are pre-rendered at build time:
-
-- Blog posts generated via `generateStaticParams()`
-- 404 page at `app/not-found.tsx`
-- Redirects handled via `public/_redirects` (Cloudflare Pages format)
-
-## Comments Configuration
-
-Comments use [Giscus](https://giscus.app/) backed by the [`ooloth/comments`](https://github.com/ooloth/comments) repository.
-
-**Allowed origins** (configured in `ooloth/comments/giscus.json`):
-
-- `https://michaeluloth.com`
-- `https://michaeluloth.netlify.app`
-- `https://*.michaeluloth.pages.dev` (Cloudflare preview deployments)
-- `http://localhost:[0-9]+` (local development)
-
-## API Retry Logic
-
-All external API calls include retry logic with exponential backoff to handle transient network failures:
-
-- **Notion API**: Posts, media items, block children
-- **Cloudinary API**: Image metadata
-- **iTunes API**: Book/album/podcast metadata
-- **TMDB API**: Movie/TV metadata
-
-**Configuration:**
-
-- **Max attempts**: 3
-- **Initial delay**: 2s
-- **Backoff multiplier**: 2x (delays: 2s, 4s, 8s)
-
-All errors are retried (network failures, timeouts, etc.). Validation errors shouldn't occur at build time since they're caught in tests.
-
-See `utils/retry.ts` for implementation details.
-
-# Deployment test
+- Alt text is enforced (build fails if Cloudinary images missing alt text)
+- Lighthouse scores: 100% accessibility, 100% best practices, 100% SEO, 90%+ performance
+- Development caching (doesn't hammer Notion API on every page refresh)
+- Pushover notifications on CI failures
