@@ -11,9 +11,7 @@ Personal site with writing, projects, and media consumption. Built with Next.js,
 - Content from Notion, images from Cloudinary
 - CI via GitHub Actions (format, lint, typecheck, test, build, Lighthouse, metadata validation)
 
-## Code Worth Looking At
-
-### Data Pipeline
+## Data Pipeline
 
 The interesting bit is how external data gets validated and transformed at the I/O boundary:
 
