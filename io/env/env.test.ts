@@ -25,6 +25,13 @@ describe('env', () => {
     // Reset modules to allow re-importing with different env vars
     vi.resetModules()
     vi.unstubAllEnvs()
+
+    // In CI, workflow-level env vars are already set in process.env
+    // We need to explicitly delete them so tests can properly test missing vars
+    Object.keys(validEnv).forEach(key => {
+      delete process.env[key]
+    })
+
     // Ensure the env module is unmocked for each test
     vi.doUnmock('@/io/env/env')
   })
