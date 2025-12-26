@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createHash } from 'node:crypto'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
-import { formatValidationError } from '@/io/logging/zod'
+import { formatValidationError } from '@/utils/logging/zod'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { withRetry } from '@/io/retry'
 import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'

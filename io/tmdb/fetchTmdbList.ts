@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
-import { formatValidationError } from '@/io/logging/zod'
+import { formatValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, Err, toErr } from '@/utils/errors/result'
 import { withRetry } from '@/io/retry'

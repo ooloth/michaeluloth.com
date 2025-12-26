@@ -6,7 +6,7 @@ import {
   type BulletedListBlock,
   type NumberedListBlock,
 } from './schemas/block'
-import { logValidationError } from '@/io/logging/zod'
+import { logValidationError } from '@/utils/logging/zod'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
 import { withRetry } from '@/io/retry'
 
