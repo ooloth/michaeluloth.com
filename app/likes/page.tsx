@@ -4,7 +4,7 @@ import fetchTmdbList from '@/io/tmdb/fetchTmdbList'
 import getMediaItems from '@/io/notion/getMediaItems'
 import fetchItunesItems from '@/io/itunes/fetchItunesItems'
 import { env } from '@/io/env/env'
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/seo/constants'
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE, SITE_LOCALE } from '@/seo/constants'
 
 import PageLayout from '@/ui/layouts/page-layout'
 import MediaSection from '@/ui/likes/media-section'
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     type: 'website',
     url: `${SITE_URL}likes/`,
     siteName: SITE_NAME,
-    locale: 'en_CA',
+    locale: SITE_LOCALE,
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {

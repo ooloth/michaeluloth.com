@@ -47,6 +47,13 @@ export const TWITTER_HANDLE = '@ooloth'
 export const DEFAULT_OG_IMAGE = '/og-image.png'
 
 /**
+ * Site locale for metadata and internationalization.
+ * Used in OpenGraph locale tags and language-specific metadata.
+ * Format follows BCP 47 language tag standard (language_COUNTRY).
+ */
+export const SITE_LOCALE = 'en_CA' as const
+
+/**
  * Social profile URLs for JSON-LD Person schema and footer navigation.
  * Used in schema.org sameAs property and social navigation links.
  * Order matches footer display order.

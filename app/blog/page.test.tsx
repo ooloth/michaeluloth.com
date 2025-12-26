@@ -8,6 +8,7 @@ import Blog, { metadata } from './page'
 import getPosts from '@/io/notion/getPosts'
 import type { PostListItem } from '@/io/notion/schemas/post'
 import { Ok } from '@/utils/errors/result'
+import { SITE_LOCALE } from '@/seo/constants'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
@@ -44,7 +45,7 @@ describe('Blog page metadata', () => {
         type: 'website',
         url: 'https://michaeluloth.com/blog/',
         siteName: 'Michael Uloth',
-        locale: 'en_CA',
+        locale: SITE_LOCALE,
         images: ['/og-image.png'],
       },
       twitter: {

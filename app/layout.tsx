@@ -2,7 +2,15 @@ import { type Metadata } from 'next'
 import { type ReactNode } from 'react'
 
 import '@/styles/globals.css'
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/seo/constants'
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_DESCRIPTION,
+  SITE_AUTHOR,
+  TWITTER_HANDLE,
+  DEFAULT_OG_IMAGE,
+  SITE_LOCALE,
+} from '@/seo/constants'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -16,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     url: SITE_URL,
-    locale: 'en_CA',
+    locale: SITE_LOCALE,
     siteName: SITE_NAME,
     images: [DEFAULT_OG_IMAGE],
   },

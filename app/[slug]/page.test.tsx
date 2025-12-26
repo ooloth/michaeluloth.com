@@ -9,6 +9,7 @@ import getPosts from '@/io/notion/getPosts'
 import getPost from '@/io/notion/getPost'
 import { notFound } from 'next/navigation'
 import { Ok, Err } from '@/utils/errors/result'
+import { SITE_LOCALE } from '@/seo/constants'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
@@ -333,7 +334,7 @@ describe('generateMetadata', () => {
           type: 'article',
           url: 'https://michaeluloth.com/test-post/',
           siteName: 'Michael Uloth',
-          locale: 'en_CA',
+          locale: SITE_LOCALE,
           title: 'Test Post Title',
           description: 'Test post description',
           publishedTime: '2024-01-15',

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
-import { SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/seo/constants'
+import { SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE, SITE_LOCALE } from '@/seo/constants'
 import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import { getPostUrl } from '@/seo/json-ld/article'
 import JsonLdScript from '@/seo/json-ld/script'
@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       url,
       siteName: SITE_NAME,
-      locale: 'en_CA', // TODO: replace with SITE_LOCALE
+      locale: SITE_LOCALE,
       title: post.title,
       description: post.description,
       publishedTime: post.firstPublished,

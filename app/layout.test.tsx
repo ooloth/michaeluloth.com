@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 import { metadata } from './layout'
+import { SITE_LOCALE } from '@/seo/constants'
 
 describe('RootLayout metadata', () => {
   it('includes metadataBase', () => {
@@ -29,7 +30,7 @@ describe('RootLayout metadata', () => {
   it('includes OpenGraph config', () => {
     expect(metadata.openGraph).toEqual({
       type: 'website',
-      locale: 'en_CA',
+      locale: SITE_LOCALE,
       siteName: 'Michael Uloth',
       url: 'https://michaeluloth.com/',
       images: ['/og-image.png'],

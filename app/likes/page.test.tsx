@@ -9,6 +9,7 @@ import getMediaItems, { type NotionMediaItem } from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
 import fetchTmdbList from '@/io/tmdb/fetchTmdbList'
 import { Ok, Err } from '@/utils/errors/result'
+import { SITE_LOCALE } from '@/seo/constants'
 
 // Mock dependencies
 vi.mock('@/io/notion/getMediaItems')
@@ -33,7 +34,7 @@ describe('Likes page metadata', () => {
         type: 'website',
         url: 'https://michaeluloth.com/likes/',
         siteName: 'Michael Uloth',
-        locale: 'en_CA',
+        locale: SITE_LOCALE,
         images: ['/og-image.png'],
       },
       twitter: {
