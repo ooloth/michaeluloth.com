@@ -14,6 +14,9 @@ import { Ok, Err, isOk, isErr } from '@/utils/errors/result'
 vi.mock('@/io/notion/getMediaItems')
 vi.mock('@/io/itunes/fetchItunesItems')
 vi.mock('@/io/tmdb/fetchTmdbList')
+vi.mock('@/ui/layouts/page-layout', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
 
 describe('Likes page metadata', () => {
   it('exports metadata with simplified title using template', () => {

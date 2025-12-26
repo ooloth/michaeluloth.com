@@ -7,10 +7,24 @@ import { SITE_URL, SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } fr
 import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import type { Post as PostType } from '@/io/notion/schemas/post'
 
+import PageLayout from '@/ui/layouts/page-layout'
 import Post from '@/ui/post/post'
 
 type Params = {
   slug: string
+}
+
+/**
+ * Generates the list of static params (slugs) for all blog posts.
+ * Replaces getStaticPaths in Next.js 13+
+ *
+ * @returns A promise that resolves to an array of objects containing post slugs.
+ * @see https://nextjs.org/docs/app/api-reference/functions/generate-static-params
+ */
+export async function generateStaticParams(): Promise<Params[]> {
+  const posts = (await getPosts({ sortDirection: 'ascending' })).unwrap()
+
+  return posts.map(post => ({ slug: post.slug }))
 }
 
 type Props = Readonly<{
@@ -29,7 +43,8 @@ export default async function DynamicRoute({ params }: Props) {
   const jsonLd = generateJsonLd(post, slug)
 
   return (
-    <>
+    <PageLayout>
+      <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -37,8 +52,7 @@ export default async function DynamicRoute({ params }: Props) {
           __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
         }}
       />
-      <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
-    </>
+    </PageLayout>
   )
 }
 
@@ -127,17 +141,4 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [ogImage],
     },
   }
-}
-
-/**
- * Generates the list of static params (slugs) for all blog posts.
- * Replaces getStaticPaths in Next.js 13+
- *
- * @returns A promise that resolves to an array of objects containing post slugs.
- * @see https://nextjs.org/docs/app/api-reference/functions/generate-static-params
- */
-export async function generateStaticParams(): Promise<Params[]> {
-  const posts = (await getPosts({ sortDirection: 'ascending' })).unwrap()
-
-  return posts.map(post => ({ slug: post.slug }))
 }

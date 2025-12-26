@@ -25,6 +25,11 @@ vi.mock('@/ui/post-list', () => ({
   },
 }))
 
+// Mock PageLayout to avoid rendering Header/Footer in tests
+vi.mock('@/ui/layouts/page-layout', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
 describe('Blog page metadata', () => {
   it('exports metadata with title and description', () => {
     expect(metadata).toEqual({

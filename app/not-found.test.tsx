@@ -5,13 +5,9 @@
 import { render, screen } from '@testing-library/react'
 import NotFound from './not-found'
 
-// Mock Header and Footer components to avoid async data fetching in tests
-vi.mock('@/ui/header', () => ({
-  default: () => <header data-testid="header">Header</header>,
-}))
-
-vi.mock('@/ui/footer', () => ({
-  default: () => <footer data-testid="footer">Footer</footer>,
+// Mock PageLayout to avoid async data fetching in Header/Footer
+vi.mock('@/ui/layouts/page-layout', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
 describe('NotFound', () => {

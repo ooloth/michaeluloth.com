@@ -1,10 +1,8 @@
 import { type ReactElement } from 'react'
-
 import CloudinaryImage from '@/ui/image'
 import Paragraph from '@/ui/typography/paragraph'
-import PostList from '@/ui/post-list'
 
-function Summary(): ReactElement {
+export default function Summary(): ReactElement {
   return (
     <section className="md:flex md:justify-between md:items-end md:gap-x-9">
       <div>
@@ -27,23 +25,5 @@ function Summary(): ReactElement {
         outerStyles="flex-none md:my-0" // don't shrink
       />
     </section>
-  )
-}
-
-function RecentWriting(): ReactElement {
-  return (
-    <section>
-      <h2 className="mt-16 mb-4 leading-tight text-[1.75rem] font-semibold text-bright">Recent Writing</h2>
-      <PostList limit={5} />
-    </section>
-  )
-}
-
-export default async function Home(): Promise<ReactElement> {
-  return (
-    <main id="main" className="flex-auto">
-      <Summary />
-      <RecentWriting />
-    </main>
   )
 }

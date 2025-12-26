@@ -16,6 +16,9 @@ vi.mock('@/io/notion/getPost')
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(),
 }))
+vi.mock('@/ui/layouts/page-layout', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
 
 describe('generateStaticParams', () => {
   beforeEach(() => {

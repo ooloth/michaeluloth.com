@@ -1,6 +1,7 @@
 import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 
+import PageLayout from '@/ui/layouts/page-layout'
 import PostList from '@/ui/post-list'
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/seo/constants'
 
@@ -25,9 +26,11 @@ export const metadata: Metadata = {
 
 export default async function Blog(): Promise<ReactElement> {
   return (
-    <main id="main" className="flex-auto">
-      <h1 className="sr-only">Blog</h1>
-      <PostList />
-    </main>
+    <PageLayout>
+      <main id="main" className="flex-auto">
+        <h1 className="sr-only">Blog</h1>
+        <PostList />
+      </main>
+    </PageLayout>
   )
 }

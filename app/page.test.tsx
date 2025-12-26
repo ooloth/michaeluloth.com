@@ -29,6 +29,11 @@ vi.mock('@/ui/post-list', () => ({
   },
 }))
 
+// Mock PageLayout to avoid rendering Header/Footer in tests
+vi.mock('@/ui/layouts/page-layout', () => ({
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
 describe('Home page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
