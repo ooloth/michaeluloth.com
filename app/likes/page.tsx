@@ -42,18 +42,15 @@ export default async function Likes(): Promise<ReactElement> {
     fetchTmdbList(env.TMDB_MOVIE_LIST_ID, 'movie').then(r => r.unwrap()),
     fetchItunesItems(
       booksNotion.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
-      'ebook',
-      'ebook',
+      'books',
     ).then(r => r.unwrap()),
     fetchItunesItems(
       albumsNotion.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
-      'music',
-      'album',
+      'albums',
     ).then(r => r.unwrap()),
     fetchItunesItems(
       podcastsNotion.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
-      'podcast',
-      'podcast',
+      'podcasts',
     ).then(r => r.unwrap()),
   ])
 

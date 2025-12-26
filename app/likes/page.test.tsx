@@ -119,10 +119,10 @@ describe('Likes page', () => {
 
       // Mock iTunes (Step 2)
       vi.mocked(fetchItunesItems).mockImplementation(
-        async (_items: Array<{ id: number; name: string; date: string }>, medium: string) => {
-          if (medium === 'ebook') return Ok(mockBooks as iTunesItem[])
-          if (medium === 'music') return Ok(mockAlbums as iTunesItem[])
-          if (medium === 'podcast') return Ok(mockPodcasts as iTunesItem[])
+        async (_items: Array<{ id: number; name: string; date: string }>, category: string) => {
+          if (category === 'books') return Ok(mockBooks as iTunesItem[])
+          if (category === 'albums') return Ok(mockAlbums as iTunesItem[])
+          if (category === 'podcasts') return Ok(mockPodcasts as iTunesItem[])
           return Ok([])
         },
       )

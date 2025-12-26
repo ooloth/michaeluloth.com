@@ -35,7 +35,7 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 123, name: 'Test Album', date: '2024-01-15' }]
 
-      const result = await fetchItunesItems(inputItems, 'music', 'album')
+      const result = await fetchItunesItems(inputItems, 'albums')
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -84,7 +84,7 @@ describe('fetchItunesItems', () => {
         { id: 3, name: 'Album 3', date: '2024-02-10' },
       ]
 
-      const result = await fetchItunesItems(inputItems, 'music', 'album')
+      const result = await fetchItunesItems(inputItems, 'albums')
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -113,7 +113,7 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 456, name: 'Test Book', date: '2024-01-15' }]
 
-      const result = await fetchItunesItems(inputItems, 'ebook', 'ebook')
+      const result = await fetchItunesItems(inputItems, 'books')
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -155,7 +155,7 @@ describe('fetchItunesItems', () => {
         { id: 3, name: 'Album 3', date: '2024-03-15' },
       ]
 
-      const result = await fetchItunesItems(inputItems, 'music', 'album')
+      const result = await fetchItunesItems(inputItems, 'albums')
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -190,7 +190,7 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
-      const result = await fetchItunesItems(inputItems, 'music', 'album')
+      const result = await fetchItunesItems(inputItems, 'albums')
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -223,7 +223,7 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
-      const result = await fetchItunesItems(inputItems, 'music', 'album')
+      const result = await fetchItunesItems(inputItems, 'albums')
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -242,7 +242,7 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
-      const result = await fetchItunesItems(inputItems, 'music', 'album')
+      const result = await fetchItunesItems(inputItems, 'albums')
 
       expect(isOk(result)).toBe(true)
       if (isOk(result)) {
@@ -260,7 +260,7 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
-      const promise = fetchItunesItems(inputItems, 'music', 'album')
+      const promise = fetchItunesItems(inputItems, 'albums')
       await vi.runAllTimersAsync()
       const result = await promise
 
@@ -279,7 +279,7 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
-      const result = await fetchItunesItems(inputItems, 'music', 'album')
+      const result = await fetchItunesItems(inputItems, 'albums')
 
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
@@ -294,7 +294,7 @@ describe('fetchItunesItems', () => {
 
       const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
 
-      const promise = fetchItunesItems(inputItems, 'music', 'album')
+      const promise = fetchItunesItems(inputItems, 'albums')
       await vi.runAllTimersAsync()
       const result = await promise
 

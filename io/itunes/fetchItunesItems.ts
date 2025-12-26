@@ -43,12 +43,19 @@ export type iTunesItem = z.infer<typeof iTunesItemSchema>
 
 type iTunesMedium = 'ebook' | 'music' | 'podcast'
 type iTunesEntity = 'album' | 'ebook' | 'podcast'
+type MediaCategory = 'books' | 'albums' | 'podcasts'
 
 export default async function fetchItunesItems(
   items: iTunesListItem[],
-  medium: iTunesMedium,
-  entity: iTunesEntity,
+  category: MediaCategory,
 ): Promise<Result<iTunesItem[], Error>> {
+  // Map category to iTunes API parameters
+  const params = {
+    books: { medium: 'ebook' as iTunesMedium, entity: 'ebook' as iTunesEntity },
+    albums: { medium: 'music' as iTunesMedium, entity: 'album' as iTunesEntity },
+    podcasts: { medium: 'podcast' as iTunesMedium, entity: 'podcast' as iTunesEntity },
+  }[category]
+
   const stringOfItemIDs = items.map(item => item.id).join(',')
 
   // See: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/#lookup
@@ -56,7 +63,7 @@ export default async function fetchItunesItems(
     const response = await withRetry(
       () =>
         fetch(
-          `https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${medium}&entity=${entity}&sort=recent`,
+          `https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${params.medium}&entity=${params.entity}&sort=recent`,
         ),
       {
         onRetry: (error, attempt, delay) => {
