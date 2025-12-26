@@ -1,5 +1,14 @@
 import fetchItunesItems from './fetchItunesItems'
 import { isOk, isErr } from '@/utils/errors/result'
+import { type CacheAdapter } from '@/io/cache/adapter'
+
+// Test helper: creates a mock cache adapter
+function createMockCache(cachedValue: unknown = null): CacheAdapter {
+  return {
+    get: vi.fn().mockResolvedValue(cachedValue),
+    set: vi.fn().mockResolvedValue(undefined),
+  }
+}
 
 // Mock dependencies
 vi.mock('@/io/cloudinary/transformCloudinaryImage', () => ({
@@ -249,6 +258,76 @@ describe('fetchItunesItems', () => {
         expect(result.value).toEqual([])
       }
     })
+
+    it('returns Ok with cached data when available', async () => {
+      const cachedData = [
+        {
+          id: '999',
+          title: 'Cached Album',
+          artist: 'Cached Artist',
+          date: '2024-01-01',
+          imageUrl: 'https://example.com/cached.jpg',
+          link: 'https://music.apple.com/album/999',
+        },
+      ]
+
+      const mockCache = createMockCache(cachedData)
+      const inputItems = [{ id: 999, name: 'Cached Album', date: '2024-01-01' }]
+
+      const result = await fetchItunesItems(inputItems, 'albums', { cache: mockCache })
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value).toEqual(cachedData)
+      }
+
+      // Should not call API when cache hit
+      expect(global.fetch).not.toHaveBeenCalled()
+    })
+
+    it('skips cache when skipCache is true', async () => {
+      const mockResponse = {
+        results: [
+          {
+            collectionId: 123,
+            collectionViewUrl: 'https://music.apple.com/album/123',
+            artistName: 'Fresh Artist',
+            artworkUrl100: 'https://example.com/art/100x100bb.jpg',
+          },
+        ],
+      }
+
+      global.fetch = vi.fn(async () => ({
+        json: async () => mockResponse,
+      })) as unknown as typeof global.fetch
+
+      const mockCache = createMockCache([
+        {
+          id: '999',
+          title: 'Cached Album',
+          artist: 'Cached Artist',
+          date: '2024-01-01',
+          imageUrl: 'https://example.com/cached.jpg',
+          link: 'https://music.apple.com/album/999',
+        },
+      ])
+
+      const inputItems = [{ id: 123, name: 'Fresh Album', date: '2024-01-15' }]
+
+      const result = await fetchItunesItems(inputItems, 'albums', { skipCache: true, cache: mockCache })
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value).toHaveLength(1)
+        expect(result.value[0].id).toBe('123')
+      }
+
+      // Should not call cache.get when skipCache is true
+      expect(mockCache.get).not.toHaveBeenCalled()
+      // Should call API and update cache even with skipCache
+      expect(global.fetch).toHaveBeenCalled()
+      expect(mockCache.set).toHaveBeenCalled()
+    })
   })
 
   describe('error cases', () => {
@@ -302,6 +381,23 @@ describe('fetchItunesItems', () => {
       if (isErr(result)) {
         expect(result.error).toBeInstanceOf(Error)
         expect(result.error.message).toBe('string error')
+      }
+    })
+
+    it('returns Err when cache read fails', async () => {
+      const cacheError = new Error('Cache read error')
+      const mockCache: CacheAdapter = {
+        get: vi.fn().mockRejectedValue(cacheError),
+        set: vi.fn().mockResolvedValue(undefined),
+      }
+
+      const inputItems = [{ id: 1, name: 'Album 1', date: '2024-01-15' }]
+
+      const result = await fetchItunesItems(inputItems, 'albums', { cache: mockCache })
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBe(cacheError)
       }
     })
   })

@@ -1,8 +1,10 @@
 import { z } from 'zod'
+import { createHash } from 'node:crypto'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
 import { formatValidationError } from '@/io/logging/zod'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { withRetry } from '@/io/retry'
+import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 
 interface iTunesListItem {
   date: string
@@ -45,10 +47,18 @@ type iTunesMedium = 'ebook' | 'music' | 'podcast'
 type iTunesEntity = 'album' | 'ebook' | 'podcast'
 type MediaCategory = 'books' | 'albums' | 'podcasts'
 
+type Options = {
+  skipCache?: boolean
+  cache?: CacheAdapter
+}
+
 export default async function fetchItunesItems(
   items: iTunesListItem[],
   category: MediaCategory,
+  options: Options = {},
 ): Promise<Result<iTunesItem[], Error>> {
+  const { skipCache = false, cache = filesystemCache } = options
+
   // Map category to iTunes API parameters
   const params = {
     books: { medium: 'ebook' as iTunesMedium, entity: 'ebook' as iTunesEntity },
@@ -60,6 +70,16 @@ export default async function fetchItunesItems(
 
   // See: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/#lookup
   try {
+    // Check cache first
+    // Hash the ID list to avoid ENAMETOOLONG errors with many items
+    const idsHash = createHash('sha256').update(stringOfItemIDs).digest('hex').slice(0, 16)
+    const cacheKey = `itunes-${category}-${idsHash}`
+    if (!skipCache) {
+      const cached = await cache.get<iTunesItem[]>(cacheKey, 'itunes')
+      if (cached) {
+        return Ok(cached)
+      }
+    }
     const response = await withRetry(
       () =>
         fetch(
@@ -138,6 +158,10 @@ export default async function fetchItunesItems(
     }
 
     const sortedResults = uniqueResults.sort((a, b) => b.date.localeCompare(a.date))
+
+    // Cache the result
+    await cache.set(cacheKey, sortedResults, 'itunes')
+
     return Ok(sortedResults)
   } catch (error) {
     return toErr(error, 'fetchItunesItems')

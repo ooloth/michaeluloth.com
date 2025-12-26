@@ -4,6 +4,7 @@ import { formatValidationError } from '@/io/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, Err, toErr } from '@/utils/errors/result'
 import { withRetry } from '@/io/retry'
+import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 
 // Schema for raw TMDB API response item
 const TmdbApiResultSchema = z.object({
@@ -26,7 +27,18 @@ const TmdbItemSchema = z.object({
 
 export type TmdbItem = z.infer<typeof TmdbItemSchema>
 
-export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie'): Promise<Result<TmdbItem[], Error>> {
+type Options = {
+  skipCache?: boolean
+  cache?: CacheAdapter
+}
+
+export default async function fetchTmdbList(
+  listId: string,
+  api: 'tv' | 'movie',
+  options: Options = {},
+): Promise<Result<TmdbItem[], Error>> {
+  const { skipCache = false, cache = filesystemCache } = options
+
   if (!listId) {
     const error = new Error('fetchTmdbList: listId is required')
     console.error(error.message)
@@ -51,8 +63,17 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
       },
     )
 
-  do {
-    try {
+  try {
+    // Check cache first
+    const cacheKey = `tmdb-${api}-${listId}`
+    if (!skipCache) {
+      const cached = await cache.get<TmdbItem[]>(cacheKey, 'tmdb')
+      if (cached) {
+        return Ok(cached)
+      }
+    }
+
+    do {
       const response = await withRetry(fetch20Items, {
         onRetry: (error, attempt, delay) => {
           console.log(
@@ -113,12 +134,15 @@ export default async function fetchTmdbList(listId: string, api: 'tv' | 'movie')
           items.push(parsedItem.data)
         }
       }
-    } catch (error) {
-      return toErr(error, 'fetchTmdbList')
-    }
 
-    page++
-  } while (page <= totalPages)
+      page++
+    } while (page <= totalPages)
 
-  return Ok(items)
+    // Cache the result
+    await cache.set(cacheKey, items, 'tmdb')
+
+    return Ok(items)
+  } catch (error) {
+    return toErr(error, 'fetchTmdbList')
+  }
 }

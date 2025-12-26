@@ -1,5 +1,14 @@
 import fetchTmdbList from './fetchTmdbList'
 import { isOk, isErr } from '@/utils/errors/result'
+import { type CacheAdapter } from '@/io/cache/adapter'
+
+// Test helper: creates a mock cache adapter
+function createMockCache(cachedValue: unknown = null): CacheAdapter {
+  return {
+    get: vi.fn().mockResolvedValue(cachedValue),
+    set: vi.fn().mockResolvedValue(undefined),
+  }
+}
 
 // Mock dependencies
 vi.mock('@/io/cloudinary/transformCloudinaryImage', () => ({
@@ -266,6 +275,72 @@ describe('fetchTmdbList', () => {
         expect(result.value).toEqual([])
       }
     })
+
+    it('returns Ok with cached data when available', async () => {
+      const cachedData = [
+        {
+          id: '999',
+          title: 'Cached Movie',
+          date: '2024-01-01',
+          imageUrl: 'https://example.com/cached.jpg',
+          link: 'https://www.themoviedb.org/movie/999',
+        },
+      ]
+
+      const mockCache = createMockCache(cachedData)
+
+      const result = await fetchTmdbList('test-list-id', 'movie', { cache: mockCache })
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value).toEqual(cachedData)
+      }
+
+      // Should not call API when cache hit
+      expect(global.fetch).not.toHaveBeenCalled()
+    })
+
+    it('skips cache when skipCache is true', async () => {
+      const mockResponse = {
+        total_pages: 1,
+        results: [
+          {
+            id: 123,
+            title: 'Fresh Movie',
+            release_date: '2024-01-15',
+            poster_path: '/poster.jpg',
+          },
+        ],
+      }
+
+      global.fetch = vi.fn(async () => ({
+        json: async () => mockResponse,
+      })) as unknown as typeof global.fetch
+
+      const mockCache = createMockCache([
+        {
+          id: '999',
+          title: 'Cached Movie',
+          date: '2024-01-01',
+          imageUrl: 'https://example.com/cached.jpg',
+          link: 'https://www.themoviedb.org/movie/999',
+        },
+      ])
+
+      const result = await fetchTmdbList('test-list-id', 'movie', { skipCache: true, cache: mockCache })
+
+      expect(isOk(result)).toBe(true)
+      if (isOk(result)) {
+        expect(result.value).toHaveLength(1)
+        expect(result.value[0].id).toBe('123')
+      }
+
+      // Should not call cache.get when skipCache is true
+      expect(mockCache.get).not.toHaveBeenCalled()
+      // Should call API and update cache even with skipCache
+      expect(global.fetch).toHaveBeenCalled()
+      expect(mockCache.set).toHaveBeenCalled()
+    })
   })
 
   describe('error cases', () => {
@@ -357,6 +432,21 @@ describe('fetchTmdbList', () => {
       expect(isErr(result)).toBe(true)
       if (isErr(result)) {
         expect(result.error.message).toBe('Pagination error')
+      }
+    })
+
+    it('returns Err when cache read fails', async () => {
+      const cacheError = new Error('Cache read error')
+      const mockCache: CacheAdapter = {
+        get: vi.fn().mockRejectedValue(cacheError),
+        set: vi.fn().mockResolvedValue(undefined),
+      }
+
+      const result = await fetchTmdbList('test-list-id', 'movie', { cache: mockCache })
+
+      expect(isErr(result)).toBe(true)
+      if (isErr(result)) {
+        expect(result.error).toBe(cacheError)
       }
     })
   })
