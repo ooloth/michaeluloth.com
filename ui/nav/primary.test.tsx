@@ -16,18 +16,22 @@ import { usePathname } from 'next/navigation'
 
 const mockPosts: PostListItem[] = [
   {
+    id: '1',
     slug: 'first-post',
     title: 'First Post',
     description: 'Description',
-    date: '2024-01-01',
-    tags: [],
+    firstPublished: '2024-01-01',
+    featuredImage: null,
+    feedId: null,
   },
   {
+    id: '2',
     slug: 'second-post',
     title: 'Second Post',
     description: 'Description',
-    date: '2024-01-02',
-    tags: [],
+    firstPublished: '2024-01-02',
+    featuredImage: null,
+    feedId: null,
   },
 ]
 

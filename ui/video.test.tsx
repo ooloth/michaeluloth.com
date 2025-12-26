@@ -38,7 +38,7 @@ describe('Video', () => {
     it('throws error for malformed YouTube URL', () => {
       const invalidUrl = 'https://youtube.com/invalid'
       expect(() => render(<Video url={invalidUrl} caption={null} />)).toThrow(
-        'Failed to extract YouTube video ID from URL: https://youtube.com/invalid'
+        'Failed to extract YouTube video ID from URL: https://youtube.com/invalid',
       )
     })
   })
@@ -57,7 +57,7 @@ describe('Video', () => {
       expect(iframe).toHaveAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation')
       expect(iframe).toHaveAttribute(
         'allow',
-        'accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+        'accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
       )
     })
 

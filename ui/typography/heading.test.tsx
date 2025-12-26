@@ -72,7 +72,11 @@ describe('Heading', () => {
       { customClass: 'mt-12', description: 'custom mt-*' },
       { customClass: 'my-6', description: 'custom my-*' },
     ])('skips default top margin when $description class present', ({ customClass }) => {
-      render(<Heading level={2} className={customClass}>Custom</Heading>)
+      render(
+        <Heading level={2} className={customClass}>
+          Custom
+        </Heading>,
+      )
       const heading = screen.getByRole('heading', { level: 2 })
       expect(heading).not.toHaveClass('mt-8')
       expect(heading).toHaveClass(customClass)
@@ -82,7 +86,11 @@ describe('Heading', () => {
       { customClass: 'mb-4', description: 'custom mb-*' },
       { customClass: 'my-6', description: 'custom my-*' },
     ])('skips default bottom margin when $description class present', ({ customClass }) => {
-      render(<Heading level={2} className={customClass}>Custom</Heading>)
+      render(
+        <Heading level={2} className={customClass}>
+          Custom
+        </Heading>,
+      )
       const heading = screen.getByRole('heading', { level: 2 })
       expect(heading).not.toHaveClass('mb-0')
       expect(heading).toHaveClass(customClass)
@@ -91,13 +99,21 @@ describe('Heading', () => {
 
   describe('custom className merging', () => {
     it('merges custom className with defaults', () => {
-      render(<Heading level={2} className="text-red-500">Custom Color</Heading>)
+      render(
+        <Heading level={2} className="text-red-500">
+          Custom Color
+        </Heading>,
+      )
       const heading = screen.getByRole('heading', { level: 2 })
       expect(heading).toHaveClass('text-red-500', 'break-after-avoid', 'mt-8', 'mb-0')
     })
 
     it('handles multiple custom classes', () => {
-      render(<Heading level={2} className="text-red-500 underline">Multiple Custom</Heading>)
+      render(
+        <Heading level={2} className="text-red-500 underline">
+          Multiple Custom
+        </Heading>,
+      )
       const heading = screen.getByRole('heading', { level: 2 })
       expect(heading).toHaveClass('text-red-500', 'underline', 'break-after-avoid')
     })
@@ -111,7 +127,7 @@ describe('Heading', () => {
     })
 
     it('renders with empty children', () => {
-      render(<Heading level={2}></Heading>)
+      render(<Heading level={2}>{''}</Heading>)
       const heading = screen.getByRole('heading', { level: 2 })
       expect(heading).toBeInTheDocument()
       expect(heading).toBeEmptyDOMElement()
@@ -121,7 +137,7 @@ describe('Heading', () => {
       render(
         <Heading level={2}>
           <span>Nested</span> content
-        </Heading>
+        </Heading>,
       )
       const heading = screen.getByRole('heading', { level: 2 })
       expect(heading).toHaveTextContent('Nested content')
