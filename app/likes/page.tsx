@@ -2,9 +2,8 @@ import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 import fetchTmdbList from '@/io/tmdb/fetchTmdbList'
 import getMediaItems from '@/io/notion/getMediaItems'
-import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
+import fetchItunesItems from '@/io/itunes/fetchItunesItems'
 import { env } from '@/io/env/env'
-import { type Result } from '@/utils/errors/result'
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/seo/constants'
 
 import PageLayout from '@/ui/layouts/page-layout'
@@ -29,42 +28,33 @@ export const metadata: Metadata = {
   },
 }
 
-const TMDB_TV_LIST_ID = env.TMDB_TV_LIST_ID
-const TMDB_MOVIE_LIST_ID = env.TMDB_MOVIE_LIST_ID
-
-type iTunesMedium = 'ebook' | 'music' | 'podcast'
-type iTunesEntity = 'ebook' | 'album' | 'podcast'
-type MediaCategory = 'books' | 'albums' | 'podcasts'
-
-/**
- * Fetches media items from Notion and enriches with iTunes metadata.
- * Returns Result to enable explicit error propagation without intermediate unwraps.
- */
-export async function fetchItunesMedia(
-  category: MediaCategory,
-  medium: iTunesMedium,
-  entity: iTunesEntity,
-): Promise<Result<iTunesItem[], Error>> {
-  const itemsResult = await getMediaItems({ category })
-  if (!itemsResult.ok) {
-    return itemsResult
-  }
-
-  return fetchItunesItems(
-    itemsResult.value.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
-    medium,
-    entity,
-  )
-}
-
 export default async function Likes(): Promise<ReactElement> {
-  // Fetch all categories in parallel
+  // Step 1: Fetch Notion items in parallel
+  const [booksNotion, albumsNotion, podcastsNotion] = await Promise.all([
+    getMediaItems({ category: 'books' }).then(r => r.unwrap()),
+    getMediaItems({ category: 'albums' }).then(r => r.unwrap()),
+    getMediaItems({ category: 'podcasts' }).then(r => r.unwrap()),
+  ])
+
+  // Step 2: Fetch TMDB and iTunes items in parallel
   const [tv, movies, books, albums, podcasts] = await Promise.all([
-    fetchTmdbList(TMDB_TV_LIST_ID, 'tv').then(r => r.unwrap()),
-    fetchTmdbList(TMDB_MOVIE_LIST_ID, 'movie').then(r => r.unwrap()),
-    fetchItunesMedia('books', 'ebook', 'ebook').then(r => r.unwrap()),
-    fetchItunesMedia('albums', 'music', 'album').then(r => r.unwrap()),
-    fetchItunesMedia('podcasts', 'podcast', 'podcast').then(r => r.unwrap()),
+    fetchTmdbList(env.TMDB_TV_LIST_ID, 'tv').then(r => r.unwrap()),
+    fetchTmdbList(env.TMDB_MOVIE_LIST_ID, 'movie').then(r => r.unwrap()),
+    fetchItunesItems(
+      booksNotion.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+      'ebook',
+      'ebook',
+    ).then(r => r.unwrap()),
+    fetchItunesItems(
+      albumsNotion.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+      'music',
+      'album',
+    ).then(r => r.unwrap()),
+    fetchItunesItems(
+      podcastsNotion.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
+      'podcast',
+      'podcast',
+    ).then(r => r.unwrap()),
   ])
 
   return (
