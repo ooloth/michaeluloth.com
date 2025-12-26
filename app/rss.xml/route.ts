@@ -2,7 +2,7 @@ import { Feed } from 'feed'
 import getPosts from '@/io/notion/getPosts'
 import getBlockChildren from '@/io/notion/getBlockChildren'
 import { renderBlocksToHtml } from '@/io/notion/renderBlocksToHtml'
-import { SITE_URL } from '@/utils/metadata'
+import { SITE_URL } from '@/seo/constants'
 
 export const dynamic = 'force-static'
 

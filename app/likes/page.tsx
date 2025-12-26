@@ -5,7 +5,7 @@ import getMediaItems from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
 import { env } from '@/io/env/env'
 import { type Result } from '@/utils/errors/result'
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/utils/metadata'
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/seo/constants'
 
 export const metadata: Metadata = {
   title: 'Likes',

@@ -6,9 +6,9 @@ import {
   type BulletedListBlock,
   type NumberedListBlock,
 } from './schemas/block'
-import { logValidationError } from '@/utils/logging/zod'
+import { logValidationError } from '@/io/logging/zod'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
-import { withRetry } from '@/utils/retry'
+import { withRetry } from '@/io/retry'
 
 export const INVALID_BLOCK_ERROR = 'Invalid block data - build aborted'
 

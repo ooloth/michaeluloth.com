@@ -7,7 +7,7 @@ import {
   hasCorrectCloudinaryDimensions,
   validateOgImage,
 } from './validate'
-import { SITE_URL } from '@/utils/metadata'
+import { SITE_URL } from '@/seo/constants'
 
 describe('isValidUrl', () => {
   it('returns true for valid absolute URLs', () => {

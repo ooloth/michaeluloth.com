@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { SITE_NAME, SITE_DESCRIPTION, SITE_AUTHOR, DEFAULT_OG_IMAGE, SITE_URL } from './metadata'
+import { SITE_NAME, SITE_DESCRIPTION, SITE_AUTHOR, DEFAULT_OG_IMAGE, SITE_URL } from './constants'
 
 describe('metadata constants', () => {
   it('exports site name', () => {

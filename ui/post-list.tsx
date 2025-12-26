@@ -2,7 +2,7 @@ import { type ReactElement } from 'react'
 
 import getPosts from '@/io/notion/getPosts'
 import Link from '@/ui/link'
-import { getHumanReadableDate, getMachineReadableDate } from '@/utils/dates'
+import { getHumanReadableDate, getMachineReadableDate } from '@/ui/dates'
 
 type PostListProps = Readonly<{
   limit?: number

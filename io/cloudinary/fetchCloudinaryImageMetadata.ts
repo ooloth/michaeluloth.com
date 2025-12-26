@@ -1,12 +1,12 @@
 import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 import cloudinary, { type CloudinaryClient } from '@/io/cloudinary/client'
-import { getErrorDetails } from '@/utils/logging/logging'
-import { formatValidationError } from '@/utils/logging/zod'
+import { getErrorDetails } from '@/io/logging/logging'
+import { formatValidationError } from '@/io/logging/zod'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
 import { z } from 'zod'
 import { ImageEffect } from 'cloudinary'
-import { withRetry } from '@/utils/retry'
+import { withRetry } from '@/io/retry'
 
 export const ERRORS = {
   FETCH_FAILED: '🚨 Error fetching Cloudinary image',

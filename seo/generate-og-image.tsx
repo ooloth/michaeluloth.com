@@ -5,10 +5,11 @@
  * - "Michael Uloth" in Inter font
  * - Accent color (#ff98a4) for visual interest
  *
- * Run: npx tsx metadata/generate-og-image.ts
+ * Run: npx tsx seo/generate-og-image.tsx
  * Output: public/og-image.png
  */
 
+import React from 'react'
 import satori from 'satori'
 import sharp from 'sharp'
 import { readFile, writeFile } from 'fs/promises'
@@ -21,7 +22,7 @@ const ZINC_900 = '#18181b'
 const ACCENT = '#ff98a4'
 
 async function fetchFont() {
-  const fontPath = join(process.cwd(), 'metadata', 'fonts', 'Inter-Bold.ttf')
+  const fontPath = join(process.cwd(), 'seo', 'fonts', 'Inter-Bold.ttf')
   return await readFile(fontPath)
 }
 
@@ -41,71 +42,55 @@ async function generateOgImage() {
 
   console.log('Generating OG image with satori...')
   const svg = await satori(
-    {
-      type: 'div',
-      props: {
-        style: {
-          width: '100%',
-          height: '100%',
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: ZINC_900,
+        padding: '80px',
+      }}
+    >
+      {/* Text section */}
+      <div
+        style={{
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          backgroundColor: ZINC_900,
-          padding: '80px',
-        },
-        children: [
-          // Text section
-          {
-            type: 'div',
-            props: {
-              style: {
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px',
-              },
-              children: [
-                {
-                  type: 'div',
-                  props: {
-                    style: {
-                      fontSize: '72px',
-                      fontWeight: 700,
-                      color: 'white',
-                      lineHeight: 1.2,
-                    },
-                    children: 'Michael Uloth',
-                  },
-                },
-                {
-                  type: 'div',
-                  props: {
-                    style: {
-                      width: '100px',
-                      height: '6px',
-                      backgroundColor: ACCENT,
-                      borderRadius: '3px',
-                    },
-                  },
-                },
-              ],
-            },
-          },
-          // Photo section
-          {
-            type: 'img',
-            props: {
-              src: photoBase64,
-              width: 300,
-              height: 300,
-              style: {
-                borderRadius: '150px',
-                objectFit: 'cover',
-              },
-            },
-          },
-        ],
-      },
-    },
+          flexDirection: 'column',
+          gap: '20px',
+        }}
+      >
+        <div
+          style={{
+            fontSize: '72px',
+            fontWeight: 700,
+            color: 'white',
+            lineHeight: 1.2,
+          }}
+        >
+          Michael Uloth
+        </div>
+        <div
+          style={{
+            width: '100px',
+            height: '6px',
+            backgroundColor: ACCENT,
+            borderRadius: '3px',
+          }}
+        />
+      </div>
+      {/* Photo section */}
+      <img
+        src={photoBase64}
+        width={300}
+        height={300}
+        style={{
+          borderRadius: '150px',
+          objectFit: 'cover',
+        }}
+      />
+    </div>,
     {
       width: 1200,
       height: 630,

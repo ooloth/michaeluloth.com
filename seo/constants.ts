@@ -36,7 +36,7 @@ export const TWITTER_HANDLE = '@ooloth'
 
 /**
  * Default OpenGraph image (1200x630px).
- * Generated via metadata/generate-og-image.ts from:
+ * Generated via seo/generate-og-image.ts from:
  * - Photo: Cloudinary (michael-landscape.jpg, color)
  * - Text: "Michael Uloth" in Inter Bold
  * - Background: zinc-900 (#18181b)

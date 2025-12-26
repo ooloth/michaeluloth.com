@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
-import { formatValidationError } from '@/utils/logging/zod'
+import { formatValidationError } from '@/io/logging/zod'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
-import { withRetry } from '@/utils/retry'
+import { withRetry } from '@/io/retry'
 
 interface iTunesListItem {
   date: string

@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
-import { formatValidationError } from '@/utils/logging/zod'
+import { formatValidationError } from '@/io/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, Err, toErr } from '@/utils/errors/result'
-import { withRetry } from '@/utils/retry'
+import { withRetry } from '@/io/retry'
 
 // Schema for raw TMDB API response item
 const TmdbApiResultSchema = z.object({

@@ -3,11 +3,11 @@ import { notFound } from 'next/navigation'
 
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
-import { SITE_URL, SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/utils/metadata'
+import { SITE_URL, SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/seo/constants'
 import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import type { Post as PostType } from '@/io/notion/schemas/post'
 
-import Post from './ui/post'
+import Post from '@/ui/post/post'
 
 type Params = {
   slug: string

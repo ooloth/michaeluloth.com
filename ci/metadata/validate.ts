@@ -20,7 +20,7 @@ import { readFile, readdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/io/cloudinary/ogImageTransforms'
-import { SITE_URL } from '@/utils/metadata'
+import { SITE_URL } from '@/seo/constants'
 import {
   OUT_DIR,
   STATIC_PAGES,
