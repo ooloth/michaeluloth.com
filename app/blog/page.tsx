@@ -4,7 +4,6 @@ import { type ReactElement } from 'react'
 import PageLayout from '@/ui/layouts/page-layout'
 import PostList from '@/ui/post-list'
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/seo/constants'
-import { generateBlogJsonLd } from '@/seo/json-ld/blog'
 import JsonLdScript from '@/seo/json-ld/script'
 
 export const metadata: Metadata = {
@@ -27,13 +26,11 @@ export const metadata: Metadata = {
 }
 
 export default async function Blog(): Promise<ReactElement> {
-  const jsonLd = generateBlogJsonLd()
-
   return (
     <PageLayout>
       <h1 className="sr-only">Blog</h1>
       <PostList />
-      <JsonLdScript data={jsonLd} />
+      <JsonLdScript type="blog" />
     </PageLayout>
   )
 }

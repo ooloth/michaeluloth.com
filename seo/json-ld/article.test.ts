@@ -31,7 +31,7 @@ describe('generateArticleJsonLd', () => {
       nextPost: null,
     }
 
-    const jsonLd = generateArticleJsonLd(post, 'test-post')
+    const jsonLd = generateArticleJsonLd(post)
 
     expect(jsonLd).toEqual({
       '@context': 'https://schema.org',
@@ -63,7 +63,7 @@ describe('generateArticleJsonLd', () => {
       nextPost: null,
     }
 
-    const jsonLd = generateArticleJsonLd(post, 'no-image')
+    const jsonLd = generateArticleJsonLd(post)
 
     expect(jsonLd.image).toBe('/og-image.png')
   })
@@ -82,7 +82,7 @@ describe('generateArticleJsonLd', () => {
       nextPost: null,
     }
 
-    const jsonLd = generateArticleJsonLd(post, 'my-awesome-post')
+    const jsonLd = generateArticleJsonLd(post)
 
     expect(jsonLd.url).toBe('https://michaeluloth.com/my-awesome-post/')
   })
@@ -101,7 +101,7 @@ describe('generateArticleJsonLd', () => {
       nextPost: null,
     }
 
-    const jsonLd = generateArticleJsonLd(post, 'test')
+    const jsonLd = generateArticleJsonLd(post)
 
     expect(jsonLd['@context']).toBe('https://schema.org')
     expect(jsonLd['@type']).toBe('Article')
@@ -121,7 +121,7 @@ describe('generateArticleJsonLd', () => {
       nextPost: null,
     }
 
-    const jsonLd = generateArticleJsonLd(post, 'test')
+    const jsonLd = generateArticleJsonLd(post)
 
     expect(jsonLd.author).toEqual({
       '@type': 'Person',
@@ -143,7 +143,7 @@ describe('generateArticleJsonLd', () => {
       nextPost: null,
     }
 
-    const jsonLd = generateArticleJsonLd(post, 'test')
+    const jsonLd = generateArticleJsonLd(post)
 
     expect(jsonLd.headline).toBe('My Amazing Blog Post Title')
   })
@@ -162,7 +162,7 @@ describe('generateArticleJsonLd', () => {
       nextPost: null,
     }
 
-    const jsonLd = generateArticleJsonLd(post, 'test')
+    const jsonLd = generateArticleJsonLd(post)
 
     expect(jsonLd.datePublished).toBe('2024-03-25')
   })
@@ -181,7 +181,7 @@ describe('generateArticleJsonLd', () => {
       nextPost: null,
     }
 
-    const jsonLd = generateArticleJsonLd(post, 'test')
+    const jsonLd = generateArticleJsonLd(post)
 
     expect(jsonLd.dateModified).toBe('2024-04-30T15:30:00.000Z')
   })

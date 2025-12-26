@@ -5,7 +5,7 @@ import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
 import { SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/seo/constants'
 import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
-import { generateArticleJsonLd, getPostUrl } from '@/seo/json-ld/article'
+import { getPostUrl } from '@/seo/json-ld/article'
 import JsonLdScript from '@/seo/json-ld/script'
 
 import PageLayout from '@/ui/layouts/page-layout'
@@ -81,12 +81,10 @@ export default async function DynamicRoute({ params }: Props) {
     notFound()
   }
 
-  const jsonLd = generateArticleJsonLd(post, slug)
-
   return (
     <PageLayout>
       <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
-      <JsonLdScript data={jsonLd} />
+      <JsonLdScript type="article" post={post} />
     </PageLayout>
   )
 }

@@ -32,8 +32,8 @@ export function getPostUrl(slug: string): string {
  * Generates JSON-LD structured data for a blog post.
  * @see https://schema.org/Article
  */
-export function generateArticleJsonLd(post: Post, slug: string): JsonLdArticle {
-  const url = getPostUrl(slug)
+export function generateArticleJsonLd(post: Post): JsonLdArticle {
+  const url = getPostUrl(post.slug)
   const rawImage = post.featuredImage ?? DEFAULT_OG_IMAGE
   const image = transformCloudinaryForOG(rawImage)
 
