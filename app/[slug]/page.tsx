@@ -6,6 +6,7 @@ import getPosts from '@/io/notion/getPosts'
 import { SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE } from '@/seo/constants'
 import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import { generateArticleJsonLd, getPostUrl } from '@/seo/json-ld/article'
+import JsonLdScript from '@/seo/json-ld/script'
 
 import PageLayout from '@/ui/layouts/page-layout'
 import Post from '@/ui/post/post'
@@ -85,13 +86,7 @@ export default async function DynamicRoute({ params }: Props) {
   return (
     <PageLayout>
       <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          // Escape < to prevent XSS if content contains </script>
-          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
-        }}
-      />
+      <JsonLdScript data={jsonLd} />
     </PageLayout>
   )
 }

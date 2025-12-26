@@ -5,6 +5,7 @@ import PageLayout from '@/ui/layouts/page-layout'
 import PostList from '@/ui/post-list'
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE } from '@/seo/constants'
 import { generateBlogJsonLd } from '@/seo/json-ld/blog'
+import JsonLdScript from '@/seo/json-ld/script'
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -32,13 +33,7 @@ export default async function Blog(): Promise<ReactElement> {
     <PageLayout>
       <h1 className="sr-only">Blog</h1>
       <PostList />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          // Escape < to prevent XSS if content contains </script>
-          __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c'),
-        }}
-      />
+      <JsonLdScript data={jsonLd} />
     </PageLayout>
   )
 }
