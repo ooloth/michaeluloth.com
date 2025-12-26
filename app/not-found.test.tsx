@@ -6,8 +6,13 @@ import { render, screen } from '@testing-library/react'
 import NotFound from './not-found'
 
 // Mock PageLayout to avoid async data fetching in Header/Footer
+// But preserve the main wrapper that PageLayout now provides
 vi.mock('@/ui/layouts/page-layout', () => ({
-  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <main id="main" className="flex-auto flex flex-col">
+      {children}
+    </main>
+  ),
 }))
 
 describe('NotFound', () => {

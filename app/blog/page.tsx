@@ -30,10 +30,8 @@ export default async function Blog(): Promise<ReactElement> {
 
   return (
     <PageLayout>
-      <main id="main" className="flex-auto">
-        <h1 className="sr-only">Blog</h1>
-        <PostList />
-      </main>
+      <h1 className="sr-only">Blog</h1>
+      <PostList />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

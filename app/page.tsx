@@ -9,10 +9,8 @@ export default async function Home(): Promise<ReactElement> {
 
   return (
     <PageLayout>
-      <main id="main" className="flex-auto">
-        <Summary />
-        <RecentWriting />
-      </main>
+      <Summary />
+      <RecentWriting />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

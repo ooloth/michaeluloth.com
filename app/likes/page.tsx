@@ -69,17 +69,15 @@ export default async function Likes(): Promise<ReactElement> {
 
   return (
     <PageLayout width="full">
-      <main className="flex-auto">
-        <h1 className="sr-only">Likes</h1>
+      <h1 className="sr-only">Likes</h1>
 
-        <div className="-mt-8">
-          <MediaSection title="TV Shows" items={tv} height="h-72" prioritizeFirstImage />
-          <MediaSection title="Movies" items={movies} height="h-72" />
-          <MediaSection title="Books" items={books} height="h-72" />
-          <MediaSection title="Albums" items={albums} height="h-48" />
-          <MediaSection title="Podcasts" items={podcasts} height="h-48" />
-        </div>
-      </main>
+      <div className="-mt-8">
+        <MediaSection title="TV Shows" items={tv} height="h-72" prioritizeFirstImage />
+        <MediaSection title="Movies" items={movies} height="h-72" />
+        <MediaSection title="Books" items={books} height="h-72" />
+        <MediaSection title="Albums" items={albums} height="h-48" />
+        <MediaSection title="Podcasts" items={podcasts} height="h-48" />
+      </div>
     </PageLayout>
   )
 }

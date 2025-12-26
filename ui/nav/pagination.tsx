@@ -5,6 +5,7 @@ import type { PostListItem } from '@/io/notion/schemas/post'
 type Props = Readonly<{
   prevPost: PostListItem | null
   nextPost: PostListItem | null
+  className?: string
 }>
 
 const NON_BREAKING_SPACE = '\u00A0'
@@ -21,9 +22,9 @@ export function replaceLastSpaceWithNonBreaking(text: string): string {
   return text.replace(/ (?!.* )/, NON_BREAKING_SPACE)
 }
 
-export default function PaginationLinks({ prevPost, nextPost }: Props) {
+export default function PaginationLinks({ prevPost, nextPost, className }: Props) {
   return (
-    <nav aria-label="Post navigation" className="mt-18 flex flex-col sm:flex-row gap-5">
+    <nav aria-label="Post navigation" className={`mt-18 flex flex-col sm:flex-row gap-5 ${className || ''}`}>
       {nextPost ? <PaginationLink post={nextPost} direction="Next" /> : <div className="basis-1/2" />}
       {prevPost ? <PaginationLink post={prevPost} direction="Previous" /> : <div className="basis-1/2" />}
     </nav>

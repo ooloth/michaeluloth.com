@@ -9,7 +9,6 @@
  * Output: public/og-image.png
  */
 
-import React from 'react'
 import satori from 'satori'
 import sharp from 'sharp'
 import { readFile, writeFile } from 'fs/promises'
@@ -81,6 +80,7 @@ async function generateOgImage() {
         />
       </div>
       {/* Photo section */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={photoBase64}
         width={300}

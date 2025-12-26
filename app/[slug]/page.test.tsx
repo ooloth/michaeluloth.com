@@ -16,8 +16,14 @@ vi.mock('@/io/notion/getPost')
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(),
 }))
+// Mock PageLayout to avoid rendering Header/Footer in tests
+// But preserve the main wrapper that PageLayout now provides
 vi.mock('@/ui/layouts/page-layout', () => ({
-  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <main id="main" className="flex-auto flex flex-col">
+      {children}
+    </main>
+  ),
 }))
 
 describe('generateStaticParams', () => {

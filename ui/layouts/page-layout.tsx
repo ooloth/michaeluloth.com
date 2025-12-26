@@ -10,26 +10,28 @@ type PageLayoutProps = Readonly<{
    * - 'full': No max width constraint
    */
   width?: 'prose' | 'full'
-  /**
-   * Whether to include a skip-to-main-content link.
-   * Should be true for all pages except those with custom skip links.
-   */
-  skipLink?: boolean
 }>
 
-export default function PageLayout({ children, width = 'prose', skipLink = true }: PageLayoutProps) {
+export default function PageLayout({ children, width = 'prose' }: PageLayoutProps) {
+  const widthClasses = width === 'prose' ? 'mx-auto max-w-[45rem] w-full' : ''
+
+  const skipLinkId = 'main'
+  const skipLinkClasses =
+    'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-black focus:rounded'
+
   return (
-    <div className={`flex flex-col min-h-screen ${width === 'prose' ? 'mx-auto max-w-[45rem] w-full' : ''}`}>
-      {skipLink && (
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-black focus:rounded"
-        >
-          Skip to main content
-        </a>
-      )}
+    <div className={`flex flex-col min-h-screen ${widthClasses}`}>
+      <a href={`#${skipLinkId}`} className={skipLinkClasses}>
+        Skip to main content
+      </a>
+
       <Header />
-      {children}
+
+      {/* Main content element is the skip-link target and grows to fill the available vertical space */}
+      <main id={skipLinkId} className="flex-auto flex flex-col">
+        {children}
+      </main>
+
       <Footer />
     </div>
   )

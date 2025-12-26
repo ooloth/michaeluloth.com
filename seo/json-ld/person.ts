@@ -29,11 +29,6 @@ export function generatePersonJsonLd(): JsonLdPerson {
     description: SITE_DESCRIPTION,
     image: 'https://res.cloudinary.com/ooloth/image/upload/v1645057009/mu/michael-landscape.jpg',
     url: SITE_URL,
-    sameAs: [
-      SOCIAL_URLS.github,
-      SOCIAL_URLS.linkedin,
-      SOCIAL_URLS.twitter,
-      SOCIAL_URLS.youtube,
-    ],
+    sameAs: [SOCIAL_URLS.github, SOCIAL_URLS.linkedin, SOCIAL_URLS.twitter, SOCIAL_URLS.youtube],
   }
 }

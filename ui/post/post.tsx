@@ -13,16 +13,15 @@ type Props = Readonly<{
 
 export default function Post({ post, prevPost, nextPost }: Props) {
   return (
-    <>
-      <main id="main" className="flex-auto">
-        <article>
-          <PostHeader title={post.title} datePublished={post.firstPublished} />
-          <NotionBlocks blocks={post.blocks} />
-          <PostFooter /> {/* needs to be a client component */}
-        </article>
-      </main>
+    <div className="flex-auto flex flex-col">
+      <article>
+        <PostHeader title={post.title} datePublished={post.firstPublished} />
+        <NotionBlocks blocks={post.blocks} />
+        <PostFooter /> {/* needs to be a client component */}
+      </article>
+
       {/* Pagination is site navigation, not post content, so it lives outside <article> */}
-      <PaginationLinks prevPost={prevPost} nextPost={nextPost} />
-    </>
+      <PaginationLinks className="mt-auto" prevPost={prevPost} nextPost={nextPost} />
+    </div>
   )
 }
