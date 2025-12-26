@@ -45,3 +45,16 @@ export const TWITTER_HANDLE = '@ooloth'
  * Regenerate: npm run generate:og-image
  */
 export const DEFAULT_OG_IMAGE = '/og-image.png'
+
+/**
+ * Social profile URLs for JSON-LD Person schema and footer navigation.
+ * Used in schema.org sameAs property and social navigation links.
+ * Order matches footer display order.
+ */
+export const SOCIAL_URLS = {
+  rss: 'https://michaeluloth.com/rss.xml',
+  youtube: 'https://youtube.com/michaeluloth',
+  github: 'https://github.com/ooloth',
+  twitter: 'https://x.com/ooloth',
+  linkedin: 'https://www.linkedin.com/in/michaeluloth',
+} as const

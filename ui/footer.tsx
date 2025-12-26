@@ -7,13 +7,14 @@ import rssIcon from '@/public/rss.svg'
 import Icon from '@/ui/icon'
 import Link from '@/ui/link'
 import Paragraph from '@/ui/typography/paragraph'
+import { SOCIAL_URLS } from '@/seo/constants'
 
 const socials = [
-  { label: 'RSS', icon: rssIcon, href: '/rss.xml' },
-  { label: 'YouTube', icon: youTubeIcon, href: 'https://youtube.com/michaeluloth' },
-  { label: 'GitHub', icon: gitHubIcon, href: 'https://github.com/ooloth' },
-  { label: 'X (Twitter)', icon: xIcon, href: 'https://x.com/ooloth' },
-  { label: 'LinkedIn', icon: linkedInIcon, href: 'https://www.linkedin.com/in/michaeluloth' },
+  { label: 'RSS', icon: rssIcon, href: SOCIAL_URLS.rss },
+  { label: 'YouTube', icon: youTubeIcon, href: SOCIAL_URLS.youtube },
+  { label: 'GitHub', icon: gitHubIcon, href: SOCIAL_URLS.github },
+  { label: 'X (Twitter)', icon: xIcon, href: SOCIAL_URLS.twitter },
+  { label: 'LinkedIn', icon: linkedInIcon, href: SOCIAL_URLS.linkedin },
 ] as const
 
 function SocialNav() {

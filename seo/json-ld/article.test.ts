@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { generateArticleJsonLd, getPostUrl } from './article-json-ld'
+import { generateArticleJsonLd, getPostUrl } from './article'
 import type { Post } from '@/io/notion/schemas/post'
 
 describe('getPostUrl', () => {
