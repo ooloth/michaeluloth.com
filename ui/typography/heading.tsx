@@ -50,5 +50,9 @@ export default function Heading({ level, children, className }: Props) {
     classes += ' ' + 'mb-0' // Only add default bottom margin if className doesn't include mb-* or my-*
   }
 
+  if (className) {
+    classes += ' ' + className
+  }
+
   return <Tag className={classes}>{children}</Tag>
 }
