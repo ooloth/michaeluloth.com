@@ -17,8 +17,8 @@ vi.mock('@/io/notion/getPost')
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(),
 }))
-// Mock PageLayout to avoid rendering Header/Footer in tests
-// But preserve the main wrapper that PageLayout now provides
+
+// Mock PageLayout to avoid Next.js usePathname() in Header component
 vi.mock('@/ui/layout/page-layout', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
     <main id="main" className="flex-auto flex flex-col">
@@ -399,13 +399,16 @@ describe('generateMetadata', () => {
   })
 
   describe('notFound behavior', () => {
-    it('returns empty object when post is null', async () => {
+    it('calls notFound() when post is null', async () => {
       vi.mocked(getPost).mockResolvedValue(Ok(null))
+      vi.mocked(notFound).mockImplementation(() => {
+        throw new Error('NEXT_NOT_FOUND')
+      })
 
       const params = Promise.resolve({ slug: 'nonexistent-post' })
-      const metadata = await generateMetadata({ params })
 
-      expect(metadata).toEqual({})
+      await expect(generateMetadata({ params })).rejects.toThrow('NEXT_NOT_FOUND')
+      expect(notFound).toHaveBeenCalled()
     })
   })
 
