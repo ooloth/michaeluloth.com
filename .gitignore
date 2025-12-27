@@ -1,20 +1,19 @@
 # Theirs
-node_modules/
 .netlify/
 .next/
 .playwright-mcp/
 .vercel/
 build/
+node_modules/
 out/
 .DS_Store
 *.log
 *.tsbuildinfo
 next-env.d.ts
-.lighthouseci/
-ci/lighthouse/urls.json
 
 # Mine
-**/cloudinary/*.json
 .env
 .env.local
+.lighthouseci/
 .local-cache/
+ci/lighthouse/urls.json

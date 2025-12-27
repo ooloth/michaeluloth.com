@@ -5,7 +5,7 @@ import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
-import { withRetry } from '@/utils/retry'
+import { withRetry } from '@/io/utils/retry'
 
 type Options = {
   cache?: CacheAdapter

@@ -1,8 +1,10 @@
 import { z } from 'zod'
+import { createHash } from 'node:crypto'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
 import { formatValidationError } from '@/utils/logging/zod'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
-import { withRetry } from '@/utils/retry'
+import { withRetry } from '@/io/utils/retry'
+import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 
 interface iTunesListItem {
   date: string
@@ -43,20 +45,45 @@ export type iTunesItem = z.infer<typeof iTunesItemSchema>
 
 type iTunesMedium = 'ebook' | 'music' | 'podcast'
 type iTunesEntity = 'album' | 'ebook' | 'podcast'
+type MediaCategory = 'books' | 'albums' | 'podcasts'
+
+type Options = {
+  skipCache?: boolean
+  cache?: CacheAdapter
+}
 
 export default async function fetchItunesItems(
   items: iTunesListItem[],
-  medium: iTunesMedium,
-  entity: iTunesEntity,
+  category: MediaCategory,
+  options: Options = {},
 ): Promise<Result<iTunesItem[], Error>> {
+  const { skipCache = false, cache = filesystemCache } = options
+
+  // Map category to iTunes API parameters
+  const params = {
+    books: { medium: 'ebook' as iTunesMedium, entity: 'ebook' as iTunesEntity },
+    albums: { medium: 'music' as iTunesMedium, entity: 'album' as iTunesEntity },
+    podcasts: { medium: 'podcast' as iTunesMedium, entity: 'podcast' as iTunesEntity },
+  }[category]
+
   const stringOfItemIDs = items.map(item => item.id).join(',')
 
   // See: https://affiliate.itunes.apple.com/resources/documentation/itunes-store-web-service-search-api/#lookup
   try {
+    // Check cache first
+    // Hash the ID list to avoid ENAMETOOLONG errors with many items
+    const idsHash = createHash('sha256').update(stringOfItemIDs).digest('hex').slice(0, 16)
+    const cacheKey = `itunes-${category}-${idsHash}`
+    if (!skipCache) {
+      const cached = await cache.get<iTunesItem[]>(cacheKey, 'itunes')
+      if (cached) {
+        return Ok(cached)
+      }
+    }
     const response = await withRetry(
       () =>
         fetch(
-          `https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${medium}&entity=${entity}&sort=recent`,
+          `https://itunes.apple.com/lookup?id=${stringOfItemIDs}&country=CA&media=${params.medium}&entity=${params.entity}&sort=recent`,
         ),
       {
         onRetry: (error, attempt, delay) => {
@@ -131,6 +158,10 @@ export default async function fetchItunesItems(
     }
 
     const sortedResults = uniqueResults.sort((a, b) => b.date.localeCompare(a.date))
+
+    // Cache the result
+    await cache.set(cacheKey, sortedResults, 'itunes')
+
     return Ok(sortedResults)
   } catch (error) {
     return toErr(error, 'fetchItunesItems')

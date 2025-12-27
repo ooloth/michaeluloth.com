@@ -1,5 +1,5 @@
-import Link from '@/ui/link'
-import { Code } from '@/ui/code'
+import Link from '@/ui/elements/link'
+import { Code } from '@/ui/elements/code'
 import { type RichTextItem } from '@/io/notion/schemas/block'
 
 type RichTextTag = 'code' | 'em' | 'span'

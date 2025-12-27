@@ -34,7 +34,11 @@
 
 import { readFileSync, existsSync, readdirSync } from 'fs'
 import { join } from 'path'
-import { LHCI_DIR } from '../config'
+
+/**
+ * Directory containing Lighthouse CI reports.
+ */
+const LHCI_DIR = join(process.cwd(), '.lighthouseci')
 
 interface LighthouseNode {
   selector?: string

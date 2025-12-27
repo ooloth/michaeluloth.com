@@ -3,12 +3,12 @@ import { type ReactElement } from 'react'
 import { type GroupedBlock, type RichTextItem } from '@/io/notion/schemas/block'
 import NotionRichText from '@/io/notion/ui/NotionRichText'
 
-import { Code } from '@/ui/code'
-import Heading from '@/ui/typography/heading'
-import CloudinaryImage from '@/ui/image'
-import List from '@/ui/list'
-import Paragraph from '@/ui/typography/paragraph'
-import Video from '@/ui/video'
+import { Code } from '@/ui/elements/code'
+import Heading from '@/ui/elements/heading'
+import CloudinaryImage from '@/ui/elements/image'
+import List from '@/ui/elements/list'
+import Paragraph from '@/ui/elements/paragraph'
+import Video from '@/ui/elements/video'
 
 type Props = {
   block: GroupedBlock

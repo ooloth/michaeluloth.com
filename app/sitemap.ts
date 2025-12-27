@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import getPosts from '@/io/notion/getPosts'
-import { SITE_URL } from '@/utils/metadata'
+import { SITE_URL } from '@/seo/constants'
 
 export const dynamic = 'force-static'
 

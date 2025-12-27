@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 import { metadata } from './layout'
+import { SITE_LOCALE, TWITTER_CARD } from '@/seo/constants'
 
 describe('RootLayout metadata', () => {
   it('includes metadataBase', () => {
@@ -13,7 +14,7 @@ describe('RootLayout metadata', () => {
   it('includes title with template', () => {
     expect(metadata.title).toEqual({
       default: 'Michael Uloth',
-      template: '%s | Michael Uloth',
+      template: '%s • Michael Uloth',
     })
   })
 
@@ -29,7 +30,7 @@ describe('RootLayout metadata', () => {
   it('includes OpenGraph config', () => {
     expect(metadata.openGraph).toEqual({
       type: 'website',
-      locale: 'en_CA',
+      locale: SITE_LOCALE,
       siteName: 'Michael Uloth',
       url: 'https://michaeluloth.com/',
       images: ['/og-image.png'],
@@ -38,7 +39,7 @@ describe('RootLayout metadata', () => {
 
   it('includes Twitter card config', () => {
     expect(metadata.twitter).toEqual({
-      card: 'summary_large_image',
+      card: TWITTER_CARD,
       creator: '@ooloth',
     })
   })
