@@ -1,6 +1,6 @@
-import Heading from '@/ui/typography/heading'
-import Paragraph from '@/ui/typography/paragraph'
-import { getHumanReadableDate } from '@/ui/dates'
+import Heading from '@/ui/elements/heading'
+import Paragraph from '@/ui/elements/paragraph'
+import { getHumanReadableDate } from '@/utils/dates'
 
 type HeaderProps = Readonly<{
   title: string

@@ -3,11 +3,11 @@
 import { usePathname } from 'next/navigation'
 import { type ReactElement } from 'react'
 
-import Link from '@/ui/link'
-import { type NavItem } from '@/ui/nav/types'
-import { isCurrentPage } from '@/ui/nav/utils'
+import Link from '@/ui/elements/link'
+import { type NavItem } from '@/ui/layout/nav-types'
+import { isCurrentPage } from '@/ui/layout/nav-utils'
 import { type PostListItem } from '@/io/notion/schemas/post'
-import Emoji from '../emoji'
+import Emoji from '@/ui/elements/emoji'
 
 const nav: NavItem[] = [
   { text: 'Home', href: '/' },

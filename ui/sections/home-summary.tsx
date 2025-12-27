@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import CloudinaryImage from '@/ui/image'
-import Paragraph from '@/ui/typography/paragraph'
+import CloudinaryImage from '@/ui/elements/image'
+import Paragraph from '@/ui/elements/paragraph'
 
 export default function Summary(): ReactElement {
   return (

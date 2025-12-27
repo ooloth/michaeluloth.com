@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
-import Header from '@/ui/header'
-import Footer from '@/ui/footer'
+import Header from '@/ui/layout/header'
+import Footer from '@/ui/layout/footer'
 
 type PageLayoutProps = Readonly<{
   children: ReactNode

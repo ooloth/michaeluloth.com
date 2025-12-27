@@ -1,5 +1,5 @@
 import type { PostListItem } from '@/io/notion/schemas/post'
-import type { NavItem } from '@/ui/nav/types'
+import type { NavItem } from '@/ui/layout/nav-types'
 
 /**
  * Determines if the given navigation item corresponds to the current page.

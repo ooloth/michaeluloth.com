@@ -4,7 +4,7 @@
 
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
-import PaginationLinks, { replaceLastSpaceWithNonBreaking } from './pagination'
+import PaginationLinks, { replaceLastSpaceWithNonBreaking } from './post-pagination'
 import type { PostListItem } from '@/io/notion/schemas/post'
 
 describe('replaceLastSpaceWithNonBreaking', () => {

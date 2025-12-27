@@ -4,9 +4,9 @@ import xIcon from '@/public/x.svg'
 import linkedInIcon from '@/public/linkedin.svg'
 import rssIcon from '@/public/rss.svg'
 
-import Icon from '@/ui/icon'
-import Link from '@/ui/link'
-import Paragraph from '@/ui/typography/paragraph'
+import Icon from '@/ui/elements/icon'
+import Link from '@/ui/elements/link'
+import Paragraph from '@/ui/elements/paragraph'
 import { SOCIAL_URLS } from '@/seo/constants'
 
 const socials = [

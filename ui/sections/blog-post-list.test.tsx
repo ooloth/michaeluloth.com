@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import PostList from './post-list'
+import PostList from './blog-post-list'
 import getPosts from '@/io/notion/getPosts'
 import type { PostListItem } from '@/io/notion/schemas/post'
 import { Ok, Err } from '@/utils/errors/result'

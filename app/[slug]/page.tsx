@@ -8,8 +8,8 @@ import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import { getPostUrl } from '@/seo/json-ld/article'
 import JsonLdScript from '@/seo/json-ld/script'
 
-import PageLayout from '@/ui/layouts/page-layout'
-import Post from '@/ui/post/post'
+import PageLayout from '@/ui/layout/main'
+import Post from '@/ui/sections/post'
 
 type Params = {
   slug: string

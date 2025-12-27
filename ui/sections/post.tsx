@@ -1,6 +1,6 @@
 import NotionBlocks from '@/io/notion/ui/NotionBlocks'
 import type { Post as PostType, PostListItem } from '@/io/notion/schemas/post'
-import PaginationLinks from '@/ui/nav/pagination'
+import PaginationLinks from '@/ui/sections/post-pagination'
 
 import PostHeader from './post-header'
 import PostFooter from './post-footer'

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { isCurrentPage } from './utils'
-import type { NavItem } from './types'
+import { isCurrentPage } from './nav-utils'
+import type { NavItem } from './nav-types'
 import type { PostListItem } from '@/io/notion/schemas/post'
 
 describe('isCurrentPage', () => {

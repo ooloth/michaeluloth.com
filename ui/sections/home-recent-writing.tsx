@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import PostList from '@/ui/post-list'
+import PostList from '@/ui/sections/blog-post-list'
 
 export default function RecentWriting(): ReactElement {
   return (

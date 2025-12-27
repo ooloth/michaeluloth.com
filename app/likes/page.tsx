@@ -6,8 +6,8 @@ import fetchItunesItems from '@/io/itunes/fetchItunesItems'
 import { env } from '@/io/env/env'
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE, SITE_LOCALE } from '@/seo/constants'
 
-import PageLayout from '@/ui/layouts/page-layout'
-import MediaSection from '@/ui/likes/media-section'
+import PageLayout from '@/ui/layout/main'
+import MediaSection from '@/ui/sections/likes-row'
 
 export const metadata: Metadata = {
   title: 'Likes',

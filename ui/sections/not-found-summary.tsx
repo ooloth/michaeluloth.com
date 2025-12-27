@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import Dot from '@/ui/dot'
-import Link from '@/ui/link'
+import Dot from '@/ui/elements/dot'
+import Link from '@/ui/elements/link'
 
 export default function NotFoundContent(): ReactElement {
   return (

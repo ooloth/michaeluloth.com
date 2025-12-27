@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import PrimaryNav from './primary'
+import PrimaryNav from './nav-primary'
 import type { PostListItem } from '@/io/notion/schemas/post'
 
 // Mock next/navigation

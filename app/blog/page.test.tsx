@@ -14,8 +14,8 @@ import { SITE_LOCALE } from '@/seo/constants'
 vi.mock('@/io/notion/getPosts')
 
 // Mock PostList to avoid async server component complexity in tests
-// The actual PostList behavior is tested in ui/post-list.test.tsx
-vi.mock('@/ui/post-list', () => ({
+// The actual PostList behavior is tested in ui/sections/blog-post-list.test.tsx
+vi.mock('@/ui/sections/blog-post-list', () => ({
   default: ({ limit }: { limit?: number }) => {
     // Call getPosts to verify it's called with correct params
     // This ensures the mock is called during render which we verify in tests
@@ -28,7 +28,7 @@ vi.mock('@/ui/post-list', () => ({
 
 // Mock PageLayout to avoid rendering Header/Footer in tests
 // But preserve the main wrapper that PageLayout now provides
-vi.mock('@/ui/layouts/page-layout', () => ({
+vi.mock('@/ui/layout/main', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
     <main id="main" className="flex-auto flex flex-col">
       {children}

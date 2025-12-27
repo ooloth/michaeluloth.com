@@ -1,5 +1,5 @@
-import Card from '@/ui/card'
-import Emoji from '@/ui/emoji'
+import Card from '@/ui/elements/card'
+import Emoji from '@/ui/elements/emoji'
 import type { PostListItem } from '@/io/notion/schemas/post'
 
 type Props = Readonly<{

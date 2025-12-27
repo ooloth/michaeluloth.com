@@ -1,5 +1,5 @@
-import PageLayout from '@/ui/layouts/page-layout'
-import NotFoundContent from '@/ui/not-found/not-found-content'
+import PageLayout from '@/ui/layout/main'
+import NotFoundContent from '@/ui/sections/not-found-summary'
 
 export default async function NotFound() {
   return (

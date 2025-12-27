@@ -17,7 +17,7 @@ vi.mock('@/io/itunes/fetchItunesItems')
 vi.mock('@/io/tmdb/fetchTmdbList')
 // Mock PageLayout to avoid rendering Header/Footer in tests
 // But preserve the main wrapper that PageLayout now provides
-vi.mock('@/ui/layouts/page-layout', () => ({
+vi.mock('@/ui/layout/main', () => ({
   default: ({ children }: { children: React.ReactNode }) => (
     <main id="main" className="flex-auto flex flex-col">
       {children}
