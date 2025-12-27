@@ -1,32 +1,12 @@
-import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
-import fetchTmdbList from '@/io/tmdb/fetchTmdbList'
-import getMediaItems from '@/io/notion/getMediaItems'
-import fetchItunesItems from '@/io/itunes/fetchItunesItems'
-import { env } from '@/io/env/env'
-import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE, SITE_LOCALE } from '@/seo/constants'
 
+import { env } from '@/io/env/env'
+import fetchItunesItems from '@/io/itunes/fetchItunesItems'
+import getMediaItems from '@/io/notion/getMediaItems'
+import fetchTmdbList from '@/io/tmdb/fetchTmdbList'
+import { metadata } from '@/seo/pages/likes'
 import PageLayout from '@/ui/layout/page-layout'
 import MediaSection from '@/ui/sections/likes-row'
-
-export const metadata: Metadata = {
-  title: 'Likes',
-  description: 'My favorite TV shows, movies, books, albums, and podcasts',
-  openGraph: {
-    type: 'website',
-    url: `${SITE_URL}likes/`,
-    siteName: SITE_NAME,
-    locale: SITE_LOCALE,
-    images: [DEFAULT_OG_IMAGE],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    creator: TWITTER_HANDLE,
-    title: 'Likes',
-    description: 'My favorite TV shows, movies, books, albums, and podcasts',
-    images: [DEFAULT_OG_IMAGE],
-  },
-}
 
 export default async function Likes(): Promise<ReactElement> {
   // Step 1: Fetch Notion items in parallel
@@ -68,3 +48,5 @@ export default async function Likes(): Promise<ReactElement> {
     </PageLayout>
   )
 }
+
+export { metadata }

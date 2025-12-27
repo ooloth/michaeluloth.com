@@ -14,7 +14,7 @@ describe('RootLayout metadata', () => {
   it('includes title with template', () => {
     expect(metadata.title).toEqual({
       default: 'Michael Uloth',
-      template: '%s | Michael Uloth',
+      template: '%s • Michael Uloth',
     })
   })
 

@@ -3,10 +3,8 @@ import { notFound } from 'next/navigation'
 
 import getPost from '@/io/notion/getPost'
 import getPosts from '@/io/notion/getPosts'
-import { SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE, SITE_LOCALE } from '@/seo/constants'
-import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
-import { getPostUrl } from '@/seo/json-ld/article'
 import JsonLdScript from '@/seo/json-ld/script'
+import metadata from '@/seo/pages/post'
 
 import NotionBlocks from '@/io/notion/ui/NotionBlocks'
 import PaginationLinks from '@/ui/sections/post-pagination'
@@ -40,36 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     notFound()
   }
 
-  const url = getPostUrl(slug)
-  const rawImage = post.featuredImage ?? DEFAULT_OG_IMAGE
-  const ogImage = transformCloudinaryForOG(rawImage)
-
-  return {
-    title: post.title,
-    description: post.description,
-    alternates: {
-      canonical: url,
-    },
-    openGraph: {
-      type: 'article',
-      url,
-      siteName: SITE_NAME,
-      locale: SITE_LOCALE,
-      title: post.title,
-      description: post.description,
-      publishedTime: post.firstPublished,
-      modifiedTime: post.lastEditedTime,
-      authors: [SITE_AUTHOR],
-      images: [ogImage],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      creator: TWITTER_HANDLE,
-      title: post.title,
-      description: post.description,
-      images: [ogImage],
-    },
-  }
+  return metadata(post)
 }
 
 type Props = Readonly<{
