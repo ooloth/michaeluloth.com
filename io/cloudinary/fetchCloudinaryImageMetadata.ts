@@ -6,7 +6,7 @@ import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
 import { z } from 'zod'
 import { ImageEffect } from 'cloudinary'
-import { withRetry } from '@/io/retry'
+import { withRetry } from '@/io/utils/retry'
 
 export const ERRORS = {
   FETCH_FAILED: '🚨 Error fetching Cloudinary image',

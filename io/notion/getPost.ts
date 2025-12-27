@@ -7,7 +7,7 @@ import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { Ok, Err, toErr, type Result } from '@/utils/errors/result'
-import { withRetry } from '@/io/retry'
+import { withRetry } from '@/io/utils/retry'
 
 type Options = {
   slug: string | null
