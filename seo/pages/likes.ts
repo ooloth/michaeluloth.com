@@ -2,9 +2,11 @@ import { type Metadata } from 'next'
 
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE, SITE_LOCALE } from '@/seo/constants'
 
+const description = 'My favorite TV shows, movies, books, albums, and podcasts'
+
 export const metadata: Metadata = {
   title: 'Likes',
-  description: 'My favorite TV shows, movies, books, albums, and podcasts',
+  description,
   openGraph: {
     type: 'website',
     url: `${SITE_URL}likes/`,
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     creator: TWITTER_HANDLE,
     title: 'Likes',
-    description: 'My favorite TV shows, movies, books, albums, and podcasts',
+    description,
     images: [DEFAULT_OG_IMAGE],
   },
 }
