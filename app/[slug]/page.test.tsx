@@ -9,7 +9,7 @@ import getPosts from '@/io/notion/getPosts'
 import getPost from '@/io/notion/getPost'
 import { notFound } from 'next/navigation'
 import { Ok, Err } from '@/utils/errors/result'
-import { SITE_LOCALE } from '@/seo/constants'
+import { SITE_LOCALE, TWITTER_CARD } from '@/seo/constants'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
@@ -343,7 +343,7 @@ describe('generateMetadata', () => {
           images: ['https://example.com/image.jpg'],
         },
         twitter: {
-          card: 'summary_large_image',
+          card: TWITTER_CARD,
           creator: '@ooloth',
           title: 'Test Post Title',
           description: 'Test post description',

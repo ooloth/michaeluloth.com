@@ -8,7 +8,7 @@ import Blog, { metadata } from './page'
 import getPosts from '@/io/notion/getPosts'
 import type { PostListItem } from '@/io/notion/schemas/post'
 import { Ok } from '@/utils/errors/result'
-import { SITE_LOCALE } from '@/seo/constants'
+import { SITE_LOCALE, TWITTER_CARD } from '@/seo/constants'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
@@ -48,7 +48,7 @@ describe('Blog page metadata', () => {
         images: ['/og-image.png'],
       },
       twitter: {
-        card: 'summary_large_image',
+        card: TWITTER_CARD,
         creator: '@ooloth',
         title: 'Blog',
         description: 'Technical writing about web development, TypeScript, React, and software engineering.',

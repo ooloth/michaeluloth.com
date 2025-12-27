@@ -35,6 +35,13 @@ export const SITE_AUTHOR = 'Michael Uloth'
 export const TWITTER_HANDLE = '@ooloth'
 
 /**
+ * Twitter card type for social sharing metadata.
+ * 'summary_large_image' displays a large image preview in Twitter cards.
+ * Used in twitter:card meta tags across all pages.
+ */
+export const TWITTER_CARD = 'summary_large_image' as const
+
+/**
  * Default OpenGraph image (1200x630px).
  * Generated via seo/generate-og-image.ts from:
  * - Photo: Cloudinary (michael-landscape.jpg, color)

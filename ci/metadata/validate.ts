@@ -20,7 +20,7 @@ import { readFile, readdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT } from '@/io/cloudinary/ogImageTransforms'
-import { SITE_URL } from '@/seo/constants'
+import { SITE_URL, TWITTER_CARD } from '@/seo/constants'
 
 // ============================================================================
 // Configuration
@@ -274,10 +274,10 @@ function validateTwitterTags(html: string, pageName: string): ValidationError[] 
 
   // Validate twitter:card value
   const twitterCard = getMetaContent($('meta[name="twitter:card"]'))
-  if (twitterCard && twitterCard !== 'summary_large_image') {
+  if (twitterCard && twitterCard !== TWITTER_CARD) {
     errors.push({
       page: pageName,
-      error: `twitter:card has invalid value: ${twitterCard} (expected "summary_large_image")`,
+      error: `twitter:card has invalid value: ${twitterCard} (expected "${TWITTER_CARD}")`,
     })
   }
 

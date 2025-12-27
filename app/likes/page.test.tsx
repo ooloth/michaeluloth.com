@@ -9,7 +9,7 @@ import getMediaItems, { type NotionMediaItem } from '@/io/notion/getMediaItems'
 import fetchItunesItems, { type iTunesItem } from '@/io/itunes/fetchItunesItems'
 import fetchTmdbList from '@/io/tmdb/fetchTmdbList'
 import { Ok, Err } from '@/utils/errors/result'
-import { SITE_LOCALE } from '@/seo/constants'
+import { SITE_LOCALE, TWITTER_CARD } from '@/seo/constants'
 
 // Mock dependencies
 vi.mock('@/io/notion/getMediaItems')
@@ -38,7 +38,7 @@ describe('Likes page metadata', () => {
         images: ['/og-image.png'],
       },
       twitter: {
-        card: 'summary_large_image',
+        card: TWITTER_CARD,
         creator: '@ooloth',
         title: 'Likes',
         description: 'My favorite TV shows, movies, books, albums, and podcasts',

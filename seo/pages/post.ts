@@ -2,7 +2,7 @@ import { type Metadata } from 'next'
 
 import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import { type Post } from '@/io/notion/schemas/post'
-import { SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, DEFAULT_OG_IMAGE, SITE_LOCALE } from '@/seo/constants'
+import { SITE_NAME, SITE_AUTHOR, TWITTER_HANDLE, TWITTER_CARD, DEFAULT_OG_IMAGE, SITE_LOCALE } from '@/seo/constants'
 import { getPostUrl } from '@/seo/json-ld/article'
 
 export default function metadata(post: Post): Metadata {
@@ -29,7 +29,7 @@ export default function metadata(post: Post): Metadata {
       images: [ogImage],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: TWITTER_CARD,
       creator: TWITTER_HANDLE,
       title: post.title,
       description: post.description,

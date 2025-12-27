@@ -6,6 +6,7 @@ import {
   SITE_DESCRIPTION,
   SITE_AUTHOR,
   TWITTER_HANDLE,
+  TWITTER_CARD,
   DEFAULT_OG_IMAGE,
   SITE_LOCALE,
 } from '@/seo/constants'
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
-    card: 'summary_large_image',
+    card: TWITTER_CARD,
     creator: TWITTER_HANDLE,
   },
   alternates: {
