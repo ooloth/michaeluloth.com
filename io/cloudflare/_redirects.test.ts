@@ -3,7 +3,7 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 
 describe('_redirects file', () => {
-  const redirectsPath = join(__dirname, '_redirects')
+  const redirectsPath = join(__dirname, '../../public/_redirects')
   const content = readFileSync(redirectsPath, 'utf-8')
   const lines = content.split('\n')
 
