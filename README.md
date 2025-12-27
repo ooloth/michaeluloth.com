@@ -1,52 +1,18 @@
 # michaeluloth.com
 
-Personal site with writing, projects, and media consumption. Built with Next.js, deployed as a static site to Cloudflare Pages.
+Personal site with writing, projects, and media consumption 📝. Built with Next.js 16, deployed as a static site to Cloudflare Pages.
 
-## Tech Stack
+## What's interesting
 
-- Next.js 16 (App Router, static export)
-- TypeScript + Zod (runtime validation)
-- Tailwind CSS 4
-- Vitest + Testing Library
-- Content from Notion, images from Cloudinary
-- CI via GitHub Actions (format, lint, typecheck, test, build, Lighthouse, metadata validation)
+- **🛡️ I/O boundary validation** - External data (Notion, Cloudinary, TMDB, iTunes) gets validated and transformed at the boundary using Zod schemas that both validate and reshape in one pass, so the rest of the app works with clean domain types instead of nested API structures
+- **✨ Result types for explicit errors** - Custom Result<T, E> type (Rust-inspired) instead of throwing exceptions everywhere, making error handling visible in function signatures
+- **🧪 Dependency injection for testable I/O** - Pure transformation functions are separated from I/O and accept dependencies as optional parameters, so tests can validate business logic without module mocking
+- **✅ Post-build metadata validation** - Scripts parse the actual build output HTML to validate OpenGraph tags, image dimensions, alt text, and SEO metadata—enforces quality at the boundary where it matters
+- **⚡ Smart CI pipeline** - Fast checks (format/lint/typecheck/test) run on every commit, slow checks (build/Lighthouse/metadata) only on ready PRs, dynamic Lighthouse URLs from RSS feed instead of hardcoded pages
+- **🔄 Retry logic with exponential backoff** - All external API calls (Notion, Cloudinary, etc.) wrapped with consistent retry behavior to handle transient failures
+- **💾 Development caching** - Zero network calls during local dev after first fetch, with per-source namespaces and scripts to clear individual caches
+- **🖼️ Responsive image pipeline** - Cloudinary integration generates 9 srcset sizes with enforced alt text (build fails if missing) and automatic format/quality optimization
+- **🔒 Environment validation at startup** - All env vars validated with Zod at app startup with helpful error messages, not runtime "undefined" surprises
+- **🧪 72k lines of tests** - Integration tests for data flow, component tests using Testing Library patterns, property factories to eliminate test data duplication
 
-## Data Pipeline
-
-The interesting bit is how external data gets validated and transformed at the I/O boundary:
-
-- **I/O boundary pattern**: `io/notion/getPosts.ts` - Fetch → validate with Zod → transform to domain types → cache → return Result
-- **Schema transformers**: `io/notion/schemas/properties.ts` - Zod schemas that both validate and reshape data
-- **Responsive images**: `io/cloudinary/fetchCloudinaryImageMetadata.ts` - Generates 9 srcset sizes with retry logic
-- **Environment validation**: `io/env/env.ts` - All env vars validated at startup
-
-### Error Handling
-
-- **Result type**: `utils/errors/result.ts` - Explicit error handling (no try/catch everywhere)
-- **Invariants**: `utils/errors/invariant.ts` - Runtime assertions with context
-- **Retry logic**: `utils/retry.ts` - Exponential backoff for all external APIs
-
-### Testing
-
-- **Pure function tests**: `io/notion/getPosts.test.ts` - Dependency injection, no mocking needed
-- **Component tests**: `ui/link.test.tsx` - Testing Library patterns
-- 46 test files, ~70k lines of test code
-
-### CI/CD
-
-- **Pipeline**: `.github/workflows/ci.yml` - Eight stages (format → lint → typecheck → test → build → Lighthouse → metadata → deploy)
-- **Metadata validation**: `ci/metadata/validate.ts` - Post-build validation of OG tags, images, SEO
-- **Dynamic Lighthouse**: `ci/lighthouse/generate-urls.ts` - Tests actual content from RSS feed
-
-### Frontend
-
-- **Accessibility**: Components tested with Testing Library, semantic HTML throughout
-- **Link component**: `ui/link.tsx` - Auto-detects internal/external, adds security attributes
-- **Tailwind utilities**: `styles/globals.css` - Custom utilities for consistent design tokens
-
-## Notable Details
-
-- Alt text is enforced (build fails if Cloudinary images missing alt text)
-- Lighthouse scores: 100% accessibility, 100% best practices, 100% SEO, 90%+ performance
-- Development caching (doesn't hammer Notion API on every page refresh)
-- Pushover notifications on CI failures
+**Tech stack:** TypeScript + Zod, Tailwind CSS 4, Vitest + Testing Library, GitHub Actions CI
