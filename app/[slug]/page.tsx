@@ -17,13 +17,6 @@ type Params = {
   slug: string
 }
 
-/**
- * Generates the list of static params (slugs) for all blog posts.
- * Replaces getStaticPaths in Next.js 13+
- *
- * @returns A promise that resolves to an array of objects containing post slugs.
- * @see https://nextjs.org/docs/app/api-reference/functions/generate-static-params
- */
 export async function generateStaticParams(): Promise<Params[]> {
   const posts = (await getPosts({ sortDirection: 'ascending' })).unwrap()
 
