@@ -1,6 +1,15 @@
 import Heading from '@/ui/elements/heading'
 import Paragraph from '@/ui/elements/paragraph'
-import { getHumanReadableDate } from '@/utils/dates'
+
+/**
+ * Given a date, returns a human-readable date string in the format "Jan 1, 2020".
+ */
+const getHumanReadableDate = (date: string | number | Date): string =>
+  new Date(date).toLocaleDateString('en-CA', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 
 type HeaderProps = Readonly<{
   title: string

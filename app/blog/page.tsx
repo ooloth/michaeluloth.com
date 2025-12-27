@@ -1,7 +1,7 @@
 import { type Metadata } from 'next'
 import { type ReactElement } from 'react'
 
-import PageLayout from '@/ui/layout/main'
+import PageLayout from '@/ui/layout/page-layout'
 import PostList from '@/ui/sections/blog-post-list'
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, TWITTER_HANDLE, SITE_LOCALE } from '@/seo/constants'
 import JsonLdScript from '@/seo/json-ld/script'

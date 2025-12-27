@@ -11,7 +11,7 @@ import JsonLdScript from '@/seo/json-ld/script'
 import NotionBlocks from '@/io/notion/ui/NotionBlocks'
 import PaginationLinks from '@/ui/sections/post-pagination'
 
-import PageLayout from '@/ui/layout/main'
+import PageLayout from '@/ui/layout/page-layout'
 import PostHeader from '@/ui/sections/post-header'
 import PostFooter from '@/ui/sections/post-footer'
 

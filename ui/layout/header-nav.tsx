@@ -4,10 +4,14 @@ import { usePathname } from 'next/navigation'
 import { type ReactElement } from 'react'
 
 import Link from '@/ui/elements/link'
-import { type NavItem } from '@/ui/layout/nav-types'
-import { isCurrentPage } from '@/ui/layout/nav-utils'
 import { type PostListItem } from '@/io/notion/schemas/post'
 import Emoji from '@/ui/elements/emoji'
+
+// Exported for testing purposes
+export type NavItem = {
+  text: string
+  href: string
+}
 
 const nav: NavItem[] = [
   { text: 'Home', href: '/' },
@@ -18,6 +22,24 @@ const nav: NavItem[] = [
   { text: 'Likes', href: '/likes/' },
 ]
 
+/**
+ * Determines if the given navigation item corresponds to the current page.
+ * Exported for testing purposes.
+ */
+export function isCurrentPage(navItem: NavItem, pathname: string, posts: PostListItem[]): boolean {
+  // Exact match?
+  if (navItem.href === pathname) {
+    return true
+  }
+
+  // Blog post?
+  if (navItem.href === '/blog/') {
+    return posts.some(post => pathname === `/${post.slug}/`)
+  }
+
+  // No match
+  return false
+}
 type Props = Readonly<{
   posts: PostListItem[]
 }>

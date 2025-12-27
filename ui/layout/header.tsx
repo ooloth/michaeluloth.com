@@ -1,5 +1,5 @@
 import getPosts from '@/io/notion/getPosts'
-import PrimaryNav from '@/ui/layout/nav-primary'
+import PrimaryNav from '@/ui/layout/header-nav'
 
 export default async function Header() {
   const posts = (await getPosts({ sortDirection: 'descending' })).unwrap()
