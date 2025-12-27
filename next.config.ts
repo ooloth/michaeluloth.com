@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: 'export', // NOTE: temporary disable this to be able to see the 404 page while dev server is running
+  output: 'export', // NOTE: temporarily disable this to be able to see the 404 page while dev server is running
   staticPageGenerationTimeout: 180, // Increase timeout for pages with slow external API calls (likes page)
   trailingSlash: true, // change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
   turbopack: {
