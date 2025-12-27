@@ -4,7 +4,7 @@
 
 import { render, screen } from '@testing-library/react'
 import { generateStaticParams, generateMetadata } from './page'
-import DynamicRoute from './page'
+import BlogPost from './page'
 import getPosts from '@/io/notion/getPosts'
 import getPost from '@/io/notion/getPost'
 import { notFound } from 'next/navigation'
@@ -171,7 +171,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'test-post' })
-      const jsx = await DynamicRoute({ params })
+      const jsx = await BlogPost({ params })
       render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
@@ -210,7 +210,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'my-post' })
-      const jsx = await DynamicRoute({ params })
+      const jsx = await BlogPost({ params })
       render(jsx)
 
       expect(getPost).toHaveBeenCalledWith({
@@ -240,7 +240,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockResolvedValue(Ok(mockPost))
 
       const params = Promise.resolve({ slug: 'standalone-post' })
-      const jsx = await DynamicRoute({ params })
+      const jsx = await BlogPost({ params })
       render(jsx)
 
       expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Standalone Post')
@@ -262,7 +262,7 @@ describe('DynamicRoute page', () => {
       })
 
       const params = Promise.resolve({ slug: 'nonexistent-post' })
-      await expect(DynamicRoute({ params })).rejects.toThrow('NEXT_NOT_FOUND')
+      await expect(BlogPost({ params })).rejects.toThrow('NEXT_NOT_FOUND')
       expect(notFound).toHaveBeenCalled()
     })
 
@@ -273,7 +273,7 @@ describe('DynamicRoute page', () => {
       })
 
       const params = Promise.resolve({ slug: 'missing-post' })
-      await expect(DynamicRoute({ params })).rejects.toThrow('NEXT_NOT_FOUND')
+      await expect(BlogPost({ params })).rejects.toThrow('NEXT_NOT_FOUND')
       expect(notFound).toHaveBeenCalled()
     })
   })
@@ -286,7 +286,7 @@ describe('DynamicRoute page', () => {
       const params = Promise.resolve({ slug: 'test-post' })
 
       // The .unwrap() call should throw, causing build to fail
-      await expect(DynamicRoute({ params })).rejects.toThrow('Failed to fetch post from Notion')
+      await expect(BlogPost({ params })).rejects.toThrow('Failed to fetch post from Notion')
     })
 
     it('throws when getPost rejects', async () => {
@@ -294,7 +294,7 @@ describe('DynamicRoute page', () => {
       vi.mocked(getPost).mockRejectedValue(error)
 
       const params = Promise.resolve({ slug: 'test-post' })
-      await expect(DynamicRoute({ params })).rejects.toThrow('Network error')
+      await expect(BlogPost({ params })).rejects.toThrow('Network error')
     })
   })
 })

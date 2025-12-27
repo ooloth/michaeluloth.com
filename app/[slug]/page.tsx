@@ -8,8 +8,12 @@ import { transformCloudinaryForOG } from '@/io/cloudinary/ogImageTransforms'
 import { getPostUrl } from '@/seo/json-ld/article'
 import JsonLdScript from '@/seo/json-ld/script'
 
+import NotionBlocks from '@/io/notion/ui/NotionBlocks'
+import PaginationLinks from '@/ui/sections/post-pagination'
+
 import PageLayout from '@/ui/layout/main'
-import Post from '@/ui/sections/post'
+import PostHeader from '@/ui/sections/post-header'
+import PostFooter from '@/ui/sections/post-footer'
 
 type Params = {
   slug: string
@@ -73,7 +77,7 @@ type Props = Readonly<{
   params: Promise<Params>
 }>
 
-export default async function DynamicRoute({ params }: Props) {
+export default async function BlogPost({ params }: Props) {
   const slug = (await params).slug
   const post = (await getPost({ slug, includeBlocks: true, includePrevAndNext: true })).unwrap()
 
@@ -83,7 +87,17 @@ export default async function DynamicRoute({ params }: Props) {
 
   return (
     <PageLayout>
-      <Post post={post} prevPost={post.prevPost} nextPost={post.nextPost} />
+      <div className="flex-auto flex flex-col">
+        <article>
+          <PostHeader title={post.title} datePublished={post.firstPublished} />
+          <NotionBlocks blocks={post.blocks} />
+          <PostFooter /> {/* needs to be a client component */}
+        </article>
+
+        {/* Pagination is site navigation, not post content, so it lives outside <article> */}
+        <PaginationLinks className="mt-auto" prevPost={post.prevPost} nextPost={post.nextPost} />
+      </div>
+
       <JsonLdScript type="article" post={post} />
     </PageLayout>
   )
