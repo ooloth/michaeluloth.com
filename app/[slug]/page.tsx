@@ -37,8 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = (await getPost({ slug })).unwrap()
 
   if (!post) {
-    // TODO: confirm if this is the right behaviour; what pages would this apply to?
-    return {}
+    notFound()
   }
 
   const url = getPostUrl(slug)
