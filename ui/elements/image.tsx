@@ -7,6 +7,8 @@ const imageStylesDefault = 'shadow-xl rounded bg-zinc-800'
 
 type Props = Readonly<{
   loading?: 'eager' | 'lazy'
+  /** @see https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/fetchpriority */
+  /** @see https://addyosmani.com/blog/fetch-priority/ */
   fetchPriority?: 'high' | 'low' | 'auto'
   url: string
   effect?: ImageEffect
@@ -22,7 +24,7 @@ type Props = Readonly<{
  */
 export default async function CloudinaryImage({
   loading = 'lazy',
-  fetchPriority,
+  fetchPriority = 'auto',
   url,
   effect,
   imageStyles,
