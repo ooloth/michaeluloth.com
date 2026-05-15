@@ -16,6 +16,8 @@ export default function transformCloudinaryImage(url: string, width: number): st
     if (url.includes('youtube/')) {
       return url.replace('youtube/', `youtube/w_${width},f_auto,q_auto/`)
     }
+
+    throw new Error(`transformCloudinaryImage: unrecognized Cloudinary URL variant: ${url}`)
   }
 
   return url

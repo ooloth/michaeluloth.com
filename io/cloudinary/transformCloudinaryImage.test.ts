@@ -25,9 +25,10 @@ describe('transformCloudinaryImage', () => {
     expect(result).toBe(input)
   })
 
-  it('returns URL unchanged if Cloudinary URL but no known transformation type', () => {
+  it('throws for a Cloudinary URL with no known transformation type', () => {
     const input = 'https://res.cloudinary.com/demo/image.jpg'
-    const result = transformCloudinaryImage(input, 400)
-    expect(result).toBe(input)
+    expect(() => transformCloudinaryImage(input, 400)).toThrow(
+      'transformCloudinaryImage: unrecognized Cloudinary URL variant: https://res.cloudinary.com/demo/image.jpg',
+    )
   })
 })
