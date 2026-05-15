@@ -4,6 +4,7 @@ import { getErrorDetails } from '@/utils/logging/logging'
 import { formatValidationError } from '@/utils/logging/zod'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
+import { invariant } from '@/utils/errors/invariant'
 import { z } from 'zod'
 import { ImageEffect } from 'cloudinary'
 import { withRetry } from '@/io/utils/retry'
@@ -84,6 +85,8 @@ export function generateResponsiveImageUrls(
   cloudinaryClient: CloudinaryClient,
   effect?: ImageEffect,
 ): { src: string; srcSet: string; sizes: string } {
+  invariant(publicId.trim().length > 0, 'generateResponsiveImageUrls: publicId must not be empty')
+
   const widths = [
     350, // image layout width on phone at 1x DPR
     700, // image layout width on phone at 2x DPR
