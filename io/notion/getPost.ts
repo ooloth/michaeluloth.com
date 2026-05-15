@@ -7,6 +7,7 @@ import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
 import { env } from '@/io/env/env'
 import { Ok, Err, toErr, type Result } from '@/utils/errors/result'
+import { invariant } from '@/utils/errors/invariant'
 import { withRetry } from '@/io/utils/retry'
 
 type Options = {
@@ -129,6 +130,11 @@ export default async function getPost({
     if (response.results.length > 1) {
       throw Error(`Multiple posts found for slug: ${slug}\n${JSON.stringify(response.results)}`)
     }
+
+    invariant(
+      response.results.length === 1,
+      `Expected exactly one result for slug "${slug}", got ${response.results.length}`,
+    )
 
     // Transform and validate external data at boundary
     let post = transformNotionPageToPost(response.results[0])
