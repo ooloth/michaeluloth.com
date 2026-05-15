@@ -133,7 +133,7 @@ export default async function getPost({
 
     invariant(
       response.results.length === 1,
-      `Expected exactly one result for slug "${slug}", got ${response.results.length}`,
+      `Post query for slug "${slug}" must return exactly one result, not ${response.results.length}`,
     )
 
     // Transform and validate external data at boundary
