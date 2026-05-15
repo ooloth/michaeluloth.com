@@ -85,7 +85,7 @@ export function generateResponsiveImageUrls(
   cloudinaryClient: CloudinaryClient,
   effect?: ImageEffect,
 ): { src: string; srcSet: string; sizes: string } {
-  invariant(publicId.length > 0, 'generateResponsiveImageUrls: publicId must not be empty')
+  invariant(publicId.trim().length > 0, 'generateResponsiveImageUrls: publicId must not be empty')
 
   const widths = [
     350, // image layout width on phone at 1x DPR

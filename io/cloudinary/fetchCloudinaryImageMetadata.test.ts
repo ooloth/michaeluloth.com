@@ -547,6 +547,13 @@ describe('generateResponsiveImageUrls', () => {
     )
   })
 
+  it('throws when publicId is whitespace only', () => {
+    const mockClient = createMockCloudinaryClient()
+    expect(() => generateResponsiveImageUrls('   ', mockClient)).toThrow(
+      'generateResponsiveImageUrls: publicId must not be empty',
+    )
+  })
+
   it('generates src URL with width 1440', () => {
     const mockClient = createMockCloudinaryClient()
     const result = generateResponsiveImageUrls('sample/image', mockClient)
