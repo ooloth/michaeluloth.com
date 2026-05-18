@@ -13,6 +13,6 @@ My personal site where I write about what I'm learning and building 📝. It's a
 - **💾 Development caching** - First fetch hits real APIs, then results are cached locally by namespace. Zero network calls on page refresh during development
 - **🖼️ Responsive images** - Cloudinary integration generates srcsets with 9 sizes, automatic format/quality optimization, and enforced alt text
 - **🔒 Environment validation** - Zod validates all env vars at startup with helpful error messages instead of runtime undefined errors
-- **🧪 Comprehensive tests** - 72k lines of tests covering data flow integration, component behavior via Testing Library, and reusable property factories for test data
+- **🧪 Comprehensive tests** - ~12k lines of tests covering data flow integration, component behavior via Testing Library, and reusable property factories for test data
 
 **Tech:** TypeScript + Zod, Tailwind CSS 4, Vitest + Testing Library, GitHub Actions, Cloudflare Pages
