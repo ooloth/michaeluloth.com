@@ -1,5 +1,58 @@
 # michaeluloth.com - Claude Code Rules
 
+## What this project is
+
+A personal blog and portfolio site built with Next.js, deployed to Cloudflare Pages (not Vercel). Content is authored in Notion and pulled at build time via the Notion API. The architecture treats the data pipeline like a production system: Zod validates every external API response at the boundary, errors are values (Rust-style `Result<T, E>`), and all external calls use exponential backoff retry.
+
+## External integrations
+
+| Integration | Role |
+|---|---|
+| Notion | CMS — posts, projects, albums, books, podcasts |
+| Cloudinary | Image CDN — responsive srcsets, format/quality optimization |
+| TMDB | Film metadata (movie and TV list data) |
+| iTunes | Podcast metadata |
+
+## Local development
+
+```bash
+npm run dev   # starts dev server at http://localhost:3000
+```
+
+On first run, each page fetch hits the real external APIs and caches the results under `.local-cache/` by namespace. Subsequent requests in the same dev session are served from that cache. The directory is created automatically on first write — no manual setup needed.
+
+Required env vars (copy `.env.example` to `.env.local` and fill in):
+
+- `NOTION_ACCESS_TOKEN`, `NOTION_DATA_SOURCE_ID_*` (albums, books, podcasts, writing)
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+- `TMDB_READ_ACCESS_TOKEN`, `TMDB_MOVIE_LIST_ID`, `TMDB_TV_LIST_ID`
+- `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` (CI/deployment only)
+- `PUSHOVER_API_TOKEN`, `PUSHOVER_USER_KEY` (CI notifications only)
+
+## Check commands
+
+```bash
+npm run lint        # ESLint
+npm run typecheck   # TypeScript
+npm run test:ci     # Vitest (all tests, no watch)
+```
+
+Run these before committing. To run a single test file: `npx vitest run path/to/file.test.ts`.
+
+## Post-build metadata validation
+
+```bash
+npm run build && npm run test:metadata
+```
+
+`test:metadata` reads the static HTML from the `out/` build directory and validates OpenGraph tags, image dimensions, alt text, and SEO fields. It must run **after** `npm run build` — running it against a stale or missing build will produce false results.
+
+## Deployment
+
+The site deploys to **Cloudflare Pages** via GitHub Actions. Do not add Vercel config or assume Vercel-specific behaviour (e.g. `vercel.json`, edge runtime defaults).
+
+---
+
 ## TypeScript Type Safety
 
 ### Never use `any`
