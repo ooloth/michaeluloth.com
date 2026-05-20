@@ -6,12 +6,12 @@ A personal blog and portfolio site built with Next.js, deployed to Cloudflare Pa
 
 ## External integrations
 
-| Integration | Role |
-|---|---|
-| Notion | CMS — posts, projects, albums, books, podcasts |
-| Cloudinary | Image CDN — responsive srcsets, format/quality optimization |
-| TMDB | Film metadata (movie and TV list data) |
-| iTunes | Podcast metadata |
+| Integration | Role                                                        |
+| ----------- | ----------------------------------------------------------- |
+| Notion      | CMS — posts, projects, albums, books, podcasts              |
+| Cloudinary  | Image CDN — responsive srcsets, format/quality optimization |
+| TMDB        | Film metadata (movie and TV list data)                      |
+| iTunes      | Podcast metadata                                            |
 
 ## Local development
 
