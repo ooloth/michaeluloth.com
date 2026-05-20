@@ -33,7 +33,7 @@ Use `invariant()` to document **impossible conditions** that should never occur 
 3. **Documenting impossible states**
 
    ```typescript
-   const ariaLabel = emojiMap.get(symbol)
+   const ariaLabel = emojiLabel[symbol]
    invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
    // Documents that our emoji map should be complete
    ```
