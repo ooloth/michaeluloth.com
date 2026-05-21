@@ -36,8 +36,13 @@ jobs:
       - name: Check formatting
         run: |
           if ! npm run format:check; then
+            FAILING=$(node_modules/.bin/prettier --list-different .)
             echo "=== Files needing formatting ==="
-            node_modules/.bin/prettier --list-different .
+            echo "$FAILING"
+            echo "## Prettier failures" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            echo "$FAILING" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
