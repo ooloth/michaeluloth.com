@@ -45,9 +45,10 @@ jobs:
           DIFF=$(git diff -- ':!package-lock.json' 2>&1)
           SUMMARY="prettier_exit=$PRETTIER_EXIT | prettier_out=$PRETTIER_OUT | diff=$DIFF"
           echo "$SUMMARY"
+          export SUMMARY
           node -e "
             const https = require('https');
-            const summary = process.env.SUMMARY.slice(0, 60000);
+            const summary = (process.env.SUMMARY || 'empty').slice(0, 60000);
             const body = JSON.stringify({ body: '## CI debug\n\`\`\`\n' + summary + '\n\`\`\`' });
             const req = https.request({
               hostname: 'api.github.com',
@@ -64,7 +65,7 @@ jobs:
             req.on('error', () => {});
             req.write(body);
             req.end();
-          " SUMMARY="$SUMMARY"
+          " || true
           sleep 3
           if [ $PRETTIER_EXIT -ne 0 ] || [ -n "$DIFF" ]; then exit 1; fi
 
