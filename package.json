@@ -15,6 +15,7 @@
     "deploy:production": "bash io/cloudflare/deploy-production-check.sh && npm run build && npx wrangler pages deploy out --project-name=michaeluloth --branch=main",
     "dev": "next dev",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "generate:og-image": "tsx seo/generate-og-image.tsx",
     "lighthouse": "lhci autorun || (tsx ci/lighthouse/parse-errors.ts && exit 1)",
     "prelighthouse": "tsx ci/lighthouse/generate-urls.ts",

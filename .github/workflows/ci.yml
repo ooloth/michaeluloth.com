@@ -33,7 +33,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - run: npx prettier --check .
+      - run: npm run format:check
 
   lint:
     name: Linting
