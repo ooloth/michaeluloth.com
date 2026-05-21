@@ -33,7 +33,13 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - run: npm run format:check
+      - name: Check formatting
+        run: |
+          if ! npm run format:check; then
+            echo "=== Files needing formatting ==="
+            node_modules/.bin/prettier --list-different .
+            exit 1
+          fi
 
   lint:
     name: Linting
