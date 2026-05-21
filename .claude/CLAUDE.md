@@ -8,7 +8,7 @@ A personal blog and portfolio site built with Next.js, deployed to Cloudflare Pa
 
 | Integration | Role                                                        |
 | ----------- | ----------------------------------------------------------- |
-| Notion      | CMS — posts, projects, albums, books, podcasts              |
+| Notion      | CMS — albums, books, podcasts, writing                      |
 | Cloudinary  | Image CDN — responsive srcsets, format/quality optimization |
 | TMDB        | Film metadata (movie and TV list data)                      |
 | iTunes      | Podcast metadata                                            |
@@ -19,15 +19,18 @@ A personal blog and portfolio site built with Next.js, deployed to Cloudflare Pa
 npm run dev   # starts dev server at http://localhost:3000
 ```
 
-On first run, each page fetch hits the real external APIs and caches the results under `.local-cache/` by namespace. Subsequent requests in the same dev session are served from that cache. The directory is created automatically on first write — no manual setup needed.
+On first run, each page fetch hits the real external APIs and caches the results under `.local-cache/` by namespace. Subsequent requests are served from that persistent on-disk cache until `.local-cache/` is manually cleared. The directory is created automatically on first write — no manual setup needed.
 
 Required env vars (copy `.env.example` to `.env.local` and fill in):
 
 - `NOTION_ACCESS_TOKEN`, `NOTION_DATA_SOURCE_ID_*` (albums, books, podcasts, writing)
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
 - `TMDB_READ_ACCESS_TOKEN`, `TMDB_MOVIE_LIST_ID`, `TMDB_TV_LIST_ID`
-- `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` (CI/deployment only)
-- `PUSHOVER_API_TOKEN`, `PUSHOVER_USER_KEY` (CI notifications only)
+- `PUSHOVER_API_TOKEN`, `PUSHOVER_USER_KEY`
+
+CI/deploy only (not needed for local dev):
+
+- `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`
 
 ## Check commands
 
