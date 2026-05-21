@@ -181,16 +181,12 @@ function getPost(slug: string) {
 
 ## Examples from Codebase
 
-### Good: Post-Validation Assertion
+### Good: Pre-Condition Guard
 
 ```typescript
-// lib/cloudinary/fetchCloudinaryImageMetadata.ts
-// Zod has already validated width/height are numbers
-invariant(metadata.width > 0 && metadata.height > 0, 'Image dimensions must be positive', {
-  width: metadata.width,
-  height: metadata.height,
-  publicId,
-})
+// io/cloudinary/fetchCloudinaryImageMetadata.ts
+// publicId has already been parsed from a validated Cloudinary URL
+invariant(publicId.trim().length > 0, 'generateResponsiveImageUrls: publicId must not be empty')
 ```
 
 ### Good: Documenting Complete Mapping
@@ -205,7 +201,7 @@ invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
 ### Bad: Checking Function That Throws
 
 ```typescript
-// lib/cloudinary/fetchCloudinaryImageMetadata.ts (old code)
+// io/cloudinary/fetchCloudinaryImageMetadata.ts (old code, before this pattern was removed)
 const publicId = parsePublicIdFromCloudinaryUrl(url)
 invariant(publicId, 'Parser must find publicId')
 // BAD: parsePublicIdFromCloudinaryUrl throws if it can't parse
