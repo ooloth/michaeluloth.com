@@ -37,39 +37,36 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          node_modules/.bin/prettier --write .
-          DIFF=$(git diff -- ':!package-lock.json')
-          if [ -n "$DIFF" ]; then
-            echo "=== Files needing formatting ==="
-            git diff --name-only -- ':!package-lock.json'
-            if [ -n "$PR_NUMBER" ]; then
-              export DIFF
-              node -e "
-                const https = require('https');
-                const diff = process.env.DIFF.slice(0, 60000);
-                const body = JSON.stringify({ body: '## Prettier format failures\n\`\`\`diff\n' + diff + '\n\`\`\`' });
-                const req = https.request({
-                  hostname: 'api.github.com',
-                  path: '/repos/' + process.env.GITHUB_REPOSITORY + '/issues/' + process.env.PR_NUMBER + '/comments',
-                  method: 'POST',
-                  headers: {
-                    'Authorization': 'Bearer ' + process.env.GH_TOKEN,
-                    'Content-Type': 'application/json',
-                    'User-Agent': 'prettier-ci',
-                    'Accept': 'application/vnd.github+json',
-                    'Content-Length': Buffer.byteLength(body)
-                  }
-                }, res => { console.log('API status:', res.statusCode); res.resume(); });
-                req.on('error', e => console.error('API error:', e.message));
-                req.write(body);
-                req.end();
-              "
-              sleep 3
-            fi
-            exit 1
-          fi
+          set +e
+          PRETTIER_OUT=$(node_modules/.bin/prettier --write . 2>&1)
+          PRETTIER_EXIT=$?
+          set -e
+          DIFF=$(git diff -- ':!package-lock.json' 2>&1)
+          SUMMARY="prettier_exit=$PRETTIER_EXIT | prettier_out=$PRETTIER_OUT | diff=$DIFF"
+          echo "$SUMMARY"
+          node -e "
+            const https = require('https');
+            const summary = process.env.SUMMARY.slice(0, 60000);
+            const body = JSON.stringify({ body: '## CI debug\n\`\`\`\n' + summary + '\n\`\`\`' });
+            const req = https.request({
+              hostname: 'api.github.com',
+              path: '/repos/ooloth/michaeluloth.com/issues/' + process.env.PR_NUMBER + '/comments',
+              method: 'POST',
+              headers: {
+                Authorization: 'Bearer ' + process.env.GH_TOKEN,
+                'Content-Type': 'application/json',
+                'User-Agent': 'prettier-ci',
+                Accept: 'application/vnd.github+json',
+                'Content-Length': Buffer.byteLength(body)
+              }
+            }, res => { res.resume(); });
+            req.on('error', () => {});
+            req.write(body);
+            req.end();
+          " SUMMARY="$SUMMARY"
+          sleep 3
+          if [ $PRETTIER_EXIT -ne 0 ] || [ -n "$DIFF" ]; then exit 1; fi
 
   lint:
     name: Linting
