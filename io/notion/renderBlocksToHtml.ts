@@ -54,8 +54,10 @@ function renderBlock(block: GroupedBlock): string {
       return `<img src="${block.url}" alt="" />`
     case 'video':
       return `<p><a href="${block.url}">[Video: ${block.caption || block.url}]</a></p>`
-    default:
-      return ''
+    default: {
+      const _exhaustive: never = block
+      return _exhaustive
+    }
   }
 }
 
