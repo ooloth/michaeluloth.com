@@ -36,19 +36,37 @@ jobs:
       - name: Check formatting
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          if ! npm run format:check; then
-            FAILING=$(node_modules/.bin/prettier --list-different .)
+          node_modules/.bin/prettier --write .
+          DIFF=$(git diff -- ':!package-lock.json')
+          if [ -n "$DIFF" ]; then
             echo "=== Files needing formatting ==="
-            echo "$FAILING"
-            echo "## Prettier failures" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            echo "$FAILING" >> "$GITHUB_STEP_SUMMARY"
-            echo '```' >> "$GITHUB_STEP_SUMMARY"
-            if [ -n "${{ github.event.pull_request.number }}" ]; then
-              gh pr comment ${{ github.event.pull_request.number }} \
-                --repo "${{ github.repository }}" \
-                --body "$(printf '## Prettier format failures\n```\n%s\n```' "$FAILING")"
+            git diff --name-only -- ':!package-lock.json'
+            if [ -n "$PR_NUMBER" ]; then
+              export DIFF
+              node -e "
+                const https = require('https');
+                const diff = process.env.DIFF.slice(0, 60000);
+                const body = JSON.stringify({ body: '## Prettier format failures\n\`\`\`diff\n' + diff + '\n\`\`\`' });
+                const req = https.request({
+                  hostname: 'api.github.com',
+                  path: '/repos/' + process.env.GITHUB_REPOSITORY + '/issues/' + process.env.PR_NUMBER + '/comments',
+                  method: 'POST',
+                  headers: {
+                    'Authorization': 'Bearer ' + process.env.GH_TOKEN,
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'prettier-ci',
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Length': Buffer.byteLength(body)
+                  }
+                }, res => { console.log('API status:', res.statusCode); res.resume(); });
+                req.on('error', e => console.error('API error:', e.message));
+                req.write(body);
+                req.end();
+              "
+              sleep 3
             fi
             exit 1
           fi
