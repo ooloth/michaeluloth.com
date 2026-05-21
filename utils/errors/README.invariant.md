@@ -196,8 +196,8 @@ invariant(metadata.width > 0 && metadata.height > 0, 'Image dimensions must be p
 ### Good: Documenting Complete Mapping
 
 ```typescript
-// ui/emoji.tsx
-const ariaLabel = emojiLabels[symbol]
+// ui/elements/emoji.tsx
+const ariaLabel = emojiLabel[symbol]
 invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
 // Documents that our emoji map should cover all symbols
 ```
