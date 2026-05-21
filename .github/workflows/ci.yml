@@ -26,6 +26,8 @@ jobs:
   format:
     name: Formatting
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,35 +40,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
+          git checkout -- package-lock.json
           set +e
           PRETTIER_OUT=$(node_modules/.bin/prettier --write . 2>&1)
           PRETTIER_EXIT=$?
           set -e
-          DIFF=$(git diff -- ':!package-lock.json' 2>&1)
-          SUMMARY="prettier_exit=$PRETTIER_EXIT | prettier_out=$PRETTIER_OUT | diff=$DIFF"
+          DIFF=$(git diff 2>&1)
+          SUMMARY="node=$(node --version) prettier=$(node_modules/.bin/prettier --version 2>&1) exit=$PRETTIER_EXIT out=$PRETTIER_OUT diff=$DIFF"
           echo "$SUMMARY"
-          export SUMMARY
-          node -e "
-            const https = require('https');
-            const summary = (process.env.SUMMARY || 'empty').slice(0, 60000);
-            const body = JSON.stringify({ body: '## CI debug\n\`\`\`\n' + summary + '\n\`\`\`' });
-            const req = https.request({
-              hostname: 'api.github.com',
-              path: '/repos/ooloth/michaeluloth.com/issues/' + process.env.PR_NUMBER + '/comments',
-              method: 'POST',
-              headers: {
-                Authorization: 'Bearer ' + process.env.GH_TOKEN,
-                'Content-Type': 'application/json',
-                'User-Agent': 'prettier-ci',
-                Accept: 'application/vnd.github+json',
-                'Content-Length': Buffer.byteLength(body)
-              }
-            }, res => { res.resume(); });
-            req.on('error', () => {});
-            req.write(body);
-            req.end();
-          " || true
-          sleep 3
+          BODY=$(jq -n --arg b "## CI debug$(printf '\n```\n')${SUMMARY}$(printf '\n```')" '{body: $b}')
+          curl -sf -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/ooloth/michaeluloth.com/issues/$PR_NUMBER/comments" \
+            -d "$BODY" || echo "comment post failed"
           if [ $PRETTIER_EXIT -ne 0 ] || [ -n "$DIFF" ]; then exit 1; fi
 
   lint:
