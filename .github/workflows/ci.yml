@@ -34,6 +34,8 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Check formatting
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if ! npm run format:check; then
             FAILING=$(node_modules/.bin/prettier --list-different .)
@@ -43,6 +45,11 @@ jobs:
             echo '```' >> "$GITHUB_STEP_SUMMARY"
             echo "$FAILING" >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
+            if [ -n "${{ github.event.pull_request.number }}" ]; then
+              gh pr comment ${{ github.event.pull_request.number }} \
+                --repo "${{ github.repository }}" \
+                --body "$(printf '## Prettier format failures\n```\n%s\n```' "$FAILING")"
+            fi
             exit 1
           fi
 
