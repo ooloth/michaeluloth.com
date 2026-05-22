@@ -26,8 +26,6 @@ jobs:
   format:
     name: Formatting
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,27 +33,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - name: Check formatting
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          git checkout -- package-lock.json
-          set +e
-          PRETTIER_OUT=$(node_modules/.bin/prettier --write . 2>&1)
-          PRETTIER_EXIT=$?
-          set -e
-          DIFF=$(git diff 2>&1)
-          SUMMARY="node=$(node --version) prettier=$(node_modules/.bin/prettier --version 2>&1) exit=$PRETTIER_EXIT out=$PRETTIER_OUT diff=$DIFF"
-          echo "$SUMMARY"
-          BODY=$(jq -n --arg b "## CI debug$(printf '\n```\n')${SUMMARY}$(printf '\n```')" '{body: $b}')
-          curl -sf -X POST \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -H "Content-Type: application/json" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/ooloth/michaeluloth.com/issues/$PR_NUMBER/comments" \
-            -d "$BODY" || echo "comment post failed"
-          if [ $PRETTIER_EXIT -ne 0 ] || [ -n "$DIFF" ]; then exit 1; fi
+      - run: npm run format:check
 
   lint:
     name: Linting
