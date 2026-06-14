@@ -12,8 +12,9 @@ on:
 
 jobs:
   claude-review:
-    # Only run on non-draft PRs (wait for draft PRs to be marked ready)
-    if: github.event.pull_request.draft == false
+    # Disabled: Claude Code pricing changed; re-enable by restoring the original condition below
+    # if: github.event.pull_request.draft == false
+    if: false
 
     runs-on: ubuntu-latest
     permissions:
