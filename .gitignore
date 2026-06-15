@@ -12,6 +12,7 @@ out/
 next-env.d.ts
 
 # Mine
+.beads/
 .env
 .env.local
 .lighthouseci/

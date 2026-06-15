@@ -33,7 +33,7 @@ Use `invariant()` to document **impossible conditions** that should never occur 
 3. **Documenting impossible states**
 
    ```typescript
-   const ariaLabel = emojiMap.get(symbol)
+   const ariaLabel = emojiLabel[symbol]
    invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
    // Documents that our emoji map should be complete
    ```
@@ -181,23 +181,19 @@ function getPost(slug: string) {
 
 ## Examples from Codebase
 
-### Good: Post-Validation Assertion
+### Good: Pre-Condition Guard
 
 ```typescript
-// lib/cloudinary/fetchCloudinaryImageMetadata.ts
-// Zod has already validated width/height are numbers
-invariant(metadata.width > 0 && metadata.height > 0, 'Image dimensions must be positive', {
-  width: metadata.width,
-  height: metadata.height,
-  publicId,
-})
+// io/cloudinary/fetchCloudinaryImageMetadata.ts
+// publicId is expected to be a non-empty Cloudinary public ID string
+invariant(publicId.trim().length > 0, 'generateResponsiveImageUrls: publicId must not be empty')
 ```
 
 ### Good: Documenting Complete Mapping
 
 ```typescript
-// ui/emoji.tsx
-const ariaLabel = emojiLabels[symbol]
+// ui/elements/emoji.tsx
+const ariaLabel = emojiLabel[symbol]
 invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
 // Documents that our emoji map should cover all symbols
 ```
@@ -205,7 +201,7 @@ invariant(ariaLabel, 'Emoji must have aria-label', { symbol })
 ### Bad: Checking Function That Throws
 
 ```typescript
-// lib/cloudinary/fetchCloudinaryImageMetadata.ts (old code)
+// io/cloudinary/fetchCloudinaryImageMetadata.ts (old code, before this pattern was removed)
 const publicId = parsePublicIdFromCloudinaryUrl(url)
 invariant(publicId, 'Parser must find publicId')
 // BAD: parsePublicIdFromCloudinaryUrl throws if it can't parse
