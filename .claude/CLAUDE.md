@@ -40,7 +40,7 @@ npm run typecheck   # TypeScript
 npm run test:ci     # Vitest (all tests, no watch)
 ```
 
-Run these before committing. To run a single test file: `npx vitest run path/to/file.test.ts`.
+Run these before committing. To run a single test file: `npm run test:ci -- path/to/file.test.ts`.
 
 ## Post-build metadata validation
 
