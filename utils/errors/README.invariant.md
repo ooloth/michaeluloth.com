@@ -185,7 +185,7 @@ function getPost(slug: string) {
 
 ```typescript
 // io/cloudinary/fetchCloudinaryImageMetadata.ts
-// publicId has already been parsed from a validated Cloudinary URL
+// publicId is expected to be a non-empty Cloudinary public ID string
 invariant(publicId.trim().length > 0, 'generateResponsiveImageUrls: publicId must not be empty')
 ```
 
