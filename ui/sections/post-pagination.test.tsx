@@ -36,6 +36,7 @@ describe('PaginationLinks', () => {
     title: 'Test Post',
     description: 'A test post',
     firstPublished: '2024-01-01',
+    featuredOrder: null,
   }
 
   describe('aria-label', () => {

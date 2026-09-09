@@ -6,6 +6,7 @@ import {
   TitlePropertySchema,
   DatePropertySchema,
   FeaturedImagePropertySchema,
+  NumberPropertySchema,
   UrlPropertySchema,
 } from './properties'
 
@@ -21,6 +22,7 @@ export const PostPropertiesSchema = createPropertiesSchema({
   'First published': DatePropertySchema,
   'Featured image': FeaturedImagePropertySchema,
   'Feed ID': UrlPropertySchema,
+  'Featured order': NumberPropertySchema,
 })
 
 // Post list item (used by getPosts and for prev/next navigation)
@@ -32,6 +34,9 @@ export const PostListItemSchema = z.object({
   featuredImage: z.url().nullish(),
   firstPublished: z.string().regex(/^\d{4}-\d{2}-\d{2}/), // ISO 8601 date or datetime
   feedId: z.string().nullish(),
+  // Sort key for the home page's Featured Writing section. Null means "not featured".
+  // Unrelated to `featuredImage`, which is the OG image.
+  featuredOrder: z.number().nullable(),
 })
 
 // Infer TypeScript type from Zod schema (single source of truth)

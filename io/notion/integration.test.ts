@@ -90,6 +90,7 @@ describe('Notion API Integration Tests', () => {
             'First published': { type: 'date', date: { start: '2024-01-01' } },
             'Featured image': { type: 'files', files: [] },
             'Feed ID': { type: 'url', url: null },
+            'Featured order': { type: 'number', number: null },
           },
         },
         {
@@ -102,6 +103,7 @@ describe('Notion API Integration Tests', () => {
             'First published': { type: 'date', date: { start: '2024-01-15' } },
             'Featured image': { type: 'files', files: [] },
             'Feed ID': { type: 'url', url: null },
+            'Featured order': { type: 'number', number: null },
           },
         },
         {
@@ -114,6 +116,7 @@ describe('Notion API Integration Tests', () => {
             'First published': { type: 'date', date: { start: '2024-02-01' } },
             'Featured image': { type: 'files', files: [] },
             'Feed ID': { type: 'url', url: null },
+            'Featured order': { type: 'number', number: null },
           },
         },
       ]
@@ -200,6 +203,7 @@ describe('Notion API Integration Tests', () => {
           'First published': { type: 'date', date: { start: '2024-01-15' } },
           'Featured image': { type: 'files', files: [] },
           'Feed ID': { type: 'url', url: null },
+          'Featured order': { type: 'number', number: null },
         },
       }
 
@@ -240,6 +244,7 @@ describe('Notion API Integration Tests', () => {
           'First published': { type: 'date', date: { start: '2024-01-15' } },
           'Featured image': { type: 'files', files: [] },
           'Feed ID': { type: 'url', url: null },
+          'Featured order': { type: 'number', number: null },
         },
       }
 
@@ -280,6 +285,7 @@ describe('Notion API Integration Tests', () => {
             'First published': { type: 'date', date: { start: '2024-01-15' } },
             'Featured image': { type: 'files', files: [] },
             'Feed ID': { type: 'url', url: null },
+            'Featured order': { type: 'number', number: null },
           },
         },
         {
@@ -292,6 +298,7 @@ describe('Notion API Integration Tests', () => {
             'First published': { type: 'date', date: { start: '2024-01-01' } },
             'Featured image': { type: 'files', files: [] },
             'Feed ID': { type: 'url', url: null },
+            'Featured order': { type: 'number', number: null },
           },
         },
       ]
@@ -369,6 +376,7 @@ describe('Notion API Integration Tests', () => {
           'First published': { type: 'date', date: { start: '2024-01-15' } },
           'Featured image': { type: 'files', files: [] },
           'Feed ID': { type: 'url', url: null },
+          'Featured order': { type: 'number', number: null },
         },
       }
 

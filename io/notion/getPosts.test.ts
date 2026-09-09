@@ -9,6 +9,7 @@ import {
   createTitleProperty,
   createDateProperty,
   createFilesProperty,
+  createNumberProperty,
   createUrlProperty,
 } from './testing/property-factories'
 import { isOk, isErr } from '@/utils/errors/result'
@@ -54,6 +55,7 @@ describe('transformNotionPagesToPostListItems', () => {
           'First published': createDateProperty('2024-01-15'),
           'Featured image': createFilesProperty(['https://res.cloudinary.com/ooloth/image/upload/mu/test-image.jpg']),
           'Feed ID': createUrlProperty(null),
+          'Featured order': createNumberProperty(null),
         },
       },
     ]
@@ -69,6 +71,7 @@ describe('transformNotionPagesToPostListItems', () => {
         firstPublished: '2024-01-15',
         featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test-image.jpg',
         feedId: null,
+        featuredOrder: null,
       },
     ])
   })
@@ -84,6 +87,7 @@ describe('transformNotionPagesToPostListItems', () => {
           'First published': createDateProperty('2024-02-20'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
+          'Featured order': createNumberProperty(null),
         },
       },
     ]
@@ -99,8 +103,69 @@ describe('transformNotionPagesToPostListItems', () => {
         firstPublished: '2024-02-20',
         featuredImage: null,
         feedId: null,
+        featuredOrder: null,
       },
     ])
+  })
+
+  it('maps a set Featured order to featuredOrder', () => {
+    const pages = [
+      {
+        id: '789',
+        properties: {
+          Slug: createRichTextProperty('featured-post'),
+          Title: createTitleProperty('Featured Post'),
+          Description: createRichTextProperty('A featured post'),
+          'First published': createDateProperty('2024-03-01'),
+          'Featured image': createFilesProperty([]),
+          'Feed ID': createUrlProperty(null),
+          'Featured order': createNumberProperty(2),
+        },
+      },
+    ]
+
+    const result = transformNotionPagesToPostListItems(pages)
+
+    expect(result[0].featuredOrder).toBe(2)
+  })
+
+  it('maps an unset Featured order to null', () => {
+    const pages = [
+      {
+        id: '790',
+        properties: {
+          Slug: createRichTextProperty('unfeatured-post'),
+          Title: createTitleProperty('Unfeatured Post'),
+          Description: createRichTextProperty('An unfeatured post'),
+          'First published': createDateProperty('2024-03-02'),
+          'Featured image': createFilesProperty([]),
+          'Feed ID': createUrlProperty(null),
+          'Featured order': createNumberProperty(null),
+        },
+      },
+    ]
+
+    const result = transformNotionPagesToPostListItems(pages)
+
+    expect(result[0].featuredOrder).toBeNull()
+  })
+
+  it('throws when the Featured order property is absent from Notion', () => {
+    const pages = [
+      {
+        id: '791',
+        properties: {
+          Slug: createRichTextProperty('renamed-property-post'),
+          Title: createTitleProperty('Renamed Property Post'),
+          Description: createRichTextProperty('A post missing the property'),
+          'First published': createDateProperty('2024-03-03'),
+          'Featured image': createFilesProperty([]),
+          'Feed ID': createUrlProperty(null),
+        },
+      },
+    ]
+
+    expect(() => transformNotionPagesToPostListItems(pages)).toThrow(INVALID_POST_PROPERTIES_ERROR)
   })
 
   it('throws on pages without properties', () => {
@@ -121,6 +186,7 @@ describe('transformNotionPagesToPostListItems', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -132,6 +198,7 @@ describe('transformNotionPagesToPostListItems', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -143,6 +210,7 @@ describe('transformNotionPagesToPostListItems', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -154,6 +222,7 @@ describe('transformNotionPagesToPostListItems', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -165,6 +234,7 @@ describe('transformNotionPagesToPostListItems', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -176,6 +246,7 @@ describe('transformNotionPagesToPostListItems', () => {
         'First published': createDateProperty(null),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -187,6 +258,7 @@ describe('transformNotionPagesToPostListItems', () => {
         'First published': createDateProperty('01/15/2024'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -199,6 +271,7 @@ describe('transformNotionPagesToPostListItems', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty(['not-a-url']),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
   ])('throws on posts with $case', ({ properties, expectedError }) => {
@@ -223,6 +296,7 @@ describe('transformNotionPagesToPostListItems', () => {
           'First published': createDateProperty('2024-01-01'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
+          'Featured order': createNumberProperty(null),
         },
       },
       {
@@ -234,6 +308,7 @@ describe('transformNotionPagesToPostListItems', () => {
           'First published': createDateProperty('2024-02-02'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
+          'Featured order': createNumberProperty(null),
         },
       },
     ]
@@ -256,6 +331,7 @@ describe('transformNotionPagesToPostListItems', () => {
           'First published': createDateProperty('2024-01-01'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
+          'Featured order': createNumberProperty(null),
         },
       },
       {
@@ -267,6 +343,7 @@ describe('transformNotionPagesToPostListItems', () => {
           'First published': createDateProperty('2024-02-02'),
           'Featured image': createFilesProperty([]),
           'Feed ID': createUrlProperty(null),
+          'Featured order': createNumberProperty(null),
         },
       },
     ]
@@ -295,6 +372,7 @@ describe('getPosts', () => {
             'First published': createDateProperty('2024-01-15'),
             'Featured image': createFilesProperty([]),
             'Feed ID': createUrlProperty(null),
+            'Featured order': createNumberProperty(null),
           },
         },
       ])
@@ -326,6 +404,7 @@ describe('getPosts', () => {
           firstPublished: '2024-01-01',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ]
 
@@ -355,6 +434,7 @@ describe('getPosts', () => {
           firstPublished: '2020-01-01',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ])
 
@@ -368,6 +448,7 @@ describe('getPosts', () => {
             'First published': createDateProperty('2024-03-15'),
             'Featured image': createFilesProperty([]),
             'Feed ID': createUrlProperty(null),
+            'Featured order': createNumberProperty(null),
           },
         },
       ])
@@ -470,6 +551,7 @@ describe('getPosts', () => {
             'First published': createDateProperty('2024-01-15'),
             'Featured image': createFilesProperty([]),
             'Feed ID': createUrlProperty(null),
+            'Featured order': createNumberProperty(null),
           },
         },
       ])
@@ -545,6 +627,7 @@ describe('getPosts', () => {
               'First published': createDateProperty('2024-01-15'),
               'Featured image': createFilesProperty([]),
               'Feed ID': createUrlProperty(null),
+              'Featured order': createNumberProperty(null),
             },
           },
         ])
@@ -574,6 +657,7 @@ describe('getPosts', () => {
             'First published': createDateProperty('2024-01-15'),
             'Featured image': createFilesProperty([]),
             'Feed ID': createUrlProperty(null),
+            'Featured order': createNumberProperty(null),
           },
         },
       ])

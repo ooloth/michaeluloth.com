@@ -8,6 +8,7 @@ import {
   createTitleProperty,
   createDateProperty,
   createFilesProperty,
+  createNumberProperty,
   createUrlProperty,
 } from './testing/property-factories'
 import { isOk, isErr, Err } from '@/utils/errors/result'
@@ -60,6 +61,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty(['https://res.cloudinary.com/ooloth/image/upload/mu/test-image.jpg']),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     }
 
@@ -73,11 +75,32 @@ describe('transformNotionPageToPost', () => {
       firstPublished: '2024-01-15',
       featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test-image.jpg',
       feedId: null,
+      featuredOrder: null,
       lastEditedTime: '2024-01-20T10:30:00.000Z',
       blocks: [],
       prevPost: null,
       nextPost: null,
     })
+  })
+
+  it('maps a set Featured order to featuredOrder', () => {
+    const page = {
+      id: '789',
+      last_edited_time: '2024-03-01T09:00:00.000Z',
+      properties: {
+        Slug: createRichTextProperty('featured-post'),
+        Title: createTitleProperty('Featured Post'),
+        Description: createRichTextProperty('A featured post'),
+        'First published': createDateProperty('2024-03-01'),
+        'Featured image': createFilesProperty([]),
+        'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(3),
+      },
+    }
+
+    const result = transformNotionPageToPost(page)
+
+    expect(result.featuredOrder).toBe(3)
   })
 
   it('transforms valid post with optional fields missing', () => {
@@ -91,6 +114,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty('2024-02-20'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     }
 
@@ -104,6 +128,7 @@ describe('transformNotionPageToPost', () => {
       firstPublished: '2024-02-20',
       featuredImage: null,
       feedId: null,
+      featuredOrder: null,
       lastEditedTime: '2024-02-25T15:45:30.000Z',
       blocks: [],
       prevPost: null,
@@ -145,6 +170,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -156,6 +182,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -167,6 +194,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -178,6 +206,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -189,6 +218,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty(null),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -200,6 +230,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty('01/15/2024'),
         'Featured image': createFilesProperty([]),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
     {
@@ -212,6 +243,7 @@ describe('transformNotionPageToPost', () => {
         'First published': createDateProperty('2024-01-15'),
         'Featured image': createFilesProperty(['not-a-url']),
         'Feed ID': createUrlProperty(null),
+        'Featured order': createNumberProperty(null),
       },
     },
   ])('throws on posts with $case', ({ properties, expectedError }) => {
@@ -264,6 +296,7 @@ describe('getPost', () => {
         firstPublished: '2024-01-01',
         featuredImage: null,
         feedId: null,
+        featuredOrder: null,
         lastEditedTime: '2024-01-01T00:00:00.000Z',
         blocks: [],
         prevPost: null,
@@ -297,6 +330,7 @@ describe('getPost', () => {
               'First published': createDateProperty('2024-01-15'),
               'Featured image': createFilesProperty([]),
               'Feed ID': createUrlProperty(null),
+              'Featured order': createNumberProperty(null),
             },
           },
         ],
@@ -350,6 +384,7 @@ describe('getPost', () => {
               'First published': createDateProperty('2024-03-15'),
               'Featured image': createFilesProperty([]),
               'Feed ID': createUrlProperty(null),
+              'Featured order': createNumberProperty(null),
             },
           },
         ],
@@ -385,6 +420,7 @@ describe('getPost', () => {
               'First published': createDateProperty('2024-01-15'),
               'Featured image': createFilesProperty([]),
               'Feed ID': createUrlProperty(null),
+              'Featured order': createNumberProperty(null),
             },
           },
         ],
@@ -427,6 +463,7 @@ describe('getPost', () => {
               'First published': createDateProperty('2024-02-15'),
               'Featured image': createFilesProperty([]),
               'Feed ID': createUrlProperty(null),
+              'Featured order': createNumberProperty(null),
             },
           },
         ],
@@ -441,6 +478,7 @@ describe('getPost', () => {
           firstPublished: '2024-01-01',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
         {
           id: '222',
@@ -450,6 +488,7 @@ describe('getPost', () => {
           firstPublished: '2024-02-15',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
         {
           id: '333',
@@ -459,6 +498,7 @@ describe('getPost', () => {
           firstPublished: '2024-03-01',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ]
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
@@ -487,6 +527,7 @@ describe('getPost', () => {
         firstPublished: '2024-01-01',
         featuredImage: null,
         feedId: null,
+        featuredOrder: null,
         lastEditedTime: '2024-01-01T00:00:00.000Z',
         blocks: [],
         prevPost: null,
@@ -551,6 +592,7 @@ describe('getPost', () => {
               'First published': createDateProperty('2024-01-15'),
               'Featured image': createFilesProperty([]),
               'Feed ID': createUrlProperty(null),
+              'Featured order': createNumberProperty(null),
             },
           },
           {
@@ -563,6 +605,7 @@ describe('getPost', () => {
               'First published': createDateProperty('2024-01-16'),
               'Featured image': createFilesProperty([]),
               'Feed ID': createUrlProperty(null),
+              'Featured order': createNumberProperty(null),
             },
           },
         ],
@@ -593,6 +636,7 @@ describe('getPost', () => {
               'First published': createDateProperty('2024-01-15'),
               'Featured image': createFilesProperty([]),
               'Feed ID': createUrlProperty(null),
+              'Featured order': createNumberProperty(null),
             },
           },
         ],
@@ -656,6 +700,7 @@ describe('getPost', () => {
           'First published': { type: 'date', date: { start: '2024-01-15' } },
           'Featured image': { type: 'files', files: [] },
           'Feed ID': { type: 'url', url: null },
+          'Featured order': { type: 'number', number: null },
         },
       }
 
@@ -695,6 +740,7 @@ describe('getPost', () => {
           'First published': { type: 'date', date: { start: '2024-01-15' } },
           'Featured image': { type: 'files', files: [] },
           'Feed ID': { type: 'url', url: null },
+          'Featured order': { type: 'number', number: null },
         },
       }
 

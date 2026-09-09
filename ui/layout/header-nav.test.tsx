@@ -27,6 +27,7 @@ const mockPosts: PostListItem[] = [
     firstPublished: '2024-01-01',
     featuredImage: null,
     feedId: null,
+    featuredOrder: null,
   },
   {
     id: '2',
@@ -36,6 +37,7 @@ const mockPosts: PostListItem[] = [
     firstPublished: '2024-01-02',
     featuredImage: null,
     feedId: null,
+    featuredOrder: null,
   },
 ]
 
@@ -207,6 +209,7 @@ describe('isCurrentPage', () => {
       description: 'Test description',
       firstPublished: '2024-01-15',
       featuredImage: null,
+      featuredOrder: null,
     },
     {
       id: '2',
@@ -215,6 +218,7 @@ describe('isCurrentPage', () => {
       description: 'Test description',
       firstPublished: '2024-01-14',
       featuredImage: null,
+      featuredOrder: null,
     },
   ]
 

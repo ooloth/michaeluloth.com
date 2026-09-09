@@ -49,6 +49,7 @@ export function transformNotionPagesToPostListItems(pages: unknown[]): PostListI
       firstPublished: properties['First published'],
       featuredImage: properties['Featured image'],
       feedId: properties['Feed ID'],
+      featuredOrder: properties['Featured order'],
     })
 
     if (!parsed.success) {

@@ -27,6 +27,7 @@ describe('PostList component', () => {
           description: 'Test description',
           firstPublished: '2024-03-15',
           featuredImage: null,
+          featuredOrder: null,
         },
         {
           id: '2',
@@ -35,6 +36,7 @@ describe('PostList component', () => {
           description: 'Another description',
           firstPublished: '2024-01-15',
           featuredImage: null,
+          featuredOrder: null,
         },
       ]
 
@@ -94,6 +96,7 @@ describe('PostList component', () => {
           description: 'Test description',
           firstPublished: '2024-03-15',
           featuredImage: null,
+          featuredOrder: null,
         },
         {
           id: '2',
@@ -102,6 +105,7 @@ describe('PostList component', () => {
           description: 'Test description',
           firstPublished: '2024-03-14',
           featuredImage: null,
+          featuredOrder: null,
         },
         {
           id: '3',
@@ -110,6 +114,7 @@ describe('PostList component', () => {
           description: 'Test description',
           firstPublished: '2024-03-13',
           featuredImage: null,
+          featuredOrder: null,
         },
       ]
 
@@ -135,6 +140,7 @@ describe('PostList component', () => {
         description: 'Test description',
         firstPublished: '2024-01-15',
         featuredImage: null,
+        featuredOrder: null,
       }))
 
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
@@ -166,6 +172,7 @@ describe('PostList component', () => {
           description: 'Test description',
           firstPublished: '2024-01-15',
           featuredImage: null,
+          featuredOrder: null,
         },
       ]
 
@@ -189,6 +196,7 @@ describe('PostList component', () => {
           description: 'Test description',
           firstPublished: '2024-03-15',
           featuredImage: null,
+          featuredOrder: null,
         },
       ]
 

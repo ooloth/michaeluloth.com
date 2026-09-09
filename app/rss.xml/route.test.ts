@@ -30,6 +30,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ]
 
@@ -87,6 +88,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ]
 
@@ -151,6 +153,7 @@ describe('RSS feed route', () => {
           description: 'Test post description',
           firstPublished: '2024-01-15',
           featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test.jpg',
+          featuredOrder: null,
         },
       ]
 
@@ -192,6 +195,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-20',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
         {
           id: 'post-1',
@@ -201,6 +205,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ]
 
@@ -256,6 +261,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ]
 
@@ -279,6 +285,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
         {
           id: 'post-2',
@@ -288,6 +295,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-14',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ]
 
@@ -327,6 +335,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: 'https://old-site.com/original-url/',
+          featuredOrder: null,
         },
       ]
 
@@ -356,6 +365,7 @@ describe('RSS feed route', () => {
           firstPublished: '2024-01-15',
           featuredImage: null,
           feedId: null,
+          featuredOrder: null,
         },
       ]
 
@@ -382,6 +392,7 @@ describe('RSS feed route', () => {
           description: 'Test description',
           firstPublished: '2024-01-15',
           featuredImage: 'https://res.cloudinary.com/ooloth/image/upload/mu/test.jpg',
+          featuredOrder: null,
         },
       ]
 

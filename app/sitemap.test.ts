@@ -45,6 +45,7 @@ describe('sitemap', () => {
         firstPublished: '2024-01-15',
         featuredImage: null,
         feedId: null,
+        featuredOrder: null,
       },
       {
         id: 'post-2',
@@ -54,6 +55,7 @@ describe('sitemap', () => {
         firstPublished: '2024-02-20',
         featuredImage: null,
         feedId: null,
+        featuredOrder: null,
       },
     ]
 
@@ -90,6 +92,7 @@ describe('sitemap', () => {
         firstPublished: '2024-01-15',
         featuredImage: null,
         feedId: null,
+        featuredOrder: null,
       },
       {
         id: 'post-2',
@@ -99,6 +102,7 @@ describe('sitemap', () => {
         firstPublished: '2024-02-20',
         featuredImage: null,
         feedId: null,
+        featuredOrder: null,
       },
     ]
 

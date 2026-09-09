@@ -52,6 +52,7 @@ export function transformNotionPageToPost(page: unknown): Post {
     firstPublished: properties['First published'],
     featuredImage: properties['Featured image'],
     feedId: properties['Feed ID'],
+    featuredOrder: properties['Featured order'],
   })
 
   if (!parsed.success) {
