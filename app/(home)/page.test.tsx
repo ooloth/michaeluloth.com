@@ -20,7 +20,9 @@ vi.mock('@/ui/elements/image', () => ({
 // Mock PostList so these tests cover what the page composes, not how the list renders.
 // The list's own rendering is tested in ui/sections/blog-post-list.test.tsx.
 vi.mock('@/ui/sections/blog-post-list', () => ({
-  default: ({ posts }: { posts: PostListItem[] }) => <div data-testid="post-list" data-count={posts.length} />,
+  default: ({ posts }: { posts: PostListItem[] }) => (
+    <div data-testid="post-list" data-count={posts.length} data-slugs={posts.map(post => post.slug).join(',')} />
+  ),
 }))
 
 // Mock PageLayout to avoid Next.js usePathname() in Header component
@@ -79,6 +81,48 @@ describe('Home page', () => {
       render(jsx)
 
       expect(screen.getByTestId('post-list')).toHaveAttribute('data-count', '5')
+    })
+
+    it('renders Featured Writing above Recent Writing', async () => {
+      vi.mocked(getPosts).mockResolvedValue(
+        Ok([
+          createPostListItem({ id: '1', slug: 'featured-one', featuredOrder: 1 }),
+          createPostListItem({ id: '2', slug: 'recent-one' }),
+        ]),
+      )
+
+      const jsx = await Home()
+      render(jsx)
+
+      const headings = screen.getAllByRole('heading', { level: 2 }).map(heading => heading.textContent)
+      expect(headings).toEqual(['Featured Writing', 'Recent Writing'])
+    })
+
+    it('excludes featured posts from Recent Writing', async () => {
+      vi.mocked(getPosts).mockResolvedValue(
+        Ok([
+          createPostListItem({ id: '1', slug: 'featured-one', featuredOrder: 1 }),
+          createPostListItem({ id: '2', slug: 'recent-one' }),
+          createPostListItem({ id: '3', slug: 'recent-two' }),
+        ]),
+      )
+
+      const jsx = await Home()
+      render(jsx)
+
+      const [featuredList, recentList] = screen.getAllByTestId('post-list')
+      expect(featuredList).toHaveAttribute('data-slugs', 'featured-one')
+      expect(recentList).toHaveAttribute('data-slugs', 'recent-one,recent-two')
+    })
+
+    it('omits the Featured Writing section entirely when no post is featured', async () => {
+      vi.mocked(getPosts).mockResolvedValue(Ok([createPostListItem({ id: '1', slug: 'only-post' })]))
+
+      const jsx = await Home()
+      render(jsx)
+
+      expect(screen.queryByRole('heading', { name: /featured writing/i })).not.toBeInTheDocument()
+      expect(screen.getAllByTestId('post-list')).toHaveLength(1)
     })
 
     it('requests posts in descending order so the newest appear first', async () => {
