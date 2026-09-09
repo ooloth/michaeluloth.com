@@ -7,23 +7,17 @@ import { render, screen } from '@testing-library/react'
 import Blog, { metadata } from './page'
 import getPosts from '@/io/notion/getPosts'
 import type { PostListItem } from '@/io/notion/schemas/post'
-import { Ok } from '@/utils/errors/result'
+import { Ok, Err } from '@/utils/errors/result'
 import { SITE_LOCALE, TWITTER_CARD } from '@/seo/constants'
+import { createPostListItem } from '@/io/notion/testing/post-factories'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
 
-// Mock PostList to avoid async server component complexity in tests
-// The actual PostList behavior is tested in ui/sections/blog-post-list.test.tsx
+// Mock PostList so these tests cover what the page composes, not how the list renders.
+// The list's own rendering is tested in ui/sections/blog-post-list.test.tsx.
 vi.mock('@/ui/sections/blog-post-list', () => ({
-  default: ({ limit }: { limit?: number }) => {
-    // Call getPosts to verify it's called with correct params
-    // This ensures the mock is called during render which we verify in tests
-    void getPosts({ sortDirection: 'descending' })
-
-    // Return a simple placeholder
-    return <div data-testid="post-list" data-limit={limit} />
-  },
+  default: ({ posts }: { posts: PostListItem[] }) => <div data-testid="post-list" data-count={posts.length} />,
 }))
 
 // Mock PageLayout to avoid Next.js usePathname() in Header component
@@ -64,21 +58,19 @@ describe('Blog page', () => {
   })
 
   describe('success cases', () => {
-    it('renders page structure and PostList component', async () => {
-      const mockPosts: PostListItem[] = []
+    it('passes every fetched post to the post list', async () => {
+      const mockPosts: PostListItem[] = [
+        createPostListItem({ id: '1', slug: 'a' }),
+        createPostListItem({ id: '2', slug: 'b' }),
+        createPostListItem({ id: '3', slug: 'c' }),
+      ]
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const jsx = await Blog()
       render(jsx)
 
-      expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending' })
-
-      // Verify page structure
-      expect(screen.getByRole('main')).toBeInTheDocument()
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Blog')
-
-      // Verify PostList is rendered
-      expect(screen.getByTestId('post-list')).toBeInTheDocument()
+      // The blog archive is unlimited: every post fetched reaches the list
+      expect(screen.getByTestId('post-list')).toHaveAttribute('data-count', '3')
     })
 
     it('renders correct page structure', async () => {
@@ -100,6 +92,17 @@ describe('Blog page', () => {
     })
   })
 
-  // Note: Error handling for getPosts is tested in ui/post-list.test.tsx
-  // since PostList is responsible for calling getPosts and handling errors
+  describe('error cases', () => {
+    it('throws when getPosts returns Err so the build fails', async () => {
+      vi.mocked(getPosts).mockResolvedValue(Err(new Error('Failed to fetch posts from Notion')))
+
+      await expect(Blog()).rejects.toThrow('Failed to fetch posts from Notion')
+    })
+
+    it('throws when getPosts rejects', async () => {
+      vi.mocked(getPosts).mockRejectedValue(new Error('Network error'))
+
+      await expect(Blog()).rejects.toThrow('Network error')
+    })
+  })
 })

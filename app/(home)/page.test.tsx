@@ -7,7 +7,8 @@ import { render, screen } from '@testing-library/react'
 import Home from './page'
 import getPosts from '@/io/notion/getPosts'
 import type { PostListItem } from '@/io/notion/schemas/post'
-import { Ok } from '@/utils/errors/result'
+import { Ok, Err } from '@/utils/errors/result'
+import { createPostListItem } from '@/io/notion/testing/post-factories'
 
 // Mock dependencies
 vi.mock('@/io/notion/getPosts')
@@ -16,17 +17,10 @@ vi.mock('@/ui/elements/image', () => ({
   default: ({ url }: { url: string }) => <img src={url} alt="Michael Uloth" />,
 }))
 
-// Mock PostList to avoid async server component complexity in tests
-// The actual PostList behavior is tested in ui/sections/blog-post-list.test.tsx
+// Mock PostList so these tests cover what the page composes, not how the list renders.
+// The list's own rendering is tested in ui/sections/blog-post-list.test.tsx.
 vi.mock('@/ui/sections/blog-post-list', () => ({
-  default: ({ limit }: { limit?: number }) => {
-    // Call getPosts to verify it's called with correct params
-    // This ensures the mock is called during render which we verify in tests
-    void getPosts({ sortDirection: 'descending' })
-
-    // Return a simple placeholder that indicates PostList was rendered
-    return <div data-testid="post-list" data-limit={limit} />
-  },
+  default: ({ posts }: { posts: PostListItem[] }) => <div data-testid="post-list" data-count={posts.length} />,
 }))
 
 // Mock PageLayout to avoid Next.js usePathname() in Header component
@@ -75,17 +69,16 @@ describe('Home page', () => {
       expect(screen.getByRole('heading', { level: 2, name: /recent writing/i })).toBeInTheDocument()
     })
 
-    it('renders PostList with limit of 5 posts', async () => {
-      const mockPosts: PostListItem[] = []
+    it('passes only the 5 most recent posts to Recent Writing', async () => {
+      const mockPosts: PostListItem[] = Array.from({ length: 8 }, (_, i) =>
+        createPostListItem({ id: `${i + 1}`, slug: `post-${i + 1}` }),
+      )
       vi.mocked(getPosts).mockResolvedValue(Ok(mockPosts))
 
       const jsx = await Home()
       render(jsx)
 
-      // Verify PostList is rendered with correct props
-      const postList = screen.getByTestId('post-list')
-      expect(postList).toBeInTheDocument()
-      expect(postList).toHaveAttribute('data-limit', '5')
+      expect(screen.getByTestId('post-list')).toHaveAttribute('data-count', '5')
     })
 
     it('handles empty posts array gracefully', async () => {
@@ -117,6 +110,17 @@ describe('Home page', () => {
     })
   })
 
-  // Note: Error handling for getPosts is tested in ui/post-list.test.tsx
-  // since PostList is responsible for calling getPosts and handling errors
+  describe('error cases', () => {
+    it('throws when getPosts returns Err so the build fails', async () => {
+      vi.mocked(getPosts).mockResolvedValue(Err(new Error('Failed to fetch posts from Notion')))
+
+      await expect(Home()).rejects.toThrow('Failed to fetch posts from Notion')
+    })
+
+    it('throws when getPosts rejects', async () => {
+      vi.mocked(getPosts).mockRejectedValue(new Error('Network error'))
+
+      await expect(Home()).rejects.toThrow('Network error')
+    })
+  })
 })

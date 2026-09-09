@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 
-import getPosts from '@/io/notion/getPosts'
+import { type PostListItem } from '@/io/notion/schemas/post'
 import Link from '@/ui/elements/link'
 
 /**
@@ -22,17 +22,13 @@ const getHumanReadableDate = (date: string | number | Date): string =>
 const getMachineReadableDate = (date: string | number | Date): string => new Date(date).toISOString()
 
 type PostListProps = Readonly<{
-  limit?: number
-  skipCache?: boolean
+  posts: readonly PostListItem[]
 }>
 
-export default async function PostList({ limit = Infinity, skipCache = false }: PostListProps): Promise<ReactElement> {
-  const posts = (await getPosts({ sortDirection: 'descending', skipCache })).unwrap()
-  const postsToShow = posts.slice(0, limit) // we avoid limiting at the query level to keep local caching simple
-
+export default function PostList({ posts }: PostListProps): ReactElement {
   return (
     <ul className="ps-0!">
-      {postsToShow.map(post => {
+      {posts.map(post => {
         return (
           <li key={post.id} className="list-none mb-7 last:mb-0">
             <article>
