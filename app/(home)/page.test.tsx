@@ -81,6 +81,14 @@ describe('Home page', () => {
       expect(screen.getByTestId('post-list')).toHaveAttribute('data-count', '5')
     })
 
+    it('requests posts in descending order so the newest appear first', async () => {
+      vi.mocked(getPosts).mockResolvedValue(Ok([]))
+
+      await Home()
+
+      expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending' })
+    })
+
     it('handles empty posts array gracefully', async () => {
       vi.mocked(getPosts).mockResolvedValue(Ok([]))
 

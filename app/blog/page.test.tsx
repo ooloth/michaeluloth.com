@@ -73,6 +73,14 @@ describe('Blog page', () => {
       expect(screen.getByTestId('post-list')).toHaveAttribute('data-count', '3')
     })
 
+    it('requests posts in descending order so the newest appear first', async () => {
+      vi.mocked(getPosts).mockResolvedValue(Ok([]))
+
+      await Blog()
+
+      expect(getPosts).toHaveBeenCalledWith({ sortDirection: 'descending' })
+    })
+
     it('renders correct page structure', async () => {
       vi.mocked(getPosts).mockResolvedValue(Ok([]))
 
