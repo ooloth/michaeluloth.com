@@ -1,6 +1,9 @@
 name: Check
 
 on:
+  # Rebuilds and deploys origin/main on demand, for publishing Notion content
+  # that has no corresponding commit here. See `npm run deploy:ci`.
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:

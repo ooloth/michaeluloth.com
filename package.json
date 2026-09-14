@@ -11,6 +11,7 @@
     "cache:clear:next": "trash .next",
     "cache:clear:notion": "trash .local-cache/notion",
     "cache:clear:tmdb": "trash .local-cache/tmdb",
+    "deploy:ci": "bash io/cloudflare/deploy-via-ci.sh",
     "deploy:preview": "npm run build && npx wrangler pages deploy out --project-name=michaeluloth --commit-dirty=true",
     "deploy:production": "bash io/cloudflare/deploy-production-check.sh && npm run build && npx wrangler pages deploy out --project-name=michaeluloth --branch=main",
     "dev": "next dev",
