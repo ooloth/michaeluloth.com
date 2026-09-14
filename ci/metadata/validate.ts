@@ -114,7 +114,7 @@ export function isValidISODate(dateString: string): boolean {
  * @example
  * getExpectedCanonicalUrl('index.html') // 'https://michaeluloth.com/'
  * getExpectedCanonicalUrl('blog/index.html') // 'https://michaeluloth.com/blog/'
- * getExpectedCanonicalUrl('blog/my-post/index.html') // 'https://michaeluloth.com/blog/my-post/'
+ * getExpectedCanonicalUrl('my-post/index.html') // 'https://michaeluloth.com/my-post/'
  */
 export function getExpectedCanonicalUrl(file: string): string {
   if (file === 'index.html') return SITE_URL
