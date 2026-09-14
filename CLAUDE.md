@@ -81,6 +81,19 @@ working tree is clean and the current branch is `main`.
 files the deployment under the current git branch. On any branch other than `main` that is a
 preview deployment.
 
+### Confirming a post is live
+
+The deploy is finished when the Check run's Deploy job succeeds, which Pushover reports. Then
+confirm the post itself:
+
+- `https://michaeluloth.com/<slug>/` renders it. Posts sit at the top level rather than under
+  `/blog/`, and `trailingSlash: true` makes the trailing slash part of the URL.
+- `https://michaeluloth.com/blog/` and `https://michaeluloth.com/rss.xml` both list it.
+
+`app/rss.xml/route.ts` links each feed entry to the post's `Feed ID` when that property is set and
+to `<site>/<slug>/` otherwise, so a post carrying a stale `Feed ID` renders correctly on the site
+while sending subscribers somewhere else.
+
 ### Notion caching
 
 `io/cache/filesystem.ts` reads and writes only when `NODE_ENV === 'development'`. Production
