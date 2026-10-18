@@ -1,6 +1,5 @@
 import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
 import cloudinary, { type CloudinaryClient } from '@/io/cloudinary/client'
-import { getErrorDetails } from '@/utils/logging/logging'
 import { formatValidationError } from '@/utils/logging/zod'
 import parsePublicIdFromCloudinaryUrl from './parsePublicIdFromCloudinaryUrl'
 import { Ok, toErr, type Result } from '@/utils/errors/result'
@@ -117,6 +116,32 @@ export function generateResponsiveImageUrls(
 }
 
 /**
+ * The only fields read from a Cloudinary SDK rejection. The SDK rejects with a plain object whose
+ * `request_options.auth` holds "api_key:api_secret", so the rest of it never reaches a message.
+ */
+const CloudinaryApiFailureSchema = z.object({
+  error: z.object({
+    message: z.string(),
+    http_code: z.number().optional(),
+  }),
+})
+
+/**
+ * Describes a failed Cloudinary API call using only Cloudinary's message and HTTP status, so no
+ * credential or other field of the SDK's rejection reaches a thrown message or a log line.
+ */
+export function describeCloudinaryFailure(error: unknown): string {
+  const parsed = CloudinaryApiFailureSchema.safeParse(error)
+  if (parsed.success) {
+    const { message, http_code } = parsed.data.error
+    return http_code === undefined ? message : `HTTP ${http_code}: ${message}`
+  }
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
+  return 'unknown Cloudinary error'
+}
+
+/**
  * Fetches Cloudinary image metadata including alt text, caption, dimensions, and responsive image attributes.
  *
  * @see https://cloudinary.com/documentation/admin_api#get_details_of_a_single_resource_by_public_id
@@ -145,7 +170,7 @@ export default async function fetchCloudinaryImageMetadata({
             type: publicId.startsWith('http') ? 'fetch' : 'upload',
           })
           .catch(error => {
-            throw Error(`${ERRORS.FETCH_FAILED}: "${publicId}":\n\n${getErrorDetails(error)}\n`)
+            throw Error(`${ERRORS.FETCH_FAILED}: "${publicId}": ${describeCloudinaryFailure(error)}`)
           }),
       {
         onRetry: (error, attempt, delay) => {

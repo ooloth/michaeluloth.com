@@ -1,4 +1,6 @@
+import fc from 'fast-check'
 import fetchCloudinaryImageMetadata, {
+  describeCloudinaryFailure,
   generateResponsiveImageUrls,
   ERRORS,
   type CloudinaryResource,
@@ -627,5 +629,95 @@ describe('generateResponsiveImageUrls', () => {
         expect(part).not.toContain('e_')
       })
     })
+  })
+})
+
+describe('Cloudinary API failures', () => {
+  const API_KEY = 'leak-check-key'
+  const API_SECRET = 'leak-check-secret'
+
+  // The shape the real SDK (2.8.0) rejects with when hide_sensitive is off.
+  function sdkRejection(extra: Record<string, unknown> = {}) {
+    return {
+      request_options: { method: 'GET', auth: `${API_KEY}:${API_SECRET}` },
+      query_params: 'context=true&type=upload',
+      error: { message: 'Invalid API key', http_code: 401 },
+      ...extra,
+    }
+  }
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  async function fetchWhileRejecting(rejection: unknown) {
+    const parsePublicIdFromCloudinaryUrl = (await import('./parsePublicIdFromCloudinaryUrl')).default
+    vi.mocked(parsePublicIdFromCloudinaryUrl).mockReturnValue('sample/image')
+    const mockClient = createMockCloudinaryClient()
+    vi.mocked(mockClient.api.resource).mockRejectedValue(rejection)
+
+    vi.useFakeTimers()
+    const pending = fetchCloudinaryImageMetadata({
+      url: 'https://res.cloudinary.com/test/image/upload/sample/image.jpg',
+      cache: createMockCache(),
+      cloudinaryClient: mockClient,
+    })
+    await vi.runAllTimersAsync()
+    return pending
+  }
+
+  it('returns an Err whose message holds no part of the API credentials', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    const result = await fetchWhileRejecting(sdkRejection())
+
+    expect(isErr(result)).toBe(true)
+    if (!isErr(result)) return
+    expect(result.error.message).not.toContain(API_SECRET)
+    expect(result.error.message).not.toContain(API_KEY)
+  })
+
+  it('logs no part of the API credentials while retrying', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    await fetchWhileRejecting(sdkRejection())
+
+    const logged = log.mock.calls.flat().map(String).join('\n')
+    expect(logged).toContain('retrying')
+    expect(logged).not.toContain(API_SECRET)
+    expect(logged).not.toContain(API_KEY)
+  })
+
+  it("keeps Cloudinary's error message and HTTP status", async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+
+    const result = await fetchWhileRejecting(sdkRejection())
+
+    expect(isErr(result)).toBe(true)
+    if (!isErr(result)) return
+    expect(result.error.message).toContain(ERRORS.FETCH_FAILED)
+    expect(result.error.message).toContain('Invalid API key')
+    expect(result.error.message).toContain('401')
+  })
+
+  it('includes no value from any field other than the error message and status', () => {
+    fc.assert(
+      fc.property(
+        fc.dictionary(
+          fc.string({ minLength: 1 }).filter(key => key !== 'error'),
+          fc.string({ minLength: 12 }).map(value => `sensitive-${value}`),
+        ),
+        extra => {
+          const described = describeCloudinaryFailure(sdkRejection(extra))
+          for (const value of Object.values(extra)) {
+            expect(described).not.toContain(value)
+          }
+        },
+      ),
+    )
   })
 })
