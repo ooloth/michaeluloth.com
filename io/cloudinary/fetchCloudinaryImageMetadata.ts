@@ -116,8 +116,9 @@ export function generateResponsiveImageUrls(
 }
 
 /**
- * The only fields read from a Cloudinary SDK rejection. The SDK rejects with a plain object whose
- * `request_options.auth` holds "api_key:api_secret", so the rest of it never reaches a message.
+ * The only fields read from a Cloudinary SDK rejection. By default (with `hide_sensitive` off), the
+ * SDK rejects with a plain object whose `request_options.auth` holds "api_key:api_secret", so the
+ * rest of it never reaches a message.
  */
 const CloudinaryApiFailureSchema = z.object({
   error: z.object({
@@ -175,7 +176,7 @@ export default async function fetchCloudinaryImageMetadata({
       {
         onRetry: (error, attempt, delay) => {
           console.log(
-            `⚠️  Cloudinary API timeout for "${publicId}" - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
+            `⚠️  Cloudinary API call failed for "${publicId}" - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
           )
         },
       },
