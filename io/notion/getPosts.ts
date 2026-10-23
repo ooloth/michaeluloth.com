@@ -6,6 +6,7 @@ import { logValidationError } from '@/utils/logging/zod'
 import { notionEnv } from '@/io/env/notion'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { withRetry } from '@/io/utils/retry'
+import { notionRetryOptions } from '@/io/notion/rateLimit'
 
 type Options = {
   cache?: CacheAdapter
@@ -98,11 +99,7 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
           },
           sorts: [{ property: 'First published', direction: sortDirection }],
         }),
-      {
-        onRetry: (error, attempt, delay) => {
-          console.log(`⚠️  Notion API timeout - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`)
-        },
-      },
+      notionRetryOptions('posts'),
     )
 
     // Transform and validate external data at boundary

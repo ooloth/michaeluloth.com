@@ -152,6 +152,22 @@ describe('withRetry', () => {
     })
   })
 
+  describe('without a retry policy', () => {
+    it('ignores a Retry-After header and uses the exponential backoff', async () => {
+      const error = Object.assign(new Error('rate limited'), {
+        status: 429,
+        headers: new Headers({ 'retry-after': '30' }),
+      })
+      const fn = vi.fn().mockRejectedValueOnce(error).mockResolvedValue('success')
+
+      const promise = withRetry(fn, { initialDelayMs: 100 })
+      await vi.advanceTimersByTimeAsync(100)
+
+      await expect(promise).resolves.toBe('success')
+      expect(fn).toHaveBeenCalledTimes(2)
+    })
+  })
+
   describe('onRetry callback', () => {
     it('calls onRetry with error, attempt, and delay', async () => {
       const error = new Error('fetch failed')

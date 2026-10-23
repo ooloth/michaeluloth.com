@@ -12,6 +12,7 @@ import { logValidationError } from '@/utils/logging/zod'
 import { notionEnv } from '@/io/env/notion'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { withRetry } from '@/io/utils/retry'
+import { notionRetryOptions } from '@/io/notion/rateLimit'
 
 type MediaCategory = 'books' | 'albums' | 'podcasts'
 
@@ -139,13 +140,7 @@ export default async function getMediaItems(options: Options): Promise<Result<No
           },
           sorts: [{ property: 'Date', direction: 'descending' }],
         }),
-      {
-        onRetry: (error, attempt, delay) => {
-          console.log(
-            `⚠️  Notion API timeout fetching ${category} - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
-          )
-        },
-      },
+      notionRetryOptions(category),
     )
 
     // Transform and validate external data at boundary

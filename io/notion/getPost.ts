@@ -8,6 +8,7 @@ import { logValidationError } from '@/utils/logging/zod'
 import { notionEnv } from '@/io/env/notion'
 import { Ok, Err, toErr, type Result } from '@/utils/errors/result'
 import { withRetry } from '@/io/utils/retry'
+import { notionRetryOptions } from '@/io/notion/rateLimit'
 
 type Options = {
   slug: string | null
@@ -111,13 +112,7 @@ export default async function getPost({
             and: [{ property: 'Slug', rich_text: { equals: slug } }],
           },
         }),
-      {
-        onRetry: (error, attempt, delay) => {
-          console.log(
-            `⚠️  Notion API timeout fetching post "${slug}" - retrying (attempt ${attempt}/3 after ${delay}ms): ${error.message}`,
-          )
-        },
-      },
+      notionRetryOptions(`post "${slug}"`),
     )
 
     if (response.results.length === 0) {

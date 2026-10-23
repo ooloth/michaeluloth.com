@@ -68,6 +68,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [format, lint, typecheck, test]
     # Dependabot PRs get no Actions secrets, so the build can't fetch content.
     # Skipping it also skips metadata and lighthouse, which need its output.
@@ -96,12 +97,9 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'npm'
       - run: npm ci
-      - name: Build
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: npm run build
+      # Notion rate limits are waited out inside the build (io/notion/rateLimit.ts), so a
+      # failed build is not rerun: a rerun would refetch everything while still throttled
+      - run: npm run build
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: build-output

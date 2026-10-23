@@ -11,7 +11,9 @@ const nextConfig: NextConfig = {
     ],
   },
   output: 'export', // NOTE: temporarily disable this to be able to see the 404 page while dev server is running
-  staticPageGenerationTimeout: 180, // Increase timeout for pages with slow external API calls (likes page)
+  // One page makes up to three Notion calls in a row, each of which may wait out a 90s rate-limit
+  // pause twice (io/notion/rateLimit.ts), so allow 600s; CI stops the whole build at 15 minutes
+  staticPageGenerationTimeout: 600,
   trailingSlash: true, // change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
   turbopack: {
     rules: {
