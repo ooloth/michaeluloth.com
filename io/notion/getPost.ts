@@ -5,7 +5,7 @@ import getPosts from '@/io/notion/getPosts'
 import { PostListItemSchema, PostPropertiesSchema, type Post } from './schemas/post'
 import { PostPageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
-import { env } from '@/io/env/env'
+import { notionEnv } from '@/io/env/notion'
 import { Ok, Err, toErr, type Result } from '@/utils/errors/result'
 import { withRetry } from '@/io/utils/retry'
 
@@ -106,7 +106,7 @@ export default async function getPost({
     const response = await withRetry(
       () =>
         notionClient.dataSources.query({
-          data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
+          data_source_id: notionEnv.NOTION_DATA_SOURCE_ID_WRITING,
           filter: {
             and: [{ property: 'Slug', rich_text: { equals: slug } }],
           },

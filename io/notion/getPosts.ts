@@ -3,7 +3,7 @@ import notion, { collectPaginatedAPI, type Client } from './client'
 import { PostListItemSchema, PostPropertiesSchema, type PostListItem } from './schemas/post'
 import { PageMetadataSchema } from './schemas/page'
 import { logValidationError } from '@/utils/logging/zod'
-import { env } from '@/io/env/env'
+import { notionEnv } from '@/io/env/notion'
 import { type Result, Ok, toErr } from '@/utils/errors/result'
 import { withRetry } from '@/io/utils/retry'
 
@@ -88,7 +88,7 @@ export default async function getPosts(options: Options = {}): Promise<Result<Po
     const pages = await withRetry(
       () =>
         collectPaginatedAPI(notionClient.dataSources.query, {
-          data_source_id: env.NOTION_DATA_SOURCE_ID_WRITING,
+          data_source_id: notionEnv.NOTION_DATA_SOURCE_ID_WRITING,
           filter: {
             and: [
               { property: 'Destination', multi_select: { contains: 'blog' } },

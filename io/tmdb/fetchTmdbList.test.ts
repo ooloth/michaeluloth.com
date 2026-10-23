@@ -15,12 +15,6 @@ vi.mock('@/io/cloudinary/transformCloudinaryImage', () => ({
   default: vi.fn((url: string) => url),
 }))
 
-vi.mock('@/io/env', () => ({
-  env: {
-    TMDB_READ_ACCESS_TOKEN: 'mock-token',
-  },
-}))
-
 describe('fetchTmdbList', () => {
   beforeEach(() => {
     vi.clearAllMocks()

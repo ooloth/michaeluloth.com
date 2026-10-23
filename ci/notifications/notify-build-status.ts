@@ -31,7 +31,7 @@
  * - PUSHOVER_API_TOKEN: Your Pushover application API token (required)
  * - PUSHOVER_USER_KEY: Your Pushover user/group key (required)
  *
- * See io/env/env.ts for validation
+ * See io/env/pushover.ts for validation
  */
 
 import { pushover } from '@/io/pushover/client'

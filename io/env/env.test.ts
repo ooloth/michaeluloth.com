@@ -1,192 +1,95 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Unmock the env module so we can test the actual validation logic
-vi.doUnmock('@/io/env/env')
+// Each service has its own env module so a process only needs the secrets for
+// the services it loads (e.g. the CI notify job only has the Pushover ones).
+const services = [
+  {
+    name: 'notion',
+    load: async () => (await import('./notion')).notionEnv,
+    valid: {
+      NOTION_ACCESS_TOKEN: 'notion-token-abc',
+      NOTION_DATA_SOURCE_ID_BOOKS: 'books-db-id',
+      NOTION_DATA_SOURCE_ID_ALBUMS: 'albums-db-id',
+      NOTION_DATA_SOURCE_ID_PODCASTS: 'podcasts-db-id',
+      NOTION_DATA_SOURCE_ID_WRITING: 'writing-db-id',
+    },
+  },
+  {
+    name: 'tmdb',
+    load: async () => (await import('./tmdb')).tmdbEnv,
+    valid: {
+      TMDB_TV_LIST_ID: 'tv-list-123',
+      TMDB_MOVIE_LIST_ID: 'movie-list-456',
+      TMDB_READ_ACCESS_TOKEN: 'tmdb-token-xyz',
+    },
+  },
+  {
+    name: 'cloudinary',
+    load: async () => (await import('./cloudinary')).cloudinaryEnv,
+    valid: {
+      CLOUDINARY_CLOUD_NAME: 'my-cloud',
+      CLOUDINARY_API_KEY: 'cloudinary-key',
+      CLOUDINARY_API_SECRET: 'cloudinary-secret',
+    },
+  },
+  {
+    name: 'pushover',
+    load: async () => (await import('./pushover')).pushoverEnv,
+    valid: {
+      PUSHOVER_API_TOKEN: 'pushover-token',
+      PUSHOVER_USER_KEY: 'pushover-user',
+    },
+  },
+] as const
 
-describe('env', () => {
-  // Valid environment variables for testing
-  const validEnv = {
-    TMDB_TV_LIST_ID: 'tv-list-123',
-    TMDB_MOVIE_LIST_ID: 'movie-list-456',
-    TMDB_READ_ACCESS_TOKEN: 'tmdb-token-xyz',
-    NOTION_ACCESS_TOKEN: 'notion-token-abc',
-    NOTION_DATA_SOURCE_ID_BOOKS: 'books-db-id',
-    NOTION_DATA_SOURCE_ID_ALBUMS: 'albums-db-id',
-    NOTION_DATA_SOURCE_ID_PODCASTS: 'podcasts-db-id',
-    NOTION_DATA_SOURCE_ID_WRITING: 'writing-db-id',
-    CLOUDINARY_CLOUD_NAME: 'my-cloud',
-    CLOUDINARY_API_KEY: 'cloudinary-key',
-    CLOUDINARY_API_SECRET: 'cloudinary-secret',
-    PUSHOVER_API_TOKEN: 'pushover-token',
-    PUSHOVER_USER_KEY: 'pushover-user',
-  }
+const allKeys = services.flatMap(service => Object.keys(service.valid))
 
-  beforeEach(() => {
-    // Reset modules to allow re-importing with different env vars
-    vi.resetModules()
-    vi.unstubAllEnvs()
+const cases = services.flatMap(service =>
+  Object.keys(service.valid).map(key => ({ service: service.name, key, ...service })),
+)
 
-    // In CI, workflow-level env vars are already set in process.env
-    // We need to explicitly delete them so tests can properly test missing vars
-    Object.keys(validEnv).forEach(key => {
-      delete process.env[key]
-    })
+function stubOnly(vars: Readonly<Record<string, string>>) {
+  Object.entries(vars).forEach(([key, value]) => vi.stubEnv(key, value))
+}
 
-    // Ensure the env module is unmocked for each test
-    vi.doUnmock('@/io/env/env')
+beforeEach(() => {
+  // Reset modules to allow re-importing with different env vars
+  vi.resetModules()
+  vi.unstubAllEnvs()
+
+  // A developer's shell or CI may already set these, so clear them so the
+  // tests control exactly which ones exist
+  allKeys.forEach(key => {
+    delete process.env[key]
   })
 
-  describe('success cases', () => {
-    it('validates and exports env when all required variables are present', async () => {
-      // Stub all required env vars
-      Object.entries(validEnv).forEach(([key, value]) => {
-        vi.stubEnv(key, value)
-      })
+  // vitest.setup.ts mocks these modules for every other test
+  services.forEach(service => vi.doUnmock(`./${service.name}`))
+})
 
-      const { env } = await import('./env')
+describe.each(services)('$name env', ({ load, valid }) => {
+  it("exports its variables when only its own are set and every other service's are absent", async () => {
+    stubOnly(valid)
 
-      expect(env).toEqual(validEnv)
-    })
-
-    it('includes all TMDB environment variables', async () => {
-      Object.entries(validEnv).forEach(([key, value]) => {
-        vi.stubEnv(key, value)
-      })
-
-      const { env } = await import('./env')
-
-      expect(env.TMDB_TV_LIST_ID).toBe('tv-list-123')
-      expect(env.TMDB_MOVIE_LIST_ID).toBe('movie-list-456')
-      expect(env.TMDB_READ_ACCESS_TOKEN).toBe('tmdb-token-xyz')
-    })
-
-    it('includes all Notion environment variables', async () => {
-      Object.entries(validEnv).forEach(([key, value]) => {
-        vi.stubEnv(key, value)
-      })
-
-      const { env } = await import('./env')
-
-      expect(env.NOTION_ACCESS_TOKEN).toBe('notion-token-abc')
-      expect(env.NOTION_DATA_SOURCE_ID_BOOKS).toBe('books-db-id')
-      expect(env.NOTION_DATA_SOURCE_ID_ALBUMS).toBe('albums-db-id')
-      expect(env.NOTION_DATA_SOURCE_ID_PODCASTS).toBe('podcasts-db-id')
-      expect(env.NOTION_DATA_SOURCE_ID_WRITING).toBe('writing-db-id')
-    })
-
-    it('includes all Cloudinary environment variables', async () => {
-      Object.entries(validEnv).forEach(([key, value]) => {
-        vi.stubEnv(key, value)
-      })
-
-      const { env } = await import('./env')
-
-      expect(env.CLOUDINARY_CLOUD_NAME).toBe('my-cloud')
-      expect(env.CLOUDINARY_API_KEY).toBe('cloudinary-key')
-      expect(env.CLOUDINARY_API_SECRET).toBe('cloudinary-secret')
-    })
-
-    it('includes all Pushover environment variables', async () => {
-      Object.entries(validEnv).forEach(([key, value]) => {
-        vi.stubEnv(key, value)
-      })
-
-      const { env } = await import('./env')
-
-      expect(env.PUSHOVER_API_TOKEN).toBe('pushover-token')
-      expect(env.PUSHOVER_USER_KEY).toBe('pushover-user')
-    })
+    await expect(load()).resolves.toEqual(valid)
   })
 
-  describe('error cases - missing variables', () => {
-    it.each([
-      'TMDB_TV_LIST_ID',
-      'TMDB_MOVIE_LIST_ID',
-      'TMDB_READ_ACCESS_TOKEN',
-      'NOTION_ACCESS_TOKEN',
-      'NOTION_DATA_SOURCE_ID_BOOKS',
-      'NOTION_DATA_SOURCE_ID_ALBUMS',
-      'NOTION_DATA_SOURCE_ID_PODCASTS',
-      'NOTION_DATA_SOURCE_ID_WRITING',
-      'CLOUDINARY_CLOUD_NAME',
-      'CLOUDINARY_API_KEY',
-      'CLOUDINARY_API_SECRET',
-      'PUSHOVER_API_TOKEN',
-      'PUSHOVER_USER_KEY',
-    ])('throws when %s is missing', async key => {
-      // Stub all env vars except the one being tested
-      Object.entries(validEnv).forEach(([envKey, value]) => {
-        if (envKey !== key) {
-          vi.stubEnv(envKey, value)
-        }
-      })
+  it('reports all of its missing variables at once', async () => {
+    await expect(load()).rejects.toThrow(new RegExp(Object.keys(valid).join('[\\s\\S]*')))
+  })
+})
 
-      // When a variable is missing (undefined), Zod says "expected string, received undefined"
-      await expect(import('./env')).rejects.toThrow()
-      await expect(import('./env')).rejects.toThrow(/expected string, received undefined/)
-    })
+describe('missing or empty variables', () => {
+  it.each(cases)('$service env throws naming $key when it is missing', async ({ key, load, valid }) => {
+    stubOnly(Object.fromEntries(Object.entries(valid).filter(([k]) => k !== key)))
+
+    await expect(load()).rejects.toThrow(key)
+    await expect(load()).rejects.toThrow(/expected string, received undefined/)
   })
 
-  describe('error cases - empty strings', () => {
-    it.each([
-      { key: 'TMDB_TV_LIST_ID', message: 'TMDB_TV_LIST_ID is required' },
-      { key: 'TMDB_MOVIE_LIST_ID', message: 'TMDB_MOVIE_LIST_ID is required' },
-      { key: 'TMDB_READ_ACCESS_TOKEN', message: 'TMDB_READ_ACCESS_TOKEN is required' },
-      { key: 'NOTION_ACCESS_TOKEN', message: 'NOTION_ACCESS_TOKEN is required' },
-      { key: 'NOTION_DATA_SOURCE_ID_BOOKS', message: 'NOTION_DATA_SOURCE_ID_BOOKS is required' },
-      { key: 'NOTION_DATA_SOURCE_ID_ALBUMS', message: 'NOTION_DATA_SOURCE_ID_ALBUMS is required' },
-      { key: 'NOTION_DATA_SOURCE_ID_PODCASTS', message: 'NOTION_DATA_SOURCE_ID_PODCASTS is required' },
-      { key: 'NOTION_DATA_SOURCE_ID_WRITING', message: 'NOTION_DATA_SOURCE_ID_WRITING is required' },
-      { key: 'CLOUDINARY_CLOUD_NAME', message: 'CLOUDINARY_CLOUD_NAME is required' },
-      { key: 'CLOUDINARY_API_KEY', message: 'CLOUDINARY_API_KEY is required' },
-      { key: 'CLOUDINARY_API_SECRET', message: 'CLOUDINARY_API_SECRET is required' },
-      { key: 'PUSHOVER_API_TOKEN', message: 'PUSHOVER_API_TOKEN is required' },
-      { key: 'PUSHOVER_USER_KEY', message: 'PUSHOVER_USER_KEY is required' },
-    ])('throws when $key is empty string', async ({ key, message }) => {
-      // Stub all env vars, but set the tested one to empty string
-      Object.entries(validEnv).forEach(([envKey, value]) => {
-        vi.stubEnv(envKey, envKey === key ? '' : value)
-      })
+  it.each(cases)('$service env throws "$key is required" when it is empty', async ({ key, load, valid }) => {
+    stubOnly({ ...valid, [key]: '' })
 
-      await expect(import('./env')).rejects.toThrow(message)
-    })
-  })
-
-  describe('error cases - validation behavior', () => {
-    it('throws ZodError with helpful message structure', async () => {
-      // Stub all env vars except one
-      Object.entries(validEnv).forEach(([envKey, value]) => {
-        if (envKey !== 'TMDB_TV_LIST_ID') {
-          vi.stubEnv(envKey, value)
-        }
-      })
-
-      try {
-        await import('./env')
-        expect.fail('Should have thrown')
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        expect((error as Error).message).toContain('TMDB_TV_LIST_ID')
-        expect((error as Error).message).toContain('expected string, received undefined')
-      }
-    })
-
-    it('reports all missing variables at once', async () => {
-      // Stub only half of the required vars
-      vi.stubEnv('TMDB_TV_LIST_ID', 'tv-list')
-      vi.stubEnv('TMDB_MOVIE_LIST_ID', 'movie-list')
-      vi.stubEnv('TMDB_READ_ACCESS_TOKEN', 'token')
-
-      try {
-        await import('./env')
-        expect.fail('Should have thrown')
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
-        const message = (error as Error).message
-        // Should report multiple missing vars
-        expect(message).toContain('NOTION_ACCESS_TOKEN')
-        expect(message).toContain('CLOUDINARY_CLOUD_NAME')
-      }
-    })
+    await expect(load()).rejects.toThrow(`${key} is required`)
   })
 })

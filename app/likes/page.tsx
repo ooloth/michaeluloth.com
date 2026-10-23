@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 
-import { env } from '@/io/env/env'
+import { tmdbEnv } from '@/io/env/tmdb'
 import fetchItunesItems from '@/io/itunes/fetchItunesItems'
 import getMediaItems from '@/io/notion/getMediaItems'
 import fetchTmdbList from '@/io/tmdb/fetchTmdbList'
@@ -18,8 +18,8 @@ export default async function Likes(): Promise<ReactElement> {
 
   // Step 2: Fetch TMDB and iTunes items in parallel
   const [tv, movies, books, albums, podcasts] = await Promise.all([
-    fetchTmdbList(env.TMDB_TV_LIST_ID, 'tv').then(r => r.unwrap()),
-    fetchTmdbList(env.TMDB_MOVIE_LIST_ID, 'movie').then(r => r.unwrap()),
+    fetchTmdbList(tmdbEnv.TMDB_TV_LIST_ID, 'tv').then(r => r.unwrap()),
+    fetchTmdbList(tmdbEnv.TMDB_MOVIE_LIST_ID, 'movie').then(r => r.unwrap()),
     fetchItunesItems(
       booksNotion.map(i => ({ id: i.appleId, name: i.name, date: i.date })),
       'books',

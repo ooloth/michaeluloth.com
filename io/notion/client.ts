@@ -1,9 +1,9 @@
 import { Client, collectPaginatedAPI } from '@notionhq/client'
-import { env } from '@/io/env/env'
+import { notionEnv } from '@/io/env/notion'
 
 // See: https://github.com/makenotion/notion-sdk-js
 const notion = new Client({
-  auth: env.NOTION_ACCESS_TOKEN,
+  auth: notionEnv.NOTION_ACCESS_TOKEN,
   notionVersion: '2025-09-03',
 })
 

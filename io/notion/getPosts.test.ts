@@ -37,12 +37,6 @@ vi.mock('./client', () => ({
   collectPaginatedAPI: vi.fn(),
 }))
 
-vi.mock('@/io/env', () => ({
-  env: {
-    NOTION_DATA_SOURCE_ID_WRITING: 'writing-ds-id',
-  },
-}))
-
 describe('transformNotionPagesToPostListItems', () => {
   it('transforms valid Notion pages to post list items', () => {
     const pages = [

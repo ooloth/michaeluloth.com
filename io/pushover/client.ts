@@ -3,11 +3,11 @@
  * See: https://pushover.net/api
  */
 
-import { env } from '@/io/env/env'
+import { pushoverEnv } from '@/io/env/pushover'
 
 export const pushover = {
-  apiToken: env.PUSHOVER_API_TOKEN,
-  userKey: env.PUSHOVER_USER_KEY,
+  apiToken: pushoverEnv.PUSHOVER_API_TOKEN,
+  userKey: pushoverEnv.PUSHOVER_USER_KEY,
   apiUrl: 'https://api.pushover.net/1/messages.json',
 } as const
 

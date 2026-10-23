@@ -43,12 +43,6 @@ vi.mock('./getPosts', () => ({
   default: vi.fn(),
 }))
 
-vi.mock('@/io/env', () => ({
-  env: {
-    NOTION_DATA_SOURCE_ID_WRITING: 'writing-ds-id',
-  },
-}))
-
 describe('transformNotionPageToPost', () => {
   it('transforms valid Notion page to post', () => {
     const page = {

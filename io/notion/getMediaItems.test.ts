@@ -30,14 +30,6 @@ vi.mock('./client', () => ({
   collectPaginatedAPI: vi.fn(),
 }))
 
-vi.mock('@/io/env', () => ({
-  env: {
-    NOTION_DATA_SOURCE_ID_BOOKS: 'book-ds-id',
-    NOTION_DATA_SOURCE_ID_ALBUMS: 'album-ds-id',
-    NOTION_DATA_SOURCE_ID_PODCASTS: 'podcast-ds-id',
-  },
-}))
-
 describe('transformNotionPagesToMediaItems', () => {
   it('transforms valid Notion pages to media items', () => {
     const pages = [

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import transformCloudinaryImage from '@/io/cloudinary/transformCloudinaryImage'
 import { formatValidationError } from '@/utils/logging/zod'
-import { env } from '@/io/env/env'
+import { tmdbEnv } from '@/io/env/tmdb'
 import { type Result, Ok, Err, toErr } from '@/utils/errors/result'
 import { withRetry } from '@/io/utils/retry'
 import { filesystemCache, type CacheAdapter } from '@/io/cache/adapter'
@@ -58,7 +58,7 @@ export default async function fetchTmdbList(
       {
         headers: {
           Accept: 'application/json',
-          Authorization: `Bearer ${env.TMDB_READ_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${tmdbEnv.TMDB_READ_ACCESS_TOKEN}`,
         },
       },
     )
