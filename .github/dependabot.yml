@@ -1,6 +1,7 @@
-# Keeps the SHA-pinned actions in .github/workflows current. At most one PR a
-# month, with every action update grouped into it. A release is only proposed
-# once it is 7 days old, so a compromised one has time to be found and pulled.
+# Keeps the npm packages and the SHA-pinned actions in .github/workflows
+# current. Each ecosystem gets at most one PR a month, with every update grouped
+# into it. A release is only proposed once it is 7 days old, so a compromised
+# one has time to be found and pulled.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -14,3 +15,19 @@ updates:
       actions:
         patterns:
           - '*'
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 1
+    groups:
+      npm:
+        patterns:
+          - '*'
+    # A major version can break the checks and block the whole grouped PR, so
+    # majors are upgraded deliberately instead.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
