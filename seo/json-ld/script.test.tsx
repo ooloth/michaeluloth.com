@@ -135,10 +135,8 @@ describe('JsonLdScript', () => {
       const { container } = render(<JsonLdScript type="person" />)
 
       const script = container.querySelector('script')
-      const content = script?.innerHTML
-      // Should not contain unescaped < (except in the opening tag which is fine)
-      const contentWithoutTags = content?.replace(/<[^>]*>/g, '')
-      expect(contentWithoutTags?.includes('<')).toBe(false)
+      // innerHTML of a <script> is its body only, so any < here is unescaped
+      expect(script?.innerHTML).not.toContain('<')
     })
 
     it('escapes < characters in Article schema with malicious content', () => {
@@ -165,6 +163,7 @@ describe('JsonLdScript', () => {
       expect(content).toContain('\\u003ctags>')
       // Should NOT contain unescaped </script>
       expect(content).not.toContain('</script><script>')
+      expect(content).not.toContain('<')
     })
   })
 })

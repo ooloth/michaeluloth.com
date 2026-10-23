@@ -25,6 +25,13 @@ describe('transformCloudinaryForOG', () => {
     expect(result).toBe(input)
   })
 
+  it.each([
+    'https://example.com/res.cloudinary.com/demo/upload/sample.jpg',
+    'https://res.cloudinary.com.example.com/demo/upload/sample.jpg',
+  ])('returns %s unchanged because its host is not Cloudinary', input => {
+    expect(transformCloudinaryForOG(input)).toBe(input)
+  })
+
   it('returns local URLs unchanged', () => {
     const input = '/og-image.png'
     const result = transformCloudinaryForOG(input)

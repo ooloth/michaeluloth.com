@@ -11,21 +11,38 @@ type Props = Readonly<{
   outerStyles?: string
 }>
 
-/**
- * Extracts YouTube video ID from various YouTube URL formats.
- * Supports: youtube.com/watch?v=, youtu.be/, youtube.com/embed/, etc.
- */
-function getYouTubeVideoId(url: string): string | null {
-  const pattern = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
-  const match = url.match(pattern)
-  return match?.[1] ?? null
-}
+const YOUTUBE_HOSTS: ReadonlySet<string> = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'])
+const YOUTUBE_VIDEO_ID = /^[A-Za-z0-9_-]{11}$/
+
+/** An 11-character YouTube video ID, safe to put in an embed URL. */
+type YouTubeVideoId = string & { readonly __brand: 'YouTubeVideoId' }
+
+type VideoSource = { kind: 'youtube'; videoId: YouTubeVideoId } | { kind: 'file'; url: string }
 
 /**
- * Checks if a URL is a YouTube URL.
+ * Decides whether a video URL is on YouTube by its host, and extracts the video ID from
+ * youtube.com/watch?v=, youtu.be/ or youtube.com/embed/ URLs. Other URLs are video files.
+ *
+ * @throws When the URL is on a YouTube host but has no valid video ID
  */
-function isYouTubeUrl(url: string): boolean {
-  return url.includes('youtube.com') || url.includes('youtu.be')
+function parseVideoSource(url: string): VideoSource {
+  const parsed = URL.canParse(url) ? new URL(url) : null
+  if (parsed === null || !YOUTUBE_HOSTS.has(parsed.hostname)) {
+    return { kind: 'file', url }
+  }
+
+  const candidate =
+    parsed.hostname === 'youtu.be'
+      ? parsed.pathname.slice(1)
+      : parsed.pathname.startsWith('/embed/')
+        ? parsed.pathname.slice('/embed/'.length)
+        : parsed.searchParams.get('v')
+
+  if (candidate === null || !YOUTUBE_VIDEO_ID.test(candidate)) {
+    throw new Error(`Failed to extract YouTube video ID from URL: ${url}`)
+  }
+
+  return { kind: 'youtube', videoId: candidate as YouTubeVideoId }
 }
 
 /**
@@ -35,7 +52,7 @@ function isYouTubeUrl(url: string): boolean {
  *
  * @example
  * // YouTube video with caption
- * <Video url="https://youtube.com/watch?v=abc123" caption="Tutorial" />
+ * <Video url="https://youtube.com/watch?v=dQw4w9WgXcQ" caption="Tutorial" />
  *
  * @example
  * // Direct video file without caption
@@ -48,13 +65,10 @@ export default function Video({ url, caption, videoStyles, outerStyles }: Props)
 
   let videoElement: ReactElement
 
-  if (isYouTubeUrl(url)) {
-    const videoId = getYouTubeVideoId(url)
-    if (!videoId) {
-      throw new Error(`Failed to extract YouTube video ID from URL: ${url}`)
-    }
+  const source = parseVideoSource(url)
 
-    const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}`
+  if (source.kind === 'youtube') {
+    const embedUrl = `https://www.youtube-nocookie.com/embed/${source.videoId}`
     const iframeClasses = videoStyles ? `${iframeStylesDefault} ${videoStyles}` : iframeStylesDefault
 
     videoElement = (

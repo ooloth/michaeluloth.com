@@ -29,30 +29,61 @@ describe('Video', () => {
         url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=30s',
         videoId: 'dQw4w9WgXcQ',
       },
+      {
+        format: 'youtube.com without www',
+        url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
+        videoId: 'dQw4w9WgXcQ',
+      },
+      {
+        format: 'm.youtube.com',
+        url: 'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
+        videoId: 'dQw4w9WgXcQ',
+      },
+      {
+        format: 'youtu.be/ with share params',
+        url: 'https://youtu.be/dQw4w9WgXcQ?si=dQw4w9WgXcQ',
+        videoId: 'dQw4w9WgXcQ',
+      },
     ])('extracts video ID from $format', ({ url, videoId }) => {
       render(<Video url={url} caption={null} />)
       const iframe = screen.getByTitle('YouTube video')
       expect(iframe).toHaveAttribute('src', `https://www.youtube-nocookie.com/embed/${videoId}`)
     })
 
-    it('throws error for malformed YouTube URL', () => {
-      const invalidUrl = 'https://youtube.com/invalid'
-      expect(() => render(<Video url={invalidUrl} caption={null} />)).toThrow(
-        'Failed to extract YouTube video ID from URL: https://youtube.com/invalid',
+    it.each([
+      'https://youtube.com/invalid',
+      'https://www.youtube.com/watch?v=short',
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQX',
+      'https://www.youtube.com/watch?v=dQw4w9WgXc!',
+      'https://youtu.be/',
+      'https://www.youtube.com/embed/',
+    ])('throws naming the URL when %s has no valid video ID', url => {
+      expect(() => render(<Video url={url} caption={null} />)).toThrow(
+        `Failed to extract YouTube video ID from URL: ${url}`,
       )
+    })
+
+    it.each([
+      'https://example.com/youtube.com/watch?v=dQw4w9WgXcQ',
+      'https://cdn.example.com/videos/youtu.be-clip.mp4',
+      'https://notyoutube.com/watch?v=dQw4w9WgXcQ',
+    ])('renders %s as a video file because its host is not YouTube', url => {
+      const { container } = render(<Video url={url} caption={null} />)
+      expect(container.querySelector('iframe')).toBeNull()
+      expect(container.querySelector('source')).toHaveAttribute('src', url)
     })
   })
 
   describe('YouTube iframe rendering', () => {
     it('renders iframe with correct embed URL', () => {
-      render(<Video url="https://www.youtube.com/watch?v=abc123" caption={null} />)
+      render(<Video url="https://www.youtube.com/watch?v=dQw4w9WgXcQ" caption={null} />)
       const iframe = screen.getByTitle('YouTube video')
       expect(iframe.tagName).toBe('IFRAME')
-      expect(iframe).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/abc123')
+      expect(iframe).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
     })
 
     it('applies security attributes to iframe', () => {
-      render(<Video url="https://youtu.be/abc123" caption={null} />)
+      render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption={null} />)
       const iframe = screen.getByTitle('YouTube video')
       expect(iframe).toHaveAttribute('sandbox', 'allow-scripts allow-same-origin allow-presentation')
       expect(iframe).toHaveAttribute(
@@ -62,25 +93,25 @@ describe('Video', () => {
     })
 
     it('applies lazy loading to iframe', () => {
-      render(<Video url="https://youtu.be/abc123" caption={null} />)
+      render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption={null} />)
       const iframe = screen.getByTitle('YouTube video')
       expect(iframe).toHaveAttribute('loading', 'lazy')
     })
 
     it('allows fullscreen', () => {
-      render(<Video url="https://youtu.be/abc123" caption={null} />)
+      render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption={null} />)
       const iframe = screen.getByTitle('YouTube video')
       expect(iframe).toHaveAttribute('allowfullscreen')
     })
 
     it('applies default iframe styles', () => {
-      render(<Video url="https://youtu.be/abc123" caption={null} />)
+      render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption={null} />)
       const iframe = screen.getByTitle('YouTube video')
       expect(iframe).toHaveClass('shadow-xl', 'rounded', 'bg-zinc-800', 'w-full', 'aspect-video')
     })
 
     it('merges custom videoStyles with defaults', () => {
-      render(<Video url="https://youtu.be/abc123" caption={null} videoStyles="border-2" />)
+      render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption={null} videoStyles="border-2" />)
       const iframe = screen.getByTitle('YouTube video')
       expect(iframe).toHaveClass('shadow-xl', 'rounded', 'bg-zinc-800', 'w-full', 'aspect-video', 'border-2')
     })
@@ -122,7 +153,7 @@ describe('Video', () => {
 
   describe('caption handling', () => {
     it('wraps YouTube video in figure when caption provided', () => {
-      render(<Video url="https://youtu.be/abc123" caption="Tutorial video" />)
+      render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption="Tutorial video" />)
       const figure = document.querySelector('figure')
       expect(figure).toBeInTheDocument()
       expect(screen.getByText('Tutorial video')).toBeInTheDocument()
@@ -137,7 +168,7 @@ describe('Video', () => {
     })
 
     it('wraps YouTube video in div when no caption', () => {
-      render(<Video url="https://youtu.be/abc123" caption={null} />)
+      render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption={null} />)
       const figure = document.querySelector('figure')
       const div = document.querySelector('div')
       expect(figure).not.toBeInTheDocument()
@@ -153,7 +184,7 @@ describe('Video', () => {
     })
 
     it('applies caption class to figcaption', () => {
-      render(<Video url="https://youtu.be/abc123" caption="Test" />)
+      render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption="Test" />)
       const figcaption = document.querySelector('figcaption')
       expect(figcaption).toHaveClass('caption')
     })
@@ -161,13 +192,13 @@ describe('Video', () => {
 
   describe('outer styles', () => {
     it('applies default outer styles', () => {
-      const { container } = render(<Video url="https://youtu.be/abc123" caption={null} />)
+      const { container } = render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption={null} />)
       const wrapper = container.firstChild as HTMLElement
       expect(wrapper).toHaveClass('my-6')
     })
 
     it('merges custom outerStyles with defaults', () => {
-      const { container } = render(<Video url="https://youtu.be/abc123" caption={null} outerStyles="mx-auto" />)
+      const { container } = render(<Video url="https://youtu.be/dQw4w9WgXcQ" caption={null} outerStyles="mx-auto" />)
       const wrapper = container.firstChild as HTMLElement
       expect(wrapper).toHaveClass('my-6', 'mx-auto')
     })

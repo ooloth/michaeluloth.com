@@ -18,7 +18,7 @@ export const OG_IMAGE_HEIGHT = 630
  */
 export function transformCloudinaryForOG(url: string): string {
   // Only transform Cloudinary URLs
-  if (!url.includes('res.cloudinary.com')) {
+  if (!URL.canParse(url) || new URL(url).hostname !== 'res.cloudinary.com') {
     return url
   }
 
