@@ -33,7 +33,7 @@
     "@notionhq/client": "^5.3.0",
     "cloudinary": "^2.8.0",
     "feed": "^5.1.0",
-    "next": "^16.0.1",
+    "next": "^16.4.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "rehype-pretty-code": "^0.14.1",
@@ -60,12 +60,12 @@
     "happy-dom": "^20.0.11",
     "prettier": "^3.6.2",
     "satori": "^0.18.3",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "shiki": "^3.15.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "turbopack-inline-svg-loader": "^1.0.2",
     "typescript": "^5",
-    "vitest": "^4.0.15"
+    "vitest": "^5.0.5"
   }
 }
