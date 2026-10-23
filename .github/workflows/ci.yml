@@ -69,9 +69,14 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: [format, lint, typecheck, test]
+    # Dependabot PRs get no Actions secrets, so the build can't fetch content.
+    # Skipping it also skips metadata and lighthouse, which need its output.
+    # Bumped actions those jobs use first run on main, after the PR is merged.
     if: |
       github.ref == 'refs/heads/main' ||
-      (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
+      (github.event_name == 'pull_request' &&
+        github.event.pull_request.draft == false &&
+        github.event.pull_request.user.login != 'dependabot[bot]')
     env:
       NOTION_ACCESS_TOKEN: ${{ secrets.NOTION_ACCESS_TOKEN }}
       NOTION_DATA_SOURCE_ID_BOOKS: ${{ secrets.NOTION_DATA_SOURCE_ID_BOOKS }}

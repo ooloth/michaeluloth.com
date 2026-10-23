@@ -1,11 +1,14 @@
 # Keeps the SHA-pinned actions in .github/workflows current. At most one PR a
-# month, with every action update grouped into it.
+# month, with every action update grouped into it. A release is only proposed
+# once it is 7 days old, so a compromised one has time to be found and pulled.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 1
     groups:
       actions:
