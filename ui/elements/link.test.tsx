@@ -38,6 +38,36 @@ describe('classifyHref', () => {
     })
   })
 
+  describe('treats links to files on the site as files, not pages', () => {
+    it.each([
+      { href: '/rss.xml', path: '/rss.xml' },
+      { href: 'https://michaeluloth.com/rss.xml', path: '/rss.xml' },
+      { href: 'http://www.michaeluloth.com/files/resume.pdf', path: '/files/resume.pdf' },
+      { href: '/og-image.png?v=2#top', path: '/og-image.png?v=2#top' },
+    ])('keeps $href as the file path $path', ({ href, path }) => {
+      expect(classifyHref(href)).toEqual({ kind: 'file', path })
+    })
+
+    it.each(['/blog', '/v1.2/notes', '/v1.2', 'https://michaeluloth.com/about/'])('keeps %s a page', href => {
+      expect(classifyHref(href).kind).toBe('internal')
+    })
+
+    it('keeps any site file path exactly as given', () => {
+      fc.assert(
+        fc.property(
+          fc.constantFrom(...siteOrigins),
+          fc.array(fc.stringMatching(/^[a-z0-9-]{1,10}$/), { maxLength: 3 }),
+          fc.stringMatching(/^[a-z0-9-]{1,10}$/),
+          fc.stringMatching(/^[a-z][a-z0-9]{0,4}$/),
+          (origin, folders, name, extension) => {
+            const path = `/${[...folders, `${name}.${extension}`].join('/')}`
+            expect(classifyHref(`${origin}${path}`)).toEqual({ kind: 'file', path })
+          },
+        ),
+      )
+    })
+  })
+
   describe('leaves other hrefs untouched', () => {
     it.each([
       'https://github.com/ooloth/michaeluloth.com',
@@ -70,7 +100,7 @@ describe('classifyHref', () => {
     fc.assert(
       fc.property(
         fc.constantFrom(...siteOrigins),
-        fc.webPath(),
+        fc.webPath().filter(path => !/\.[a-z][a-z0-9]*$/i.test(path.split('/').at(-1) ?? '')),
         fc.option(fc.webQueryParameters(), { nil: undefined }),
         fc.option(fc.webFragments(), { nil: undefined }),
         (origin, path, query, fragment) => {
@@ -143,6 +173,15 @@ describe('Link', () => {
       const link = screen.getByRole('link', { name: 'About' })
       expect(link).toHaveClass('custom-link')
       expect(link).not.toHaveClass('link')
+    })
+  })
+
+  describe('file links', () => {
+    it('renders a link to a file on the site as a plain anchor to its path', () => {
+      render(<Link href="https://michaeluloth.com/rss.xml">RSS</Link>)
+      const link = screen.getByRole('link', { name: 'RSS' })
+      expect(link).toHaveAttribute('href', '/rss.xml')
+      expect(link).not.toHaveAttribute('rel')
     })
   })
 

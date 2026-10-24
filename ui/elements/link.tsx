@@ -14,7 +14,29 @@ const SITE_HOSTS: ReadonlySet<string> = new Set(['michaeluloth.com', 'www.michae
 /** A root-relative path on this site, normalized to `/path/` with any query and hash after it. */
 type InternalPath = string & { readonly __brand: 'InternalPath' }
 
-type SiteHref = { kind: 'internal'; path: InternalPath } | { kind: 'external'; href: string }
+/** A root-relative path to a file on this site, such as `/rss.xml`, kept exactly as given. */
+type FilePath = string & { readonly __brand: 'FilePath' }
+
+type SiteHref =
+  | { kind: 'internal'; path: InternalPath }
+  | { kind: 'file'; path: FilePath }
+  | { kind: 'external'; href: string }
+
+/** A last path segment ending in an extension that starts with a letter, like `rss.xml` (not `v1.2`). */
+const FILE_EXTENSION = /\.[a-z][a-z0-9]*$/i
+
+/**
+ * Classifies a root-relative path on this site as a file (by its extension) or a page.
+ */
+function toSitePath(rootRelative: string): SiteHref {
+  const suffixStart = rootRelative.search(/[?#]/)
+  const pathname = suffixStart === -1 ? rootRelative : rootRelative.slice(0, suffixStart)
+  const lastSegment = pathname.split('/').at(-1) ?? ''
+
+  return FILE_EXTENSION.test(lastSegment)
+    ? { kind: 'file', path: rootRelative as FilePath }
+    : { kind: 'internal', path: toInternalPath(rootRelative) }
+}
 
 /**
  * Ensures a root-relative path has leading and trailing slashes and no empty segments,
@@ -35,25 +57,25 @@ function toInternalPath(rootRelative: string): InternalPath {
 
 /**
  * Decides whether an href points at this site. Root-relative paths and http(s) URLs whose host
- * is michaeluloth.com or www.michaeluloth.com are internal; everything else is returned unchanged.
+ * is michaeluloth.com or www.michaeluloth.com are on the site: a page (internal) or, when the last
+ * segment has a file extension, a file. Everything else is returned unchanged.
  *
  * @example
  * classifyHref('/blog') // { kind: 'internal', path: '/blog/' }
+ * classifyHref('https://michaeluloth.com/rss.xml') // { kind: 'file', path: '/rss.xml' }
  * classifyHref('http://www.michaeluloth.com/about') // { kind: 'internal', path: '/about/' }
  * classifyHref('https://github.com/ooloth/michaeluloth.com') // { kind: 'external', href: '...' }
  */
 export function classifyHref(href: string): SiteHref {
   if (href.startsWith('/')) {
-    return { kind: 'internal', path: toInternalPath(href) }
+    return toSitePath(href)
   }
 
   const url = URL.canParse(href) ? new URL(href) : null
   const isSiteUrl =
     url !== null && (url.protocol === 'https:' || url.protocol === 'http:') && SITE_HOSTS.has(url.hostname)
 
-  return isSiteUrl
-    ? { kind: 'internal', path: toInternalPath(`${url.pathname}${url.search}${url.hash}`) }
-    : { kind: 'external', href }
+  return isSiteUrl ? toSitePath(`${url.pathname}${url.search}${url.hash}`) : { kind: 'external', href }
 }
 
 export default function Link({ ariaCurrent, ariaLabel, href, children, className }: Props) {
@@ -76,6 +98,15 @@ export default function Link({ ariaCurrent, ariaLabel, href, children, className
       >
         {children}
       </NextLink>
+    )
+  }
+
+  // A file is not a page, so Next's router must not navigate to or prefetch it
+  if (siteHref.kind === 'file') {
+    return (
+      <a href={siteHref.path} aria-current={ariaCurrent} aria-label={ariaLabel} className={classes}>
+        {children}
+      </a>
     )
   }
 
