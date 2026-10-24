@@ -51,7 +51,7 @@
     "@types/node": "^20.19.27",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitest/ui": "^4.0.15",
+    "@vitest/ui": "^4.1.12",
     "cheerio": "^1.1.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
@@ -66,6 +66,6 @@
     "tsx": "^4.21.0",
     "turbopack-inline-svg-loader": "^1.0.2",
     "typescript": "^5",
-    "vitest": "^4.0.15"
+    "vitest": "^4.1.12"
   }
 }

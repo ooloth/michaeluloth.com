@@ -60,7 +60,7 @@ describe('transformNotionPagesToMediaItems', () => {
       { id: '123' }, // No properties
     ]
 
-    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_PROPERTIES_ERROR.books)
+    expect(() => transformNotionPagesToMediaItems(pages, 'books')).toThrow(INVALID_MEDIA_ITEM_ERROR.books)
   })
 
   it.each([
