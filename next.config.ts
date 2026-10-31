@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Amp sets PUBLIC_URL only for orb portal services; allow that one host to reach dev resources
+  // such as HMR. Elsewhere (e.g. local dev) it is unset, so Next's default blocking applies.
+  allowedDevOrigins: process.env.PUBLIC_URL ? [new URL(process.env.PUBLIC_URL).hostname] : [],
   images: {
     unoptimized: true, // Required for static exports - no image optimization server
     remotePatterns: [
