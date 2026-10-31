@@ -1,0 +1,9 @@
+services:
+  site:
+    # next dev reads $PORT from the environment. Passing it as `-p "$PORT"`
+    # broke after `amp orb restart-processes`, which re-escaped the variable.
+    # Pages need the Notion, TMDB and Cloudinary values in the Amp project's
+    # secrets and env vars; without them every page returns 500.
+    command: npx next dev
+    portal:
+      title: michaeluloth.com (next dev)
