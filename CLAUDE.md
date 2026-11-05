@@ -43,6 +43,12 @@ const svg = await satori(
 
 This rule ensures the codebase maintains full type safety and prevents runtime errors that `any` would hide.
 
+## Dependency Updates
+
+**A Dependabot PR is merged only after `npm run build` passes on its branch locally.** CI skips
+the build on Dependabot PRs because they get no secrets, so a dependency update that breaks the
+build passes CI, and merging it breaks `main` and every `npm run deploy:ci` until it is fixed.
+
 ## Publishing and Deploying
 
 Blog posts live in Notion, not in this repo. `next.config.ts` sets `output: 'export'`, so the
