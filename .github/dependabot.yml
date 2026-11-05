@@ -1,7 +1,10 @@
-# Keeps the npm packages and the SHA-pinned actions in .github/workflows
-# current. Each ecosystem gets at most one PR a month, with every update grouped
-# into it. A release is only proposed once it is 7 days old, so a compromised
-# one has time to be found and pulled.
+# Keeps the npm packages and the SHA-pinned actions in .github/workflows current.
+#
+# Version updates arrive at most monthly, and only for releases at least 7 days old, so a
+# compromised release has time to be found and pulled. Minor and patch updates are grouped into
+# one PR per ecosystem. Majors open as their own PRs, so one breaking upgrade cannot block the
+# rest, and the PR limit leaves room for them beside the group. Security updates ignore the
+# version-update groups and would open one PR per package, so they get their own group.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -10,24 +13,27 @@ updates:
       interval: monthly
     cooldown:
       default-days: 7
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 5
     groups:
       actions:
-        patterns:
-          - '*'
+        applies-to: version-updates
+        patterns: ['*']
+        update-types: [minor, patch]
+      actions-security:
+        applies-to: security-updates
+        patterns: ['*']
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: monthly
     cooldown:
       default-days: 7
-    open-pull-requests-limit: 1
+    open-pull-requests-limit: 5
     groups:
       npm:
-        patterns:
-          - '*'
-    # A major version can break the checks and block the whole grouped PR, so
-    # majors are upgraded deliberately instead.
-    ignore:
-      - dependency-name: '*'
-        update-types: ['version-update:semver-major']
+        applies-to: version-updates
+        patterns: ['*']
+        update-types: [minor, patch]
+      npm-security:
+        applies-to: security-updates
+        patterns: ['*']
