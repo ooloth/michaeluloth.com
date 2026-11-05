@@ -8,7 +8,7 @@ My personal site where I write about what I'm learning and building 📝. It's a
 - **✨ Result types for errors** - Rust-style `Result<T, E>` instead of exceptions. Errors are values that flow through function signatures, making error handling explicit
 - **🧪 Testable by design** - Dependency injection separates I/O from business logic, so tests can validate transformations without mocking modules
 - **✅ Post-build validation** - Scripts parse the actual build output to validate OpenGraph tags, image dimensions, alt text, and SEO metadata. Builds fail if Cloudinary images are missing alt text.
-- **⚡ Smart CI pipeline** - Fast checks (format/lint/typecheck/test) run on every commit. Slow checks (build/Lighthouse/metadata) only run when PRs are ready. Lighthouse tests a randomized sample of URLs from the RSS feed instead of only hardcoded paths
+- **⚡ Smart CI pipeline** - Fast checks (format/lint/typecheck/test) run on every commit. Slow checks (build/Lighthouse/metadata) only run when PRs are ready, and not on Dependabot's PRs, which get no secrets to fetch content with. Lighthouse tests a randomized sample of URLs from the RSS feed instead of only hardcoded paths
 - **🔄 Retry with backoff** - All external API calls are wrapped with exponential backoff retry logic to handle transient failures
 - **💾 Development caching** - First fetch hits real APIs, then results are cached locally by namespace. Zero network calls on page refresh during development
 - **🖼️ Responsive images** - Cloudinary integration generates srcsets with 9 sizes, automatic format/quality optimization, and enforced alt text
