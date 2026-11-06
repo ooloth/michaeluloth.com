@@ -45,9 +45,19 @@ This rule ensures the codebase maintains full type safety and prevents runtime e
 
 ## Dependency Updates
 
-**A Dependabot PR is merged only after `npm run build` passes on its branch locally.** CI skips
-the build on Dependabot PRs because they get no secrets, so a dependency update that breaks the
-build passes CI, and merging it breaks `main` and every `npm run deploy:ci` until it is fixed.
+**A Dependabot PR is merged only after the Check workflow, started by hand on its branch, passes
+Build, Metadata and Lighthouse at the commit being merged.** CI skips those jobs on Dependabot PRs,
+because GitHub gives Dependabot no Actions secrets and the build fetches content with them. An
+update that breaks them would pass CI, and merging it would break `main` and every
+`npm run deploy:ci` until it is fixed. Dependabot rebases its branches, so a run of an earlier
+commit does not count.
+
+The run gives the new code the build's secrets, and security updates skip the 7-day cooldown, so
+check each release the PR adopts for signs of a compromised publish before starting it: a new
+publisher, new install scripts, new dependencies, provenance the previous release had and this one
+lacks, or a publish only hours old. Then run `gh workflow run ci.yml --ref <branch>` and read the
+result with `gh run list --workflow ci.yml --branch <branch>`. `cloudflare/wrangler-action` runs
+only in Deploy, so a bump to it first runs on `main`.
 
 ## Publishing and Deploying
 

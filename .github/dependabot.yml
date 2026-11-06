@@ -2,11 +2,16 @@
 #
 # Version updates arrive at most monthly, and only for releases at least 7 days old, so a
 # compromised release has time to be found and pulled. Minor and patch updates are grouped into
-# one PR per ecosystem. Majors open as their own PRs, so one breaking upgrade cannot block the
-# rest, and the PR limit leaves room for them beside the group. Packages that only work at matching
-# versions are the exception, in groups of their own that take majors too. Security updates ignore
-# the version-update groups and would open one PR per package, so they get their own group, which
-# also leaves majors to their own PRs.
+# one catch-all PR per ecosystem, and majors open as their own PRs. Dependabot reads the second
+# number of a 0.x version as the minor, so a breaking 0.x release (satori, sharp, @lhci/cli,
+# rehype-pretty-code) still lands in the catch-all. Packages that only work at matching versions
+# are the exception, in groups of their own that take majors too. Security updates ignore the
+# version-update groups and would open one PR per package, so they get their own group. It takes
+# every update type, because Dependabot judges the type from a package's newest release rather
+# than its fix (SemverGroupingRules in dependabot-core), and a narrower group would split off patch
+# fixes. The cost is that a breaking fix can hold up the others in that PR. Security updates skip
+# the cooldown and the coupled groups, so a fix moves only the package it patches, and a coupled
+# package left behind is bumped by hand in the same PR.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -17,6 +22,12 @@ updates:
       default-days: 7
     open-pull-requests-limit: 5
     groups:
+      # upload-artifact and download-artifact have broken compatibility across majors before (v4
+      # could not read v3's artifacts), so they arrive together, majors included. Dependabot gives a
+      # dependency to the first group that matches, so this comes before the catch-all.
+      artifacts:
+        applies-to: version-updates
+        patterns: [actions/upload-artifact, actions/download-artifact]
       actions:
         applies-to: version-updates
         patterns: ['*']
@@ -24,24 +35,31 @@ updates:
       actions-security:
         applies-to: security-updates
         patterns: ['*']
-        update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: monthly
     cooldown:
       default-days: 7
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
+    # @types/node describes the Node API, so it stays at or below the major in .nvmrc. Raise this
+    # with .nvmrc.
+    ignore:
+      - dependency-name: '@types/node'
+        versions: ['>=26']
     groups:
       # Each of these sets is pinned or released in step, so one package moving alone can fail the
-      # checks. They arrive as one PR each, majors included. Dependabot gives a dependency to the
-      # first group that matches, so these come before the catch-all.
+      # checks. They arrive as one PR each, majors included, for version updates only. Dependabot
+      # gives a dependency to the first group that matches, so these come before the catch-all.
       next:
         applies-to: version-updates
         patterns: [next, eslint-config-next]
       react:
         applies-to: version-updates
         patterns: [react, react-dom, '@types/react', '@types/react-dom']
+      tailwind:
+        applies-to: version-updates
+        patterns: [tailwindcss, '@tailwindcss/*']
       vitest:
         applies-to: version-updates
         patterns: [vitest, '@vitest/*']
@@ -52,4 +70,3 @@ updates:
       npm-security:
         applies-to: security-updates
         patterns: ['*']
-        update-types: [minor, patch]

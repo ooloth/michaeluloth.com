@@ -1,8 +1,10 @@
 name: Check
 
 on:
-  # Rebuilds and deploys origin/main on demand, for publishing Notion content
-  # that has no corresponding commit here. See `npm run deploy:ci`.
+  # On main, rebuilds and deploys on demand, for publishing Notion content that
+  # has no corresponding commit here (see `npm run deploy:ci`). On any other
+  # branch, runs the slow checks without deploying, which is how a Dependabot
+  # PR is checked before merging (see build).
   workflow_dispatch:
   push:
     branches: [main]
@@ -64,7 +66,8 @@ jobs:
       - run: npm ci
       - run: npm run test:ci
 
-  # Slow checks - run on main and on PRs that are not drafts, except Dependabot's (see build)
+  # Slow checks - run on main, on runs started by hand, and on PRs that are not
+  # drafts, except Dependabot's (see build)
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -72,10 +75,14 @@ jobs:
     needs: [format, lint, typecheck, test]
     # Dependabot PRs get no Actions secrets, so the build can't fetch content.
     # Skipping it also skips metadata and lighthouse, which need its output.
-    # A bumped npm package, or an action only these jobs use, is first built
-    # on main, after the PR is merged.
+    # To check one before merging, start this workflow on its branch with
+    # `gh workflow run ci.yml --ref <branch>`. A run started by hand has the
+    # Actions secrets, so check the releases first, as the Dependency Updates
+    # section of CLAUDE.md says. Deploy, and so wrangler-action, still runs
+    # only on main.
     if: |
       github.ref == 'refs/heads/main' ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&
         github.event.pull_request.draft == false &&
         github.event.pull_request.user.login != 'dependabot[bot]')
@@ -112,6 +119,7 @@ jobs:
     needs: build
     if: |
       github.ref == 'refs/heads/main' ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -132,6 +140,7 @@ jobs:
     needs: build
     if: |
       github.ref == 'refs/heads/main' ||
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' && github.event.pull_request.draft == false)
     env:
       LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
