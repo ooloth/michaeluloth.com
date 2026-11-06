@@ -25,8 +25,9 @@ fail() {
   exit 1
 }
 
+# Runs are also dispatched on Dependabot branches to check them, so only main's count.
 latest_dispatch_run_id() {
-  gh run list --workflow="$WORKFLOW" --event=workflow_dispatch --limit=1 --json databaseId --jq '.[0].databaseId // ""'
+  gh run list --workflow="$WORKFLOW" --branch="$BRANCH" --event=workflow_dispatch --limit=1 --json databaseId --jq '.[0].databaseId // ""'
 }
 
 if ! command -v gh >/dev/null 2>&1; then
