@@ -6,12 +6,14 @@
 # number of a 0.x version as the minor, so a breaking 0.x release (satori, sharp, @lhci/cli,
 # rehype-pretty-code) still lands in the catch-all. Packages that only work at matching versions
 # are the exception, in groups of their own that take majors too. Security updates ignore the
-# version-update groups and would open one PR per package, so they get their own group. It takes
+# version-update groups and would open one PR per package, so npm's get their own group. It takes
 # every update type, because Dependabot judges the type from a package's newest release rather
 # than its fix (SemverGroupingRules in dependabot-core), and a narrower group would split off patch
 # fixes. The cost is that a breaking fix can hold up the others in that PR. Security updates skip
 # the cooldown and the coupled groups, so a fix moves only the package it patches, and a coupled
 # package left behind is bumped by hand in the same PR.
+# GitHub raises no security alerts for actions pinned to a SHA, so there is no security-update group
+# for them, and fixes to actions arrive as version updates.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -32,9 +34,6 @@ updates:
         applies-to: version-updates
         patterns: ['*']
         update-types: [minor, patch]
-      actions-security:
-        applies-to: security-updates
-        patterns: ['*']
   - package-ecosystem: npm
     directory: /
     schedule:
