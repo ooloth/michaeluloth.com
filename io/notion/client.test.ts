@@ -1,6 +1,7 @@
 /**
  * The shared pause in rateLimit.ts decides every wait after a Notion 429 or 529, so the SDK must
- * hand the first one straight to withRetry rather than retrying on its own.
+ * hand the first one straight to withRetry rather than retrying on its own. retry: false turns off
+ * the SDK's retry for both statuses; this checks it with a 429.
  */
 
 describe('notion client', () => {

@@ -20,7 +20,8 @@ function rateLimited(retryAfter: string | null, status = 429): Error {
     })
   }
 
-  // This SDK version has no error code for 529, so it surfaces as an unknown HTTP error
+  // A 529 whose body is not Notion's JSON error surfaces as an unknown HTTP error; one with that
+  // body is an APIResponseError (service_overload), the same shape as the 429 above
   return new UnknownHTTPResponseError({ status, message: 'service_overload', headers, rawBodyText })
 }
 
