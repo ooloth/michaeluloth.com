@@ -45,6 +45,8 @@ async function generateOgImage() {
       style={{
         width: '100%',
         height: '100%',
+        // Keeps the padding inside the 1200x630 canvas; satori defaults to content-box
+        boxSizing: 'border-box',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',

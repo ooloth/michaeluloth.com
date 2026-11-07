@@ -31,6 +31,14 @@ vi.mock('@/io/env/cloudinary', () => ({
   },
 }))
 
+// Automocking a Notion fetcher still loads the real client, which the SDK refuses to construct
+// with a token under happy-dom (BrowserTokenNotAllowedError). The fetcher tests in io/notion replace
+// this with their own vi.mock('./client'), and io/notion/client.test.ts loads the real module.
+vi.mock('@/io/notion/client', () => ({
+  default: {},
+  collectPaginatedAPI: vi.fn(),
+}))
+
 vi.mock('@/io/env/pushover', () => ({
   pushoverEnv: {
     PUSHOVER_API_TOKEN: 'test-pushover-token',

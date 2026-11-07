@@ -5,6 +5,8 @@ import { notionEnv } from '@/io/env/notion'
 const notion = new Client({
   auth: notionEnv.NOTION_ACCESS_TOKEN,
   notionVersion: '2025-09-03',
+  // withRetry and the shared pause in rateLimit.ts own retries; the SDK's own would bypass the pause
+  retry: false,
 })
 
 export default notion
