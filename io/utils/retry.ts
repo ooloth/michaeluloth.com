@@ -2,9 +2,7 @@
  * What to do after a failed attempt: wait a time the server asked for, back off, or stop retrying.
  */
 export type RetryDecision =
-  | { kind: 'wait'; delayMs: number }
-  | { kind: 'backoff'; delayMs: number }
-  | { kind: 'give-up'; error: Error }
+  { kind: 'wait'; delayMs: number } | { kind: 'backoff'; delayMs: number } | { kind: 'give-up'; error: Error }
 
 /**
  * Lets one API decide how its failures are retried, and hold back new attempts while it is paused.

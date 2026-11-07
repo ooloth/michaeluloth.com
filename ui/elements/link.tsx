@@ -18,9 +18,7 @@ type InternalPath = string & { readonly __brand: 'InternalPath' }
 type FilePath = string & { readonly __brand: 'FilePath' }
 
 type SiteHref =
-  | { kind: 'internal'; path: InternalPath }
-  | { kind: 'file'; path: FilePath }
-  | { kind: 'external'; href: string }
+  { kind: 'internal'; path: InternalPath } | { kind: 'file'; path: FilePath } | { kind: 'external'; href: string }
 
 /** A last path segment ending in an extension that starts with a letter, like `rss.xml` (not `v1.2`). */
 const FILE_EXTENSION = /\.[a-z][a-z0-9]*$/i
