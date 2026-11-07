@@ -103,8 +103,15 @@ preview deployment.
 
 ### Confirming a post is live
 
-The deploy is finished when the Check run's Deploy job succeeds, which Pushover reports. Then
-confirm the post itself:
+The deploy is finished when the Check run's Deploy job succeeds, which Pushover reports.
+
+To see which commit production serves, run
+`npx wrangler pages deployment list --project-name=michaeluloth --environment production` from a
+checkout whose `.env` sets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. The top row is the
+deployment `michaeluloth.com` serves, and its `Source` column is the commit it was built from.
+Without those variables, wrangler exits with "Not logged in".
+
+Then confirm the post itself:
 
 - `https://michaeluloth.com/<slug>/` renders it. Posts sit at the top level rather than under
   `/blog/`, and `trailingSlash: true` makes the trailing slash part of the URL.
